@@ -57,7 +57,7 @@ const SECONDARY_NAV: NavItem[] = [
   { label: "Metrics", to: "/app/metrics", icon: Gauge },
 ];
 
-function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
+function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: (() => void) | undefined }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -87,7 +87,7 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => v
   );
 }
 
-function BusinessSelector({ onNavigate }: { onNavigate?: () => void }) {
+function BusinessSelector({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -121,7 +121,7 @@ function BusinessSelector({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarBody({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
   return (
     <div className="flex h-full flex-col gap-6 overflow-y-auto px-4 pb-6">
       <BusinessSelector onNavigate={onNavigate} />
