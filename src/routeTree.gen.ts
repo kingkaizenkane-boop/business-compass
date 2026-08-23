@@ -22,6 +22,7 @@ import { Route as AppInterviewRouteImport } from './routes/app.interview'
 import { Route as AppLeadsRouteImport } from './routes/app.leads'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
 import { Route as AppOperationsRouteImport } from './routes/app.operations'
+import { Route as AppSeoRouteImport } from './routes/app.seo'
 import { Route as AppServicesRouteImport } from './routes/app.services'
 
 const IndexRoute = IndexRouteImport.update({
@@ -89,6 +90,11 @@ const AppOperationsRoute = AppOperationsRouteImport.update({
   path: '/operations',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSeoRoute = AppSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppServicesRoute = AppServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -108,6 +114,7 @@ export interface FileRoutesByFullPath {
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app/': typeof AppIndexRoute
 }
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app': typeof AppIndexRoute
 }
@@ -140,6 +148,7 @@ export interface FileRoutesById {
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app/': typeof AppIndexRoute
 }
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/offers'
     | '/app/operations'
+    | '/app/seo'
     | '/app/services'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
@@ -173,6 +183,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/offers'
     | '/app/operations'
+    | '/app/seo'
     | '/app/services'
     | '/app'
   id:
@@ -189,6 +200,7 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/offers'
     | '/app/operations'
+    | '/app/seo'
     | '/app/services'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -291,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOperationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/seo': {
+      id: '/app/seo'
+      path: '/seo'
+      fullPath: '/app/seo'
+      preLoaderRoute: typeof AppSeoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/services': {
       id: '/app/services'
       path: '/services'
@@ -312,6 +331,7 @@ interface AppRouteChildren {
   AppLeadsRoute: typeof AppLeadsRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOperationsRoute: typeof AppOperationsRoute
+  AppSeoRoute: typeof AppSeoRoute
   AppServicesRoute: typeof AppServicesRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -327,6 +347,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLeadsRoute: AppLeadsRoute,
   AppOffersRoute: AppOffersRoute,
   AppOperationsRoute: AppOperationsRoute,
+  AppSeoRoute: AppSeoRoute,
   AppServicesRoute: AppServicesRoute,
   AppIndexRoute: AppIndexRoute,
 }
