@@ -10,33 +10,290 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppActionPlanRouteImport } from './routes/app.action-plan'
+import { Route as AppBlueprintRouteImport } from './routes/app.blueprint'
+import { Route as AppBrainRouteImport } from './routes/app.brain'
+import { Route as AppCustomersRouteImport } from './routes/app.customers'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
+import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
+import { Route as AppHelpRouteImport } from './routes/app.help'
+import { Route as AppInterviewRouteImport } from './routes/app.interview'
+import { Route as AppLeadsRouteImport } from './routes/app.leads'
+import { Route as AppMetricsRouteImport } from './routes/app.metrics'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppOffersRouteImport } from './routes/app.offers'
+import { Route as AppOperationsRouteImport } from './routes/app.operations'
+import { Route as AppSeoRouteImport } from './routes/app.seo'
+import { Route as AppServicesRouteImport } from './routes/app.services'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as BusinessNewRouteImport } from './routes/business.new'
+import { Route as BusinessSelectRouteImport } from './routes/business.select'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActionPlanRoute = AppActionPlanRouteImport.update({
+  id: '/action-plan',
+  path: '/action-plan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBlueprintRoute = AppBlueprintRouteImport.update({
+  id: '/blueprint',
+  path: '/blueprint',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppBrainRoute = AppBrainRouteImport.update({
+  id: '/brain',
+  path: '/brain',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomersRoute = AppCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDiagnosisRoute = AppDiagnosisRouteImport.update({
+  id: '/diagnosis',
+  path: '/diagnosis',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExperimentsRoute = AppExperimentsRouteImport.update({
+  id: '/experiments',
+  path: '/experiments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInterviewRoute = AppInterviewRouteImport.update({
+  id: '/interview',
+  path: '/interview',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLeadsRoute = AppLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMetricsRoute = AppMetricsRouteImport.update({
+  id: '/metrics',
+  path: '/metrics',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOffersRoute = AppOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppOperationsRoute = AppOperationsRouteImport.update({
+  id: '/operations',
+  path: '/operations',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSeoRoute = AppSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppServicesRoute = AppServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const BusinessNewRoute = BusinessNewRouteImport.update({
+  id: '/business/new',
+  path: '/business/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BusinessSelectRoute = BusinessSelectRouteImport.update({
+  id: '/business/select',
+  path: '/business/select',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/action-plan': typeof AppActionPlanRoute
+  '/app/blueprint': typeof AppBlueprintRoute
+  '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/offers': typeof AppOffersRoute
+  '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
+  '/app/services': typeof AppServicesRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/action-plan': typeof AppActionPlanRoute
+  '/app/blueprint': typeof AppBlueprintRoute
+  '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/offers': typeof AppOffersRoute
+  '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
+  '/app/services': typeof AppServicesRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/app/action-plan': typeof AppActionPlanRoute
+  '/app/blueprint': typeof AppBlueprintRoute
+  '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
+  '/app/interview': typeof AppInterviewRoute
+  '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/offers': typeof AppOffersRoute
+  '/app/operations': typeof AppOperationsRoute
+  '/app/seo': typeof AppSeoRoute
+  '/app/services': typeof AppServicesRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/app/action-plan'
+    | '/app/blueprint'
+    | '/app/brain'
+    | '/app/customers'
+    | '/app/dashboard'
+    | '/app/diagnosis'
+    | '/app/experiments'
+    | '/app/help'
+    | '/app/interview'
+    | '/app/leads'
+    | '/app/metrics'
+    | '/app/notifications'
+    | '/app/offers'
+    | '/app/operations'
+    | '/app/seo'
+    | '/app/services'
+    | '/app/settings'
+    | '/business/new'
+    | '/business/select'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app/action-plan'
+    | '/app/blueprint'
+    | '/app/brain'
+    | '/app/customers'
+    | '/app/dashboard'
+    | '/app/diagnosis'
+    | '/app/experiments'
+    | '/app/help'
+    | '/app/interview'
+    | '/app/leads'
+    | '/app/metrics'
+    | '/app/notifications'
+    | '/app/offers'
+    | '/app/operations'
+    | '/app/seo'
+    | '/app/services'
+    | '/app/settings'
+    | '/business/new'
+    | '/business/select'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/app/action-plan'
+    | '/app/blueprint'
+    | '/app/brain'
+    | '/app/customers'
+    | '/app/dashboard'
+    | '/app/diagnosis'
+    | '/app/experiments'
+    | '/app/help'
+    | '/app/interview'
+    | '/app/leads'
+    | '/app/metrics'
+    | '/app/notifications'
+    | '/app/offers'
+    | '/app/operations'
+    | '/app/seo'
+    | '/app/services'
+    | '/app/settings'
+    | '/business/new'
+    | '/business/select'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  BusinessNewRoute: typeof BusinessNewRoute
+  BusinessSelectRoute: typeof BusinessSelectRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +305,205 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/action-plan': {
+      id: '/app/action-plan'
+      path: '/action-plan'
+      fullPath: '/app/action-plan'
+      preLoaderRoute: typeof AppActionPlanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/blueprint': {
+      id: '/app/blueprint'
+      path: '/blueprint'
+      fullPath: '/app/blueprint'
+      preLoaderRoute: typeof AppBlueprintRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/brain': {
+      id: '/app/brain'
+      path: '/brain'
+      fullPath: '/app/brain'
+      preLoaderRoute: typeof AppBrainRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/customers': {
+      id: '/app/customers'
+      path: '/customers'
+      fullPath: '/app/customers'
+      preLoaderRoute: typeof AppCustomersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/diagnosis': {
+      id: '/app/diagnosis'
+      path: '/diagnosis'
+      fullPath: '/app/diagnosis'
+      preLoaderRoute: typeof AppDiagnosisRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/experiments': {
+      id: '/app/experiments'
+      path: '/experiments'
+      fullPath: '/app/experiments'
+      preLoaderRoute: typeof AppExperimentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/help': {
+      id: '/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AppHelpRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/interview': {
+      id: '/app/interview'
+      path: '/interview'
+      fullPath: '/app/interview'
+      preLoaderRoute: typeof AppInterviewRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/leads': {
+      id: '/app/leads'
+      path: '/leads'
+      fullPath: '/app/leads'
+      preLoaderRoute: typeof AppLeadsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/metrics': {
+      id: '/app/metrics'
+      path: '/metrics'
+      fullPath: '/app/metrics'
+      preLoaderRoute: typeof AppMetricsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/offers': {
+      id: '/app/offers'
+      path: '/offers'
+      fullPath: '/app/offers'
+      preLoaderRoute: typeof AppOffersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/operations': {
+      id: '/app/operations'
+      path: '/operations'
+      fullPath: '/app/operations'
+      preLoaderRoute: typeof AppOperationsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/seo': {
+      id: '/app/seo'
+      path: '/seo'
+      fullPath: '/app/seo'
+      preLoaderRoute: typeof AppSeoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/services': {
+      id: '/app/services'
+      path: '/services'
+      fullPath: '/app/services'
+      preLoaderRoute: typeof AppServicesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/business/new': {
+      id: '/business/new'
+      path: '/business/new'
+      fullPath: '/business/new'
+      preLoaderRoute: typeof BusinessNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/business/select': {
+      id: '/business/select'
+      path: '/business/select'
+      fullPath: '/business/select'
+      preLoaderRoute: typeof BusinessSelectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AppRouteChildren {
+  AppActionPlanRoute: typeof AppActionPlanRoute
+  AppBlueprintRoute: typeof AppBlueprintRoute
+  AppBrainRoute: typeof AppBrainRoute
+  AppCustomersRoute: typeof AppCustomersRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppDiagnosisRoute: typeof AppDiagnosisRoute
+  AppExperimentsRoute: typeof AppExperimentsRoute
+  AppHelpRoute: typeof AppHelpRoute
+  AppInterviewRoute: typeof AppInterviewRoute
+  AppLeadsRoute: typeof AppLeadsRoute
+  AppMetricsRoute: typeof AppMetricsRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppOffersRoute: typeof AppOffersRoute
+  AppOperationsRoute: typeof AppOperationsRoute
+  AppSeoRoute: typeof AppSeoRoute
+  AppServicesRoute: typeof AppServicesRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppActionPlanRoute: AppActionPlanRoute,
+  AppBlueprintRoute: AppBlueprintRoute,
+  AppBrainRoute: AppBrainRoute,
+  AppCustomersRoute: AppCustomersRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppDiagnosisRoute: AppDiagnosisRoute,
+  AppExperimentsRoute: AppExperimentsRoute,
+  AppHelpRoute: AppHelpRoute,
+  AppInterviewRoute: AppInterviewRoute,
+  AppLeadsRoute: AppLeadsRoute,
+  AppMetricsRoute: AppMetricsRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppOffersRoute: AppOffersRoute,
+  AppOperationsRoute: AppOperationsRoute,
+  AppSeoRoute: AppSeoRoute,
+  AppServicesRoute: AppServicesRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  BusinessNewRoute: BusinessNewRoute,
+  BusinessSelectRoute: BusinessSelectRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
