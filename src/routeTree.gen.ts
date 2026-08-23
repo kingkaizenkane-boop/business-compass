@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppActionPlanRouteImport } from './routes/app.action-plan'
 import { Route as AppBlueprintRouteImport } from './routes/app.blueprint'
 import { Route as AppBrainRouteImport } from './routes/app.brain'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
@@ -31,6 +32,11 @@ const AppRoute = AppRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppActionPlanRoute = AppActionPlanRouteImport.update({
+  id: '/action-plan',
+  path: '/action-plan',
   getParentRoute: () => AppRoute,
 } as any)
 const AppBlueprintRoute = AppBlueprintRouteImport.update({
@@ -62,6 +68,7 @@ const AppInterviewRoute = AppInterviewRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -71,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -82,6 +90,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
+  '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
@@ -94,6 +103,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/app'
+    | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
     | '/app/dashboard'
@@ -103,6 +113,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
     | '/app/dashboard'
@@ -113,6 +124,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/app'
+    | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
     | '/app/dashboard'
@@ -147,6 +159,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/action-plan': {
+      id: '/app/action-plan'
+      path: '/action-plan'
+      fullPath: '/app/action-plan'
+      preLoaderRoute: typeof AppActionPlanRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/blueprint': {
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppActionPlanRoute: typeof AppActionPlanRoute
   AppBlueprintRoute: typeof AppBlueprintRoute
   AppBrainRoute: typeof AppBrainRoute
   AppDashboardRoute: typeof AppDashboardRoute
@@ -197,6 +217,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActionPlanRoute: AppActionPlanRoute,
   AppBlueprintRoute: AppBlueprintRoute,
   AppBrainRoute: AppBrainRoute,
   AppDashboardRoute: AppDashboardRoute,
