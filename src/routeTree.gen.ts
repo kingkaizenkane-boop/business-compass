@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppActionPlanRouteImport } from './routes/app.action-plan'
 import { Route as AppBlueprintRouteImport } from './routes/app.blueprint'
 import { Route as AppBrainRouteImport } from './routes/app.brain'
+import { Route as AppCustomersRouteImport } from './routes/app.customers'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
@@ -50,6 +51,11 @@ const AppBrainRoute = AppBrainRouteImport.update({
   path: '/brain',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCustomersRoute = AppCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/app/action-plan': typeof AppActionPlanRoute
   '/app/blueprint': typeof AppBlueprintRoute
   '/app/brain': typeof AppBrainRoute
+  '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/interview'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/interview'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/interview'
@@ -194,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBrainRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/customers': {
+      id: '/app/customers'
+      path: '/customers'
+      fullPath: '/app/customers'
+      preLoaderRoute: typeof AppCustomersRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/dashboard': {
       id: '/app/dashboard'
       path: '/dashboard'
@@ -229,6 +248,7 @@ interface AppRouteChildren {
   AppActionPlanRoute: typeof AppActionPlanRoute
   AppBlueprintRoute: typeof AppBlueprintRoute
   AppBrainRoute: typeof AppBrainRoute
+  AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDiagnosisRoute: typeof AppDiagnosisRoute
   AppInterviewRoute: typeof AppInterviewRoute
@@ -240,6 +260,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppActionPlanRoute: AppActionPlanRoute,
   AppBlueprintRoute: AppBlueprintRoute,
   AppBrainRoute: AppBrainRoute,
+  AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDiagnosisRoute: AppDiagnosisRoute,
   AppInterviewRoute: AppInterviewRoute,
