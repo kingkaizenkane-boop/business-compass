@@ -18,6 +18,7 @@ import { Route as AppBrainRouteImport } from './routes/app.brain'
 import { Route as AppCustomersRouteImport } from './routes/app.customers'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
+import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
 import { Route as AppLeadsRouteImport } from './routes/app.leads'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
@@ -70,6 +71,11 @@ const AppDiagnosisRoute = AppDiagnosisRouteImport.update({
   path: '/diagnosis',
   getParentRoute: () => AppRoute,
 } as any)
+const AppExperimentsRoute = AppExperimentsRouteImport.update({
+  id: '/experiments',
+  path: '/experiments',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInterviewRoute = AppInterviewRouteImport.update({
   id: '/interview',
   path: '/interview',
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByTo {
   '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
@@ -144,6 +152,7 @@ export interface FileRoutesById {
   '/app/customers': typeof AppCustomersRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
+  '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/offers': typeof AppOffersRoute
@@ -163,6 +172,7 @@ export interface FileRouteTypes {
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
+    | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
     | '/app/offers'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
+    | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
     | '/app/offers'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
+    | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
     | '/app/offers'
@@ -275,6 +287,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDiagnosisRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/experiments': {
+      id: '/app/experiments'
+      path: '/experiments'
+      fullPath: '/app/experiments'
+      preLoaderRoute: typeof AppExperimentsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/interview': {
       id: '/app/interview'
       path: '/interview'
@@ -327,6 +346,7 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppDiagnosisRoute: typeof AppDiagnosisRoute
+  AppExperimentsRoute: typeof AppExperimentsRoute
   AppInterviewRoute: typeof AppInterviewRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppOffersRoute: typeof AppOffersRoute
@@ -343,6 +363,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppDiagnosisRoute: AppDiagnosisRoute,
+  AppExperimentsRoute: AppExperimentsRoute,
   AppInterviewRoute: AppInterviewRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppOffersRoute: AppOffersRoute,
