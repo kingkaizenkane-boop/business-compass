@@ -18,7 +18,11 @@ export const getLatestDiagnosis = createServerFn({ method: "POST" })
     await assertBusinessAccess(supabase, data.businessId);
     const { facts } = await loadBrain(supabase, data.businessId);
     const readiness = assessReadiness(facts);
-    return loadDiagnosis(supabase, data.businessId, data.runId ?? null, readiness);
+    const result = await loadDiagnosis(supabase, data.businessId, data.runId ?? null, readiness);
+    if (result.status === "empty" && !readiness.ready) {
+      return { ...result, status: "insufficient" as const };
+    }
+    return result as typeof result | (Omit<typeof result, "status"> & { status: "insufficient" });
   });
 
 export const runDiagnosis = createServerFn({ method: "POST" })
