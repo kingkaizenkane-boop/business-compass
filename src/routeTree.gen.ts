@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppBrainRouteImport } from './routes/app.brain'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
 
 const IndexRoute = IndexRouteImport.update({
@@ -41,6 +42,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppDiagnosisRoute = AppDiagnosisRouteImport.update({
+  id: '/diagnosis',
+  path: '/diagnosis',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInterviewRoute = AppInterviewRouteImport.update({
   id: '/interview',
   path: '/interview',
@@ -52,6 +58,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/': typeof AppIndexRoute
 }
@@ -59,6 +66,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
   '/app': typeof AppIndexRoute
 }
@@ -68,21 +76,35 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/app/brain': typeof AppBrainRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/app' | '/app/brain' | '/app/dashboard' | '/app/interview' | '/app/'
+    | '/'
+    | '/app'
+    | '/app/brain'
+    | '/app/dashboard'
+    | '/app/diagnosis'
+    | '/app/interview'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/app/brain' | '/app/dashboard' | '/app/interview' | '/app'
+  to:
+    | '/'
+    | '/app/brain'
+    | '/app/dashboard'
+    | '/app/diagnosis'
+    | '/app/interview'
+    | '/app'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/app/brain'
     | '/app/dashboard'
+    | '/app/diagnosis'
     | '/app/interview'
     | '/app/'
   fileRoutesById: FileRoutesById
@@ -129,6 +151,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/diagnosis': {
+      id: '/app/diagnosis'
+      path: '/diagnosis'
+      fullPath: '/app/diagnosis'
+      preLoaderRoute: typeof AppDiagnosisRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/interview': {
       id: '/app/interview'
       path: '/interview'
@@ -142,6 +171,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBrainRoute: typeof AppBrainRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppDiagnosisRoute: typeof AppDiagnosisRoute
   AppInterviewRoute: typeof AppInterviewRoute
   AppIndexRoute: typeof AppIndexRoute
 }
@@ -149,6 +179,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBrainRoute: AppBrainRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppDiagnosisRoute: AppDiagnosisRoute,
   AppInterviewRoute: AppInterviewRoute,
   AppIndexRoute: AppIndexRoute,
 }
