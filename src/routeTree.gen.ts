@@ -30,6 +30,7 @@ import { Route as AppSeoRouteImport } from './routes/app.seo'
 import { Route as AppServicesRouteImport } from './routes/app.services'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as BusinessNewRouteImport } from './routes/business.new'
+import { Route as BusinessSelectRouteImport } from './routes/business.select'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +137,11 @@ const BusinessNewRoute = BusinessNewRouteImport.update({
   path: '/business/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BusinessSelectRoute = BusinessSelectRouteImport.update({
+  id: '/business/select',
+  path: '/business/select',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -158,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
   '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
   '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
   '/business/new': typeof BusinessNewRoute
+  '/business/select': typeof BusinessSelectRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -229,6 +238,7 @@ export interface FileRouteTypes {
     | '/app/services'
     | '/app/settings'
     | '/business/new'
+    | '/business/select'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -251,6 +261,7 @@ export interface FileRouteTypes {
     | '/app/services'
     | '/app/settings'
     | '/business/new'
+    | '/business/select'
     | '/app'
   id:
     | '__root__'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/app/services'
     | '/app/settings'
     | '/business/new'
+    | '/business/select'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   BusinessNewRoute: typeof BusinessNewRoute
+  BusinessSelectRoute: typeof BusinessSelectRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/business/select': {
+      id: '/business/select'
+      path: '/business/select'
+      fullPath: '/business/select'
+      preLoaderRoute: typeof BusinessSelectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -483,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   BusinessNewRoute: BusinessNewRoute,
+  BusinessSelectRoute: BusinessSelectRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
