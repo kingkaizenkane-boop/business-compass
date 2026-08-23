@@ -19,6 +19,7 @@ import { Route as AppCustomersRouteImport } from './routes/app.customers'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
 import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
+import { Route as AppHelpRouteImport } from './routes/app.help'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
 import { Route as AppLeadsRouteImport } from './routes/app.leads'
 import { Route as AppMetricsRouteImport } from './routes/app.metrics'
@@ -79,6 +80,11 @@ const AppExperimentsRoute = AppExperimentsRouteImport.update({
   path: '/experiments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppHelpRoute = AppHelpRouteImport.update({
+  id: '/help',
+  path: '/help',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInterviewRoute = AppInterviewRouteImport.update({
   id: '/interview',
   path: '/interview',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByTo {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
@@ -177,6 +185,7 @@ export interface FileRoutesById {
   '/app/dashboard': typeof AppDashboardRoute
   '/app/diagnosis': typeof AppDiagnosisRoute
   '/app/experiments': typeof AppExperimentsRoute
+  '/app/help': typeof AppHelpRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
@@ -200,6 +209,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/experiments'
+    | '/app/help'
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/experiments'
+    | '/app/help'
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
@@ -241,6 +252,7 @@ export interface FileRouteTypes {
     | '/app/dashboard'
     | '/app/diagnosis'
     | '/app/experiments'
+    | '/app/help'
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
@@ -330,6 +342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExperimentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/help': {
+      id: '/app/help'
+      path: '/help'
+      fullPath: '/app/help'
+      preLoaderRoute: typeof AppHelpRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/interview': {
       id: '/app/interview'
       path: '/interview'
@@ -404,6 +423,7 @@ interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRoute
   AppDiagnosisRoute: typeof AppDiagnosisRoute
   AppExperimentsRoute: typeof AppExperimentsRoute
+  AppHelpRoute: typeof AppHelpRoute
   AppInterviewRoute: typeof AppInterviewRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppMetricsRoute: typeof AppMetricsRoute
@@ -424,6 +444,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRoute,
   AppDiagnosisRoute: AppDiagnosisRoute,
   AppExperimentsRoute: AppExperimentsRoute,
+  AppHelpRoute: AppHelpRoute,
   AppInterviewRoute: AppInterviewRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppMetricsRoute: AppMetricsRoute,
