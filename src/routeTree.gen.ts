@@ -29,6 +29,7 @@ import { Route as AppOperationsRouteImport } from './routes/app.operations'
 import { Route as AppSeoRouteImport } from './routes/app.seo'
 import { Route as AppServicesRouteImport } from './routes/app.services'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as BusinessNewRouteImport } from './routes/business.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -130,6 +131,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const BusinessNewRoute = BusinessNewRouteImport.update({
+  id: '/business/new',
+  path: '/business/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -172,6 +179,7 @@ export interface FileRoutesByTo {
   '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -195,6 +203,7 @@ export interface FileRoutesById {
   '/app/seo': typeof AppSeoRoute
   '/app/services': typeof AppServicesRoute
   '/app/settings': typeof AppSettingsRoute
+  '/business/new': typeof BusinessNewRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,6 +228,7 @@ export interface FileRouteTypes {
     | '/app/seo'
     | '/app/services'
     | '/app/settings'
+    | '/business/new'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -240,6 +250,7 @@ export interface FileRouteTypes {
     | '/app/seo'
     | '/app/services'
     | '/app/settings'
+    | '/business/new'
     | '/app'
   id:
     | '__root__'
@@ -262,12 +273,14 @@ export interface FileRouteTypes {
     | '/app/seo'
     | '/app/services'
     | '/app/settings'
+    | '/business/new'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
+  BusinessNewRoute: typeof BusinessNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -412,6 +425,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/business/new': {
+      id: '/business/new'
+      path: '/business/new'
+      fullPath: '/business/new'
+      preLoaderRoute: typeof BusinessNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -462,6 +482,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
+  BusinessNewRoute: BusinessNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
