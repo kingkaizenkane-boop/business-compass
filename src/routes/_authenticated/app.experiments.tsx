@@ -3,7 +3,7 @@ import { FlaskConical } from "lucide-react";
 
 import { AwaitingData } from "@/components/business-os/awaiting-data";
 
-export const Route = createFileRoute("/app/experiments")({
+export const Route = createFileRoute("/_authenticated/app/experiments")({
   head: () => ({
     meta: [
       { title: "Experiments — Business OS" },

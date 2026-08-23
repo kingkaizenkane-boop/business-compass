@@ -33,6 +33,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useWorkspace } from "@/hooks/use-workspace";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
 type NavItem = { label: string; to: string; icon: typeof Brain };
@@ -88,6 +90,8 @@ function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: (() => 
 }
 
 function BusinessSelector({ onNavigate }: { onNavigate?: (() => void) | undefined }) {
+  const { businesses, activeBusiness, setActiveBusinessId } = useWorkspace();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -95,25 +99,40 @@ function BusinessSelector({ onNavigate }: { onNavigate?: (() => void) | undefine
           <span className="min-w-0">
             <span className="eyebrow block">Business</span>
             <span className="mt-0.5 block truncate text-sm font-medium text-sidebar-foreground">
-              No business yet
+              {activeBusiness ? activeBusiness.name : "No business yet"}
             </span>
           </span>
           <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
-          You haven't created a business yet. Brain completeness appears here once you do.
-        </DropdownMenuLabel>
+        {businesses.length === 0 ? (
+          <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+            You haven't created a business yet. Brain completeness appears here once you do.
+          </DropdownMenuLabel>
+        ) : (
+          <>
+            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+              Switch business
+            </DropdownMenuLabel>
+            {businesses.map((business) => (
+              <DropdownMenuItem
+                key={business.id}
+                onSelect={() => {
+                  setActiveBusinessId(business.id);
+                  onNavigate?.();
+                }}
+                className={business.id === activeBusiness?.id ? "font-medium text-foreground" : ""}
+              >
+                {business.name}
+              </DropdownMenuItem>
+            ))}
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link to="/business/new" onClick={onNavigate}>
             Create a business
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link to="/business/select" onClick={onNavigate}>
-            Switch business
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -147,6 +166,42 @@ function SidebarBody({ onNavigate }: { onNavigate?: (() => void) | undefined }) 
   );
 }
 
+function ActiveBusinessLabel() {
+  const { activeBusiness, loading } = useWorkspace();
+  if (loading) {
+    return <span className="truncate text-sm text-muted-foreground">Loading your workspace…</span>;
+  }
+  if (!activeBusiness) {
+    return (
+      <span className="truncate text-sm text-muted-foreground">
+        No active business —{" "}
+        <Link to="/business/new" className="text-primary underline underline-offset-4">
+          create one
+        </Link>
+      </span>
+    );
+  }
+  return (
+    <span className="truncate text-sm text-muted-foreground">
+      {activeBusiness.name}
+      {activeBusiness.industry ? ` · ${activeBusiness.industry}` : ""}
+    </span>
+  );
+}
+
+function BrainHealthPill() {
+  const { activeBusiness } = useWorkspace();
+  return (
+    <span className="hidden items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
+      <span
+        aria-hidden
+        className={cn("size-1.5 rounded-full", activeBusiness ? "bg-primary" : "bg-muted-foreground")}
+      />
+      {activeBusiness ? "Brain building" : "Brain health —"}
+    </span>
+  );
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
@@ -177,16 +232,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <SidebarBody />
                 </SheetContent>
               </Sheet>
-              <span className="truncate text-sm text-muted-foreground">
-                No active business — <Link to="/business/new" className="text-primary underline underline-offset-4">create one</Link>
-              </span>
+              <ActiveBusinessLabel />
             </div>
 
             <div className="flex items-center gap-1.5">
-              <span className="hidden items-center gap-2 rounded-full border border-border px-3 py-1 text-xs text-muted-foreground sm:flex">
-                <span aria-hidden className="size-1.5 rounded-full bg-muted-foreground" />
-                Brain health —
-              </span>
+              <BrainHealthPill />
+              <Button variant="ghost" size="sm" onClick={() => void supabase.auth.signOut()}>
+                Sign out
+              </Button>
               <Button variant="ghost" size="icon" aria-label="Notifications" asChild>
                 <Link to="/app/notifications">
                   <Bell className="size-4" aria-hidden />

@@ -3,7 +3,7 @@ import { Search } from "lucide-react";
 
 import { EmptyState, PageHeader, SectionLabel } from "@/components/business-os/primitives";
 
-export const Route = createFileRoute("/app/seo")({
+export const Route = createFileRoute("/_authenticated/app/seo")({
   head: () => ({
     meta: [
       { title: "SEO Engine — Business OS" },

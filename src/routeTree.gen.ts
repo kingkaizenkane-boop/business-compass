@@ -10,215 +10,244 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppActionPlanRouteImport } from './routes/app.action-plan'
-import { Route as AppBlueprintRouteImport } from './routes/app.blueprint'
-import { Route as AppBrainRouteImport } from './routes/app.brain'
-import { Route as AppCustomersRouteImport } from './routes/app.customers'
-import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
-import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
-import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
-import { Route as AppHelpRouteImport } from './routes/app.help'
-import { Route as AppInterviewRouteImport } from './routes/app.interview'
-import { Route as AppLeadsRouteImport } from './routes/app.leads'
-import { Route as AppMetricsRouteImport } from './routes/app.metrics'
-import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
-import { Route as AppOffersRouteImport } from './routes/app.offers'
-import { Route as AppOperationsRouteImport } from './routes/app.operations'
-import { Route as AppSeoRouteImport } from './routes/app.seo'
-import { Route as AppServicesRouteImport } from './routes/app.services'
-import { Route as AppSettingsRouteImport } from './routes/app.settings'
-import { Route as BusinessNewRouteImport } from './routes/business.new'
-import { Route as BusinessSelectRouteImport } from './routes/business.select'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
+import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authenticated/app.action-plan'
+import { Route as AuthenticatedAppBlueprintRouteImport } from './routes/_authenticated/app.blueprint'
+import { Route as AuthenticatedAppBrainRouteImport } from './routes/_authenticated/app.brain'
+import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
+import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/app.dashboard'
+import { Route as AuthenticatedAppDiagnosisRouteImport } from './routes/_authenticated/app.diagnosis'
+import { Route as AuthenticatedAppExperimentsRouteImport } from './routes/_authenticated/app.experiments'
+import { Route as AuthenticatedAppHelpRouteImport } from './routes/_authenticated/app.help'
+import { Route as AuthenticatedAppInterviewRouteImport } from './routes/_authenticated/app.interview'
+import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
+import { Route as AuthenticatedAppMetricsRouteImport } from './routes/_authenticated/app.metrics'
+import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
+import { Route as AuthenticatedAppOffersRouteImport } from './routes/_authenticated/app.offers'
+import { Route as AuthenticatedAppOperationsRouteImport } from './routes/_authenticated/app.operations'
+import { Route as AuthenticatedAppSeoRouteImport } from './routes/_authenticated/app.seo'
+import { Route as AuthenticatedAppServicesRouteImport } from './routes/_authenticated/app.services'
+import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
+import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenticated/business.new'
+import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppRoute = AppRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
+const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppActionPlanRoute = AppActionPlanRouteImport.update({
-  id: '/action-plan',
-  path: '/action-plan',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppBlueprintRoute = AppBlueprintRouteImport.update({
-  id: '/blueprint',
-  path: '/blueprint',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppBrainRoute = AppBrainRouteImport.update({
+const AuthenticatedAppActionPlanRoute =
+  AuthenticatedAppActionPlanRouteImport.update({
+    id: '/action-plan',
+    path: '/action-plan',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppBlueprintRoute =
+  AuthenticatedAppBlueprintRouteImport.update({
+    id: '/blueprint',
+    path: '/blueprint',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppBrainRoute = AuthenticatedAppBrainRouteImport.update({
   id: '/brain',
   path: '/brain',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppCustomersRoute = AppCustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDashboardRoute = AppDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppDiagnosisRoute = AppDiagnosisRouteImport.update({
-  id: '/diagnosis',
-  path: '/diagnosis',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppExperimentsRoute = AppExperimentsRouteImport.update({
-  id: '/experiments',
-  path: '/experiments',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppHelpRoute = AppHelpRouteImport.update({
+const AuthenticatedAppCustomersRoute =
+  AuthenticatedAppCustomersRouteImport.update({
+    id: '/customers',
+    path: '/customers',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppDashboardRoute =
+  AuthenticatedAppDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppDiagnosisRoute =
+  AuthenticatedAppDiagnosisRouteImport.update({
+    id: '/diagnosis',
+    path: '/diagnosis',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppExperimentsRoute =
+  AuthenticatedAppExperimentsRouteImport.update({
+    id: '/experiments',
+    path: '/experiments',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppHelpRoute = AuthenticatedAppHelpRouteImport.update({
   id: '/help',
   path: '/help',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppInterviewRoute = AppInterviewRouteImport.update({
-  id: '/interview',
-  path: '/interview',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppLeadsRoute = AppLeadsRouteImport.update({
+const AuthenticatedAppInterviewRoute =
+  AuthenticatedAppInterviewRouteImport.update({
+    id: '/interview',
+    path: '/interview',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   id: '/leads',
   path: '/leads',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppMetricsRoute = AppMetricsRouteImport.update({
+const AuthenticatedAppMetricsRoute = AuthenticatedAppMetricsRouteImport.update({
   id: '/metrics',
   path: '/metrics',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppNotificationsRoute = AppNotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppOffersRoute = AppOffersRouteImport.update({
+const AuthenticatedAppNotificationsRoute =
+  AuthenticatedAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppOffersRoute = AuthenticatedAppOffersRouteImport.update({
   id: '/offers',
   path: '/offers',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppOperationsRoute = AppOperationsRouteImport.update({
-  id: '/operations',
-  path: '/operations',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSeoRoute = AppSeoRouteImport.update({
+const AuthenticatedAppOperationsRoute =
+  AuthenticatedAppOperationsRouteImport.update({
+    id: '/operations',
+    path: '/operations',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppSeoRoute = AuthenticatedAppSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
-  getParentRoute: () => AppRoute,
+  getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AppServicesRoute = AppServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppSettingsRoute = AppSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => AppRoute,
-} as any)
-const BusinessNewRoute = BusinessNewRouteImport.update({
-  id: '/business/new',
-  path: '/business/new',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessSelectRoute = BusinessSelectRouteImport.update({
-  id: '/business/select',
-  path: '/business/select',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedAppServicesRoute =
+  AuthenticatedAppServicesRouteImport.update({
+    id: '/services',
+    path: '/services',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppSettingsRoute =
+  AuthenticatedAppSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedBusinessNewRoute =
+  AuthenticatedBusinessNewRouteImport.update({
+    id: '/business/new',
+    path: '/business/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBusinessSelectRoute =
+  AuthenticatedBusinessSelectRouteImport.update({
+    id: '/business/select',
+    path: '/business/select',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
-  '/app/action-plan': typeof AppActionPlanRoute
-  '/app/blueprint': typeof AppBlueprintRoute
-  '/app/brain': typeof AppBrainRoute
-  '/app/customers': typeof AppCustomersRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/diagnosis': typeof AppDiagnosisRoute
-  '/app/experiments': typeof AppExperimentsRoute
-  '/app/help': typeof AppHelpRoute
-  '/app/interview': typeof AppInterviewRoute
-  '/app/leads': typeof AppLeadsRoute
-  '/app/metrics': typeof AppMetricsRoute
-  '/app/notifications': typeof AppNotificationsRoute
-  '/app/offers': typeof AppOffersRoute
-  '/app/operations': typeof AppOperationsRoute
-  '/app/seo': typeof AppSeoRoute
-  '/app/services': typeof AppServicesRoute
-  '/app/settings': typeof AppSettingsRoute
-  '/business/new': typeof BusinessNewRoute
-  '/business/select': typeof BusinessSelectRoute
-  '/app/': typeof AppIndexRoute
+  '/auth': typeof AuthRoute
+  '/app': typeof AuthenticatedAppRouteWithChildren
+  '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
+  '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/customers': typeof AuthenticatedAppCustomersRoute
+  '/app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
+  '/app/experiments': typeof AuthenticatedAppExperimentsRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
+  '/app/interview': typeof AuthenticatedAppInterviewRoute
+  '/app/leads': typeof AuthenticatedAppLeadsRoute
+  '/app/metrics': typeof AuthenticatedAppMetricsRoute
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/app/offers': typeof AuthenticatedAppOffersRoute
+  '/app/operations': typeof AuthenticatedAppOperationsRoute
+  '/app/seo': typeof AuthenticatedAppSeoRoute
+  '/app/services': typeof AuthenticatedAppServicesRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/business/new': typeof AuthenticatedBusinessNewRoute
+  '/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/app/action-plan': typeof AppActionPlanRoute
-  '/app/blueprint': typeof AppBlueprintRoute
-  '/app/brain': typeof AppBrainRoute
-  '/app/customers': typeof AppCustomersRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/diagnosis': typeof AppDiagnosisRoute
-  '/app/experiments': typeof AppExperimentsRoute
-  '/app/help': typeof AppHelpRoute
-  '/app/interview': typeof AppInterviewRoute
-  '/app/leads': typeof AppLeadsRoute
-  '/app/metrics': typeof AppMetricsRoute
-  '/app/notifications': typeof AppNotificationsRoute
-  '/app/offers': typeof AppOffersRoute
-  '/app/operations': typeof AppOperationsRoute
-  '/app/seo': typeof AppSeoRoute
-  '/app/services': typeof AppServicesRoute
-  '/app/settings': typeof AppSettingsRoute
-  '/business/new': typeof BusinessNewRoute
-  '/business/select': typeof BusinessSelectRoute
-  '/app': typeof AppIndexRoute
+  '/auth': typeof AuthRoute
+  '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
+  '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/customers': typeof AuthenticatedAppCustomersRoute
+  '/app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
+  '/app/experiments': typeof AuthenticatedAppExperimentsRoute
+  '/app/help': typeof AuthenticatedAppHelpRoute
+  '/app/interview': typeof AuthenticatedAppInterviewRoute
+  '/app/leads': typeof AuthenticatedAppLeadsRoute
+  '/app/metrics': typeof AuthenticatedAppMetricsRoute
+  '/app/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/app/offers': typeof AuthenticatedAppOffersRoute
+  '/app/operations': typeof AuthenticatedAppOperationsRoute
+  '/app/seo': typeof AuthenticatedAppSeoRoute
+  '/app/services': typeof AuthenticatedAppServicesRoute
+  '/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/business/new': typeof AuthenticatedBusinessNewRoute
+  '/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/app': typeof AppRouteWithChildren
-  '/app/action-plan': typeof AppActionPlanRoute
-  '/app/blueprint': typeof AppBlueprintRoute
-  '/app/brain': typeof AppBrainRoute
-  '/app/customers': typeof AppCustomersRoute
-  '/app/dashboard': typeof AppDashboardRoute
-  '/app/diagnosis': typeof AppDiagnosisRoute
-  '/app/experiments': typeof AppExperimentsRoute
-  '/app/help': typeof AppHelpRoute
-  '/app/interview': typeof AppInterviewRoute
-  '/app/leads': typeof AppLeadsRoute
-  '/app/metrics': typeof AppMetricsRoute
-  '/app/notifications': typeof AppNotificationsRoute
-  '/app/offers': typeof AppOffersRoute
-  '/app/operations': typeof AppOperationsRoute
-  '/app/seo': typeof AppSeoRoute
-  '/app/services': typeof AppServicesRoute
-  '/app/settings': typeof AppSettingsRoute
-  '/business/new': typeof BusinessNewRoute
-  '/business/select': typeof BusinessSelectRoute
-  '/app/': typeof AppIndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/_authenticated/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
+  '/_authenticated/app/brain': typeof AuthenticatedAppBrainRoute
+  '/_authenticated/app/customers': typeof AuthenticatedAppCustomersRoute
+  '/_authenticated/app/dashboard': typeof AuthenticatedAppDashboardRoute
+  '/_authenticated/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
+  '/_authenticated/app/experiments': typeof AuthenticatedAppExperimentsRoute
+  '/_authenticated/app/help': typeof AuthenticatedAppHelpRoute
+  '/_authenticated/app/interview': typeof AuthenticatedAppInterviewRoute
+  '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRoute
+  '/_authenticated/app/metrics': typeof AuthenticatedAppMetricsRoute
+  '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
+  '/_authenticated/app/offers': typeof AuthenticatedAppOffersRoute
+  '/_authenticated/app/operations': typeof AuthenticatedAppOperationsRoute
+  '/_authenticated/app/seo': typeof AuthenticatedAppSeoRoute
+  '/_authenticated/app/services': typeof AuthenticatedAppServicesRoute
+  '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
+  '/_authenticated/business/new': typeof AuthenticatedBusinessNewRoute
+  '/_authenticated/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/app'
     | '/app/action-plan'
     | '/app/blueprint'
@@ -243,6 +272,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/app/action-plan'
     | '/app/blueprint'
     | '/app/brain'
@@ -266,34 +296,35 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/app'
-    | '/app/action-plan'
-    | '/app/blueprint'
-    | '/app/brain'
-    | '/app/customers'
-    | '/app/dashboard'
-    | '/app/diagnosis'
-    | '/app/experiments'
-    | '/app/help'
-    | '/app/interview'
-    | '/app/leads'
-    | '/app/metrics'
-    | '/app/notifications'
-    | '/app/offers'
-    | '/app/operations'
-    | '/app/seo'
-    | '/app/services'
-    | '/app/settings'
-    | '/business/new'
-    | '/business/select'
-    | '/app/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/app'
+    | '/_authenticated/app/action-plan'
+    | '/_authenticated/app/blueprint'
+    | '/_authenticated/app/brain'
+    | '/_authenticated/app/customers'
+    | '/_authenticated/app/dashboard'
+    | '/_authenticated/app/diagnosis'
+    | '/_authenticated/app/experiments'
+    | '/_authenticated/app/help'
+    | '/_authenticated/app/interview'
+    | '/_authenticated/app/leads'
+    | '/_authenticated/app/metrics'
+    | '/_authenticated/app/notifications'
+    | '/_authenticated/app/offers'
+    | '/_authenticated/app/operations'
+    | '/_authenticated/app/seo'
+    | '/_authenticated/app/services'
+    | '/_authenticated/app/settings'
+    | '/_authenticated/business/new'
+    | '/_authenticated/business/select'
+    | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AppRoute: typeof AppRouteWithChildren
-  BusinessNewRoute: typeof BusinessNewRoute
-  BusinessSelectRoute: typeof BusinessSelectRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -305,205 +336,234 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/app': {
-      id: '/app'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/app': {
+      id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedAppRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/app/': {
-      id: '/app/'
+    '/_authenticated/app/': {
+      id: '/_authenticated/app/'
       path: '/'
       fullPath: '/app/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppIndexRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/action-plan': {
-      id: '/app/action-plan'
+    '/_authenticated/app/action-plan': {
+      id: '/_authenticated/app/action-plan'
       path: '/action-plan'
       fullPath: '/app/action-plan'
-      preLoaderRoute: typeof AppActionPlanRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppActionPlanRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/blueprint': {
-      id: '/app/blueprint'
+    '/_authenticated/app/blueprint': {
+      id: '/_authenticated/app/blueprint'
       path: '/blueprint'
       fullPath: '/app/blueprint'
-      preLoaderRoute: typeof AppBlueprintRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppBlueprintRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/brain': {
-      id: '/app/brain'
+    '/_authenticated/app/brain': {
+      id: '/_authenticated/app/brain'
       path: '/brain'
       fullPath: '/app/brain'
-      preLoaderRoute: typeof AppBrainRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppBrainRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/customers': {
-      id: '/app/customers'
+    '/_authenticated/app/customers': {
+      id: '/_authenticated/app/customers'
       path: '/customers'
       fullPath: '/app/customers'
-      preLoaderRoute: typeof AppCustomersRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppCustomersRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/dashboard': {
-      id: '/app/dashboard'
+    '/_authenticated/app/dashboard': {
+      id: '/_authenticated/app/dashboard'
       path: '/dashboard'
       fullPath: '/app/dashboard'
-      preLoaderRoute: typeof AppDashboardRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppDashboardRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/diagnosis': {
-      id: '/app/diagnosis'
+    '/_authenticated/app/diagnosis': {
+      id: '/_authenticated/app/diagnosis'
       path: '/diagnosis'
       fullPath: '/app/diagnosis'
-      preLoaderRoute: typeof AppDiagnosisRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppDiagnosisRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/experiments': {
-      id: '/app/experiments'
+    '/_authenticated/app/experiments': {
+      id: '/_authenticated/app/experiments'
       path: '/experiments'
       fullPath: '/app/experiments'
-      preLoaderRoute: typeof AppExperimentsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppExperimentsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/help': {
-      id: '/app/help'
+    '/_authenticated/app/help': {
+      id: '/_authenticated/app/help'
       path: '/help'
       fullPath: '/app/help'
-      preLoaderRoute: typeof AppHelpRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppHelpRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/interview': {
-      id: '/app/interview'
+    '/_authenticated/app/interview': {
+      id: '/_authenticated/app/interview'
       path: '/interview'
       fullPath: '/app/interview'
-      preLoaderRoute: typeof AppInterviewRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppInterviewRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/leads': {
-      id: '/app/leads'
+    '/_authenticated/app/leads': {
+      id: '/_authenticated/app/leads'
       path: '/leads'
       fullPath: '/app/leads'
-      preLoaderRoute: typeof AppLeadsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppLeadsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/metrics': {
-      id: '/app/metrics'
+    '/_authenticated/app/metrics': {
+      id: '/_authenticated/app/metrics'
       path: '/metrics'
       fullPath: '/app/metrics'
-      preLoaderRoute: typeof AppMetricsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppMetricsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/notifications': {
-      id: '/app/notifications'
+    '/_authenticated/app/notifications': {
+      id: '/_authenticated/app/notifications'
       path: '/notifications'
       fullPath: '/app/notifications'
-      preLoaderRoute: typeof AppNotificationsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/offers': {
-      id: '/app/offers'
+    '/_authenticated/app/offers': {
+      id: '/_authenticated/app/offers'
       path: '/offers'
       fullPath: '/app/offers'
-      preLoaderRoute: typeof AppOffersRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppOffersRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/operations': {
-      id: '/app/operations'
+    '/_authenticated/app/operations': {
+      id: '/_authenticated/app/operations'
       path: '/operations'
       fullPath: '/app/operations'
-      preLoaderRoute: typeof AppOperationsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppOperationsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/seo': {
-      id: '/app/seo'
+    '/_authenticated/app/seo': {
+      id: '/_authenticated/app/seo'
       path: '/seo'
       fullPath: '/app/seo'
-      preLoaderRoute: typeof AppSeoRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppSeoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/services': {
-      id: '/app/services'
+    '/_authenticated/app/services': {
+      id: '/_authenticated/app/services'
       path: '/services'
       fullPath: '/app/services'
-      preLoaderRoute: typeof AppServicesRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppServicesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/app/settings': {
-      id: '/app/settings'
+    '/_authenticated/app/settings': {
+      id: '/_authenticated/app/settings'
       path: '/settings'
       fullPath: '/app/settings'
-      preLoaderRoute: typeof AppSettingsRouteImport
-      parentRoute: typeof AppRoute
+      preLoaderRoute: typeof AuthenticatedAppSettingsRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
     }
-    '/business/new': {
-      id: '/business/new'
+    '/_authenticated/business/new': {
+      id: '/_authenticated/business/new'
       path: '/business/new'
       fullPath: '/business/new'
-      preLoaderRoute: typeof BusinessNewRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedBusinessNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/business/select': {
-      id: '/business/select'
+    '/_authenticated/business/select': {
+      id: '/_authenticated/business/select'
       path: '/business/select'
       fullPath: '/business/select'
-      preLoaderRoute: typeof BusinessSelectRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedBusinessSelectRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
-interface AppRouteChildren {
-  AppActionPlanRoute: typeof AppActionPlanRoute
-  AppBlueprintRoute: typeof AppBlueprintRoute
-  AppBrainRoute: typeof AppBrainRoute
-  AppCustomersRoute: typeof AppCustomersRoute
-  AppDashboardRoute: typeof AppDashboardRoute
-  AppDiagnosisRoute: typeof AppDiagnosisRoute
-  AppExperimentsRoute: typeof AppExperimentsRoute
-  AppHelpRoute: typeof AppHelpRoute
-  AppInterviewRoute: typeof AppInterviewRoute
-  AppLeadsRoute: typeof AppLeadsRoute
-  AppMetricsRoute: typeof AppMetricsRoute
-  AppNotificationsRoute: typeof AppNotificationsRoute
-  AppOffersRoute: typeof AppOffersRoute
-  AppOperationsRoute: typeof AppOperationsRoute
-  AppSeoRoute: typeof AppSeoRoute
-  AppServicesRoute: typeof AppServicesRoute
-  AppSettingsRoute: typeof AppSettingsRoute
-  AppIndexRoute: typeof AppIndexRoute
+interface AuthenticatedAppRouteChildren {
+  AuthenticatedAppActionPlanRoute: typeof AuthenticatedAppActionPlanRoute
+  AuthenticatedAppBlueprintRoute: typeof AuthenticatedAppBlueprintRoute
+  AuthenticatedAppBrainRoute: typeof AuthenticatedAppBrainRoute
+  AuthenticatedAppCustomersRoute: typeof AuthenticatedAppCustomersRoute
+  AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
+  AuthenticatedAppDiagnosisRoute: typeof AuthenticatedAppDiagnosisRoute
+  AuthenticatedAppExperimentsRoute: typeof AuthenticatedAppExperimentsRoute
+  AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
+  AuthenticatedAppInterviewRoute: typeof AuthenticatedAppInterviewRoute
+  AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
+  AuthenticatedAppMetricsRoute: typeof AuthenticatedAppMetricsRoute
+  AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
+  AuthenticatedAppOffersRoute: typeof AuthenticatedAppOffersRoute
+  AuthenticatedAppOperationsRoute: typeof AuthenticatedAppOperationsRoute
+  AuthenticatedAppSeoRoute: typeof AuthenticatedAppSeoRoute
+  AuthenticatedAppServicesRoute: typeof AuthenticatedAppServicesRoute
+  AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
+  AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
 }
 
-const AppRouteChildren: AppRouteChildren = {
-  AppActionPlanRoute: AppActionPlanRoute,
-  AppBlueprintRoute: AppBlueprintRoute,
-  AppBrainRoute: AppBrainRoute,
-  AppCustomersRoute: AppCustomersRoute,
-  AppDashboardRoute: AppDashboardRoute,
-  AppDiagnosisRoute: AppDiagnosisRoute,
-  AppExperimentsRoute: AppExperimentsRoute,
-  AppHelpRoute: AppHelpRoute,
-  AppInterviewRoute: AppInterviewRoute,
-  AppLeadsRoute: AppLeadsRoute,
-  AppMetricsRoute: AppMetricsRoute,
-  AppNotificationsRoute: AppNotificationsRoute,
-  AppOffersRoute: AppOffersRoute,
-  AppOperationsRoute: AppOperationsRoute,
-  AppSeoRoute: AppSeoRoute,
-  AppServicesRoute: AppServicesRoute,
-  AppSettingsRoute: AppSettingsRoute,
-  AppIndexRoute: AppIndexRoute,
+const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
+  AuthenticatedAppActionPlanRoute: AuthenticatedAppActionPlanRoute,
+  AuthenticatedAppBlueprintRoute: AuthenticatedAppBlueprintRoute,
+  AuthenticatedAppBrainRoute: AuthenticatedAppBrainRoute,
+  AuthenticatedAppCustomersRoute: AuthenticatedAppCustomersRoute,
+  AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
+  AuthenticatedAppDiagnosisRoute: AuthenticatedAppDiagnosisRoute,
+  AuthenticatedAppExperimentsRoute: AuthenticatedAppExperimentsRoute,
+  AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
+  AuthenticatedAppInterviewRoute: AuthenticatedAppInterviewRoute,
+  AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
+  AuthenticatedAppMetricsRoute: AuthenticatedAppMetricsRoute,
+  AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
+  AuthenticatedAppOffersRoute: AuthenticatedAppOffersRoute,
+  AuthenticatedAppOperationsRoute: AuthenticatedAppOperationsRoute,
+  AuthenticatedAppSeoRoute: AuthenticatedAppSeoRoute,
+  AuthenticatedAppServicesRoute: AuthenticatedAppServicesRoute,
+  AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
+  AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
 }
 
-const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+const AuthenticatedAppRouteWithChildren =
+  AuthenticatedAppRoute._addFileChildren(AuthenticatedAppRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAppRoute: typeof AuthenticatedAppRouteWithChildren
+  AuthenticatedBusinessNewRoute: typeof AuthenticatedBusinessNewRoute
+  AuthenticatedBusinessSelectRoute: typeof AuthenticatedBusinessSelectRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAppRoute: AuthenticatedAppRouteWithChildren,
+  AuthenticatedBusinessNewRoute: AuthenticatedBusinessNewRoute,
+  AuthenticatedBusinessSelectRoute: AuthenticatedBusinessSelectRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AppRoute: AppRouteWithChildren,
-  BusinessNewRoute: BusinessNewRoute,
-  BusinessSelectRoute: BusinessSelectRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -3,7 +3,7 @@ import { Gauge } from "lucide-react";
 
 import { AwaitingData } from "@/components/business-os/awaiting-data";
 
-export const Route = createFileRoute("/app/metrics")({
+export const Route = createFileRoute("/_authenticated/app/metrics")({
   head: () => ({
     meta: [
       { title: "Metrics — Business OS" },

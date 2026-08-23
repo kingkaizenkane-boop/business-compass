@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { LoopDiagram } from "@/components/business-os/loop-diagram";
 import { PageHeader, SectionLabel } from "@/components/business-os/primitives";
 
-export const Route = createFileRoute("/app/help")({
+export const Route = createFileRoute("/_authenticated/app/help")({
   head: () => ({
     meta: [
       { title: "How Business OS works — Business OS" },
