@@ -26,6 +26,7 @@ type Organization = {
 
 type WorkspaceValue = {
   loading: boolean;
+  error: Error | null;
   organizations: Organization[];
   businesses: Business[];
   activeBusiness: Business | null;
@@ -43,7 +44,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const [activeId, setActiveId] = useState<string | null>(null);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["workspace"],
     queryFn: () => fetchWorkspace({ data: undefined }),
     staleTime: 30_000,
@@ -72,6 +73,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
   const value: WorkspaceValue = {
     loading: isLoading,
+    error: (error as Error) ?? null,
     organizations: data?.organizations ?? [],
     businesses,
     activeBusiness,

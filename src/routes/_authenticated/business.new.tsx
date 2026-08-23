@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_authenticated/business/new")({
 });
 
 function NewBusinessPage() {
-  const { activeOrganization, loading, setActiveBusinessId, refresh } = useWorkspace();
+  const { activeOrganization, loading, error: workspaceError, setActiveBusinessId, refresh } = useWorkspace();
   const create = useServerFn(createBusiness);
   const navigate = useNavigate();
 
@@ -55,7 +55,13 @@ function NewBusinessPage() {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      if (!activeOrganization) throw new Error("Workspace still loading");
+      if (!activeOrganization) {
+        throw new Error(
+          workspaceError
+            ? `Workspace could not be loaded: ${workspaceError.message}`
+            : "Workspace is still loading — try again in a moment.",
+        );
+      }
       return create({
         data: {
           organizationId: activeOrganization.id,
@@ -96,6 +102,12 @@ function NewBusinessPage() {
         }}
       >
         <SectionLabel>Business basics</SectionLabel>
+
+        {workspaceError ? (
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-xs text-destructive">
+            Your workspace couldn't be loaded: {workspaceError.message}
+          </p>
+        ) : null}
 
         <Field
           id="name"

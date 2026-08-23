@@ -25,21 +25,30 @@ export const getWorkspace = createServerFn({ method: "POST" })
 
       const name = profile?.full_name ? `${profile.full_name}'s workspace` : "My workspace";
       const slug = `ws-${userId.slice(0, 8)}-${Date.now().toString(36)}`;
+      const orgId = crypto.randomUUID();
 
-      const { data: org, error: orgError } = await supabase
+      // Insert without returning: the SELECT policy requires membership,
+      // which only exists after the organization_members row below.
+      const { error: orgError } = await supabase
         .from("organizations")
-        .insert({ name, slug, created_by: userId })
-        .select("id, name, slug, plan_code, status")
-        .single();
+        .insert({ id: orgId, name, slug, created_by: userId });
       if (orgError) throw orgError;
 
       const { error: linkError } = await supabase
         .from("organization_members")
-        .insert({ organization_id: org.id, user_id: userId, role: "owner" });
+        .insert({ organization_id: orgId, user_id: userId, role: "owner" });
       if (linkError) throw linkError;
+
+      const { data: org, error: readError } = await supabase
+        .from("organizations")
+        .select("id, name, slug, plan_code, status")
+        .eq("id", orgId)
+        .single();
+      if (readError) throw readError;
 
       orgs = [org];
     }
+
 
     const { data: businesses, error: bizError } = await supabase
       .from("businesses")
