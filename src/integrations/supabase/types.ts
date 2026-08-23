@@ -1895,6 +1895,40 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_ai_job: {
+        Args: { requested_job_types?: string[]; worker_id: string }
+        Returns: {
+          attempts: number
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_data: Json
+          job_type: string
+          locked_at: string | null
+          locked_by: string | null
+          max_attempts: number
+          output_data: Json | null
+          priority: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["ai_job_status"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "ai_jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      complete_ai_job: {
+        Args: { job_id: string; result: Json }
+        Returns: undefined
+      }
+      fail_ai_job: {
+        Args: { error_text: string; job_id: string }
+        Returns: undefined
+      }
       is_business_manager: {
         Args: { target_business: string }
         Returns: boolean
@@ -1905,6 +1939,43 @@ export type Database = {
       }
       is_org_admin: { Args: { target_org: string }; Returns: boolean }
       is_org_member: { Args: { target_org: string }; Returns: boolean }
+      match_business_memory: {
+        Args: {
+          match_business_id: string
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content: string
+          id: string
+          memory_type: string
+          similarity: number
+          title: string
+        }[]
+      }
+      update_interview_progress: {
+        Args: {
+          new_coverage: number
+          new_progress: number
+          new_question_key: string
+          new_stage: string
+          target_session: string
+        }
+        Returns: undefined
+      }
+      write_audit_log: {
+        Args: {
+          action_name: string
+          actor?: string
+          new_value: Json
+          old_value: Json
+          target_business: string
+          target_record: string
+          target_table: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       ai_job_status: "queued" | "running" | "completed" | "failed" | "cancelled"
