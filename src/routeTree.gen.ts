@@ -21,6 +21,7 @@ import { Route as AppDiagnosisRouteImport } from './routes/app.diagnosis'
 import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
 import { Route as AppLeadsRouteImport } from './routes/app.leads'
+import { Route as AppMetricsRouteImport } from './routes/app.metrics'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
 import { Route as AppOperationsRouteImport } from './routes/app.operations'
 import { Route as AppSeoRouteImport } from './routes/app.seo'
@@ -86,6 +87,11 @@ const AppLeadsRoute = AppLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMetricsRoute = AppMetricsRouteImport.update({
+  id: '/metrics',
+  path: '/metrics',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOffersRoute = AppOffersRouteImport.update({
   id: '/offers',
   path: '/offers',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/app/experiments': typeof AppExperimentsRoute
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
+  '/app/metrics': typeof AppMetricsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
+    | '/app/metrics'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
+    | '/app/metrics'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/app/experiments'
     | '/app/interview'
     | '/app/leads'
+    | '/app/metrics'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -308,6 +320,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLeadsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/metrics': {
+      id: '/app/metrics'
+      path: '/metrics'
+      fullPath: '/app/metrics'
+      preLoaderRoute: typeof AppMetricsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/offers': {
       id: '/app/offers'
       path: '/offers'
@@ -349,6 +368,7 @@ interface AppRouteChildren {
   AppExperimentsRoute: typeof AppExperimentsRoute
   AppInterviewRoute: typeof AppInterviewRoute
   AppLeadsRoute: typeof AppLeadsRoute
+  AppMetricsRoute: typeof AppMetricsRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOperationsRoute: typeof AppOperationsRoute
   AppSeoRoute: typeof AppSeoRoute
@@ -366,6 +386,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppExperimentsRoute: AppExperimentsRoute,
   AppInterviewRoute: AppInterviewRoute,
   AppLeadsRoute: AppLeadsRoute,
+  AppMetricsRoute: AppMetricsRoute,
   AppOffersRoute: AppOffersRoute,
   AppOperationsRoute: AppOperationsRoute,
   AppSeoRoute: AppSeoRoute,
