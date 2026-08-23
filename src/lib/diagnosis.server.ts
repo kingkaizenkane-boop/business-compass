@@ -7,7 +7,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
-import { chatJson } from "./ai.server";
+import { chatJsonResult } from "./ai.server";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = SupabaseClient<Database>;
