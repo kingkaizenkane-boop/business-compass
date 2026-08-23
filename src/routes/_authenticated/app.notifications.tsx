@@ -3,7 +3,7 @@ import { Bell } from "lucide-react";
 
 import { EmptyState, PageHeader } from "@/components/business-os/primitives";
 
-export const Route = createFileRoute("/app/notifications")({
+export const Route = createFileRoute("/_authenticated/app/notifications")({
   head: () => ({
     meta: [
       { title: "Notifications — Business OS" },

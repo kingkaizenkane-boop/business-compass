@@ -10,7 +10,7 @@ import {
 } from "@/components/business-os/primitives";
 import { Button } from "@/components/ui/button";
 
-export const Route = createFileRoute("/app/dashboard")({
+export const Route = createFileRoute("/_authenticated/app/dashboard")({
   head: () => ({
     meta: [
       { title: "Dashboard — Business OS" },

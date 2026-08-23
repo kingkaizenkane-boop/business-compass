@@ -3,7 +3,7 @@ import { Package } from "lucide-react";
 
 import { AwaitingData } from "@/components/business-os/awaiting-data";
 
-export const Route = createFileRoute("/app/services")({
+export const Route = createFileRoute("/_authenticated/app/services")({
   head: () => ({
     meta: [
       { title: "Services — Business OS" },

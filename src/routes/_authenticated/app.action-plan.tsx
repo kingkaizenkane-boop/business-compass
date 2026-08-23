@@ -8,7 +8,7 @@ import {
   SectionLabel,
 } from "@/components/business-os/primitives";
 
-export const Route = createFileRoute("/app/action-plan")({
+export const Route = createFileRoute("/_authenticated/app/action-plan")({
   head: () => ({
     meta: [
       { title: "90-Day Action Plan — Business OS" },

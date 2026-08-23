@@ -3,7 +3,7 @@ import { Compass } from "lucide-react";
 
 import { AwaitingData } from "@/components/business-os/awaiting-data";
 
-export const Route = createFileRoute("/app/leads")({
+export const Route = createFileRoute("/_authenticated/app/leads")({
   head: () => ({
     meta: [
       { title: "Leads — Business OS" },

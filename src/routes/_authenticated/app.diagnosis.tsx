@@ -4,7 +4,7 @@ import { Activity } from "lucide-react";
 import { EmptyState, PageHeader, SectionLabel } from "@/components/business-os/primitives";
 import { DIAGNOSIS_CATEGORIES } from "@/lib/business-os";
 
-export const Route = createFileRoute("/app/diagnosis")({
+export const Route = createFileRoute("/_authenticated/app/diagnosis")({
   head: () => ({
     meta: [
       { title: "Business Diagnosis — Business OS" },

@@ -4,7 +4,7 @@ import { FileText } from "lucide-react";
 import { EmptyState, PageHeader, SectionLabel } from "@/components/business-os/primitives";
 import { BLUEPRINT_SECTIONS } from "@/lib/business-os";
 
-export const Route = createFileRoute("/app/blueprint")({
+export const Route = createFileRoute("/_authenticated/app/blueprint")({
   head: () => ({
     meta: [
       { title: "Business Blueprint — Business OS" },
