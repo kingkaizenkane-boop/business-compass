@@ -59,6 +59,68 @@ export type Database = {
           },
         ]
       }
+      ai_jobs: {
+        Row: {
+          attempts: number
+          business_id: string | null
+          completed_at: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          input_data: Json
+          job_type: string
+          locked_at: string | null
+          locked_by: string | null
+          max_attempts: number
+          output_data: Json | null
+          priority: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["ai_job_status"]
+        }
+        Insert: {
+          attempts?: number
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_data?: Json
+          job_type: string
+          locked_at?: string | null
+          locked_by?: string | null
+          max_attempts?: number
+          output_data?: Json | null
+          priority?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["ai_job_status"]
+        }
+        Update: {
+          attempts?: number
+          business_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          input_data?: Json
+          job_type?: string
+          locked_at?: string | null
+          locked_by?: string | null
+          max_attempts?: number
+          output_data?: Json | null
+          priority?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["ai_job_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_jobs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_memory: {
         Row: {
           business_id: string
@@ -149,6 +211,66 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_type: string
+          business_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          new_data: Json | null
+          old_data: Json | null
+          organization_id: string | null
+          record_id: string | null
+          table_name: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_type: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_type?: string
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          new_data?: Json | null
+          old_data?: Json | null
+          organization_id?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_logs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_logs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -314,6 +436,193 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "brain_facts_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_blueprints: {
+        Row: {
+          acquisition_strategy: string | null
+          blueprint_data: Json
+          business_id: string
+          core_problem: string | null
+          created_at: string
+          diagnosis_run_id: string | null
+          differentiation: string | null
+          executive_summary: string | null
+          id: string
+          ideal_customer: string | null
+          methodology: string | null
+          operating_model: string | null
+          owner_role: string | null
+          positioning: string | null
+          pricing_strategy: string | null
+          retention_strategy: string | null
+          status: string
+          transformation: string | null
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          acquisition_strategy?: string | null
+          blueprint_data?: Json
+          business_id: string
+          core_problem?: string | null
+          created_at?: string
+          diagnosis_run_id?: string | null
+          differentiation?: string | null
+          executive_summary?: string | null
+          id?: string
+          ideal_customer?: string | null
+          methodology?: string | null
+          operating_model?: string | null
+          owner_role?: string | null
+          positioning?: string | null
+          pricing_strategy?: string | null
+          retention_strategy?: string | null
+          status?: string
+          transformation?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          acquisition_strategy?: string | null
+          blueprint_data?: Json
+          business_id?: string
+          core_problem?: string | null
+          created_at?: string
+          diagnosis_run_id?: string | null
+          differentiation?: string | null
+          executive_summary?: string | null
+          id?: string
+          ideal_customer?: string | null
+          methodology?: string | null
+          operating_model?: string | null
+          owner_role?: string | null
+          positioning?: string | null
+          pricing_strategy?: string | null
+          retention_strategy?: string | null
+          status?: string
+          transformation?: string | null
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_blueprints_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_blueprints_diagnosis_run_id_fkey"
+            columns: ["diagnosis_run_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_goals: {
+        Row: {
+          business_id: string
+          category: string | null
+          created_at: string
+          current_value: number | null
+          description: string | null
+          id: string
+          name: string
+          status: string
+          target_date: string | null
+          target_value: number | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          category?: string | null
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          name: string
+          status?: string
+          target_date?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          current_value?: number | null
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          target_date?: string | null
+          target_value?: number | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_goals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      business_metrics: {
+        Row: {
+          business_id: string
+          id: string
+          metadata: Json
+          metric_key: string
+          metric_name: string
+          period_end: string | null
+          period_start: string | null
+          recorded_at: string
+          source: string | null
+          unit: string | null
+          value: number | null
+        }
+        Insert: {
+          business_id: string
+          id?: string
+          metadata?: Json
+          metric_key: string
+          metric_name: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_at?: string
+          source?: string | null
+          unit?: string | null
+          value?: number | null
+        }
+        Update: {
+          business_id?: string
+          id?: string
+          metadata?: Json
+          metric_key?: string
+          metric_name?: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_at?: string
+          source?: string | null
+          unit?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_metrics_business_id_fkey"
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
@@ -512,6 +821,206 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customers: {
+        Row: {
+          business_id: string
+          created_at: string
+          customer_segment: string | null
+          email: string | null
+          first_name: string | null
+          first_purchase_at: string | null
+          id: string
+          last_name: string | null
+          last_purchase_at: string | null
+          lead_id: string | null
+          lifetime_value: number
+          metadata: Json
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          customer_segment?: string | null
+          email?: string | null
+          first_name?: string | null
+          first_purchase_at?: string | null
+          id?: string
+          last_name?: string | null
+          last_purchase_at?: string | null
+          lead_id?: string | null
+          lifetime_value?: number
+          metadata?: Json
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          customer_segment?: string | null
+          email?: string | null
+          first_name?: string | null
+          first_purchase_at?: string | null
+          id?: string
+          last_name?: string | null
+          last_purchase_at?: string | null
+          lead_id?: string | null
+          lifetime_value?: number
+          metadata?: Json
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customers_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customers_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnosis_items: {
+        Row: {
+          business_id: string
+          category: Database["public"]["Enums"]["diagnosis_category"]
+          confidence_score: number | null
+          created_at: string
+          description: string | null
+          diagnosis_run_id: string
+          effort_score: number | null
+          evidence: Json
+          id: string
+          impact_score: number | null
+          priority_level: Database["public"]["Enums"]["priority_level"] | null
+          priority_score: number | null
+          recommendation: string | null
+          status: Database["public"]["Enums"]["opportunity_status"]
+          title: string
+          updated_at: string
+          urgency_score: number | null
+        }
+        Insert: {
+          business_id: string
+          category: Database["public"]["Enums"]["diagnosis_category"]
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          diagnosis_run_id: string
+          effort_score?: number | null
+          evidence?: Json
+          id?: string
+          impact_score?: number | null
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          priority_score?: number | null
+          recommendation?: string | null
+          status?: Database["public"]["Enums"]["opportunity_status"]
+          title: string
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Update: {
+          business_id?: string
+          category?: Database["public"]["Enums"]["diagnosis_category"]
+          confidence_score?: number | null
+          created_at?: string
+          description?: string | null
+          diagnosis_run_id?: string
+          effort_score?: number | null
+          evidence?: Json
+          id?: string
+          impact_score?: number | null
+          priority_level?: Database["public"]["Enums"]["priority_level"] | null
+          priority_score?: number | null
+          recommendation?: string | null
+          status?: Database["public"]["Enums"]["opportunity_status"]
+          title?: string
+          updated_at?: string
+          urgency_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnosis_items_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "diagnosis_items_diagnosis_run_id_fkey"
+            columns: ["diagnosis_run_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      diagnosis_runs: {
+        Row: {
+          automation_score: number | null
+          brain_version: number | null
+          business_id: string
+          created_at: string
+          growth_score: number | null
+          id: string
+          marketing_score: number | null
+          operations_score: number | null
+          overall_score: number | null
+          owner_dependency_score: number | null
+          retention_score: number | null
+          revenue_score: number | null
+          sales_score: number | null
+          summary: string | null
+        }
+        Insert: {
+          automation_score?: number | null
+          brain_version?: number | null
+          business_id: string
+          created_at?: string
+          growth_score?: number | null
+          id?: string
+          marketing_score?: number | null
+          operations_score?: number | null
+          overall_score?: number | null
+          owner_dependency_score?: number | null
+          retention_score?: number | null
+          revenue_score?: number | null
+          sales_score?: number | null
+          summary?: string | null
+        }
+        Update: {
+          automation_score?: number | null
+          brain_version?: number | null
+          business_id?: string
+          created_at?: string
+          growth_score?: number | null
+          id?: string
+          marketing_score?: number | null
+          operations_score?: number | null
+          overall_score?: number | null
+          owner_dependency_score?: number | null
+          retention_score?: number | null
+          revenue_score?: number | null
+          sales_score?: number | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "diagnosis_runs_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
             referencedColumns: ["id"]
           },
         ]
@@ -959,6 +1468,116 @@ export type Database = {
         }
         Relationships: []
       }
+      process_steps: {
+        Row: {
+          automation_type: string
+          configuration: Json
+          created_at: string
+          depends_on_step_id: string | null
+          description: string | null
+          estimated_minutes: number | null
+          id: string
+          name: string
+          process_id: string
+          responsible_role: string | null
+          sequence: number
+        }
+        Insert: {
+          automation_type?: string
+          configuration?: Json
+          created_at?: string
+          depends_on_step_id?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          name: string
+          process_id: string
+          responsible_role?: string | null
+          sequence: number
+        }
+        Update: {
+          automation_type?: string
+          configuration?: Json
+          created_at?: string
+          depends_on_step_id?: string | null
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          name?: string
+          process_id?: string
+          responsible_role?: string | null
+          sequence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_steps_depends_on_step_id_fkey"
+            columns: ["depends_on_step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_steps_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      processes: {
+        Row: {
+          automation_score: number | null
+          business_id: string
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json
+          name: string
+          owner_dependency_score: number | null
+          owner_user_id: string | null
+          process_category: string | null
+          status: Database["public"]["Enums"]["process_status"]
+          updated_at: string
+        }
+        Insert: {
+          automation_score?: number | null
+          business_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          owner_dependency_score?: number | null
+          owner_user_id?: string | null
+          process_category?: string | null
+          status?: Database["public"]["Enums"]["process_status"]
+          updated_at?: string
+        }
+        Update: {
+          automation_score?: number | null
+          business_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          owner_dependency_score?: number | null
+          owner_user_id?: string | null
+          process_category?: string | null
+          status?: Database["public"]["Enums"]["process_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "processes_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -995,12 +1614,297 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_opportunities: {
+        Row: {
+          commercial_score: number | null
+          competition_score: number | null
+          created_at: string
+          geographic_modifier: string | null
+          id: string
+          keyword: string
+          metadata: Json
+          opportunity_score: number | null
+          recommended_page_type: string | null
+          relevance_score: number | null
+          search_intent: string | null
+          seo_site_id: string
+          status: string
+          topic_cluster: string | null
+        }
+        Insert: {
+          commercial_score?: number | null
+          competition_score?: number | null
+          created_at?: string
+          geographic_modifier?: string | null
+          id?: string
+          keyword: string
+          metadata?: Json
+          opportunity_score?: number | null
+          recommended_page_type?: string | null
+          relevance_score?: number | null
+          search_intent?: string | null
+          seo_site_id: string
+          status?: string
+          topic_cluster?: string | null
+        }
+        Update: {
+          commercial_score?: number | null
+          competition_score?: number | null
+          created_at?: string
+          geographic_modifier?: string | null
+          id?: string
+          keyword?: string
+          metadata?: Json
+          opportunity_score?: number | null
+          recommended_page_type?: string | null
+          relevance_score?: number | null
+          search_intent?: string | null
+          seo_site_id?: string
+          status?: string
+          topic_cluster?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_opportunities_seo_site_id_fkey"
+            columns: ["seo_site_id"]
+            isOneToOne: false
+            referencedRelation: "seo_sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_page_templates: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          name: string
+          page_type: string
+          template_config: Json
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name: string
+          page_type: string
+          template_config: Json
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          name?: string
+          page_type?: string
+          template_config?: Json
+        }
+        Relationships: []
+      }
+      seo_pages: {
+        Row: {
+          canonical_url: string | null
+          content: Json | null
+          h1: string | null
+          id: string
+          indexable: boolean
+          last_refreshed_at: string | null
+          meta_description: string | null
+          opportunity_id: string | null
+          published_at: string | null
+          quality_score: number | null
+          schema_json: Json | null
+          seo_site_id: string
+          slug: string
+          status: Database["public"]["Enums"]["seo_page_status"]
+          template_id: string | null
+          title: string | null
+        }
+        Insert: {
+          canonical_url?: string | null
+          content?: Json | null
+          h1?: string | null
+          id?: string
+          indexable?: boolean
+          last_refreshed_at?: string | null
+          meta_description?: string | null
+          opportunity_id?: string | null
+          published_at?: string | null
+          quality_score?: number | null
+          schema_json?: Json | null
+          seo_site_id: string
+          slug: string
+          status?: Database["public"]["Enums"]["seo_page_status"]
+          template_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          canonical_url?: string | null
+          content?: Json | null
+          h1?: string | null
+          id?: string
+          indexable?: boolean
+          last_refreshed_at?: string | null
+          meta_description?: string | null
+          opportunity_id?: string | null
+          published_at?: string | null
+          quality_score?: number | null
+          schema_json?: Json | null
+          seo_site_id?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["seo_page_status"]
+          template_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_pages_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "seo_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_pages_seo_site_id_fkey"
+            columns: ["seo_site_id"]
+            isOneToOne: false
+            referencedRelation: "seo_sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_pages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "seo_page_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_sites: {
+        Row: {
+          active: boolean
+          business_id: string | null
+          configuration: Json
+          created_at: string
+          domain: string | null
+          id: string
+          site_type: string
+        }
+        Insert: {
+          active?: boolean
+          business_id?: string | null
+          configuration?: Json
+          created_at?: string
+          domain?: string | null
+          id?: string
+          site_type: string
+        }
+        Update: {
+          active?: boolean
+          business_id?: string | null
+          configuration?: Json
+          created_at?: string
+          domain?: string | null
+          id?: string
+          site_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_sites_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          business_id: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_at: string | null
+          id: string
+          metadata: Json
+          priority: Database["public"]["Enums"]["task_priority"]
+          process_id: string | null
+          process_step_id: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          business_id: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          metadata?: Json
+          priority?: Database["public"]["Enums"]["task_priority"]
+          process_id?: string | null
+          process_step_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          business_id?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string | null
+          id?: string
+          metadata?: Json
+          priority?: Database["public"]["Enums"]["task_priority"]
+          process_id?: string | null
+          process_step_id?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_process_step_id_fkey"
+            columns: ["process_step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_business_manager: {
+        Args: { target_business: string }
+        Returns: boolean
+      }
+      is_business_member: {
+        Args: { target_business: string }
+        Returns: boolean
+      }
+      is_org_admin: { Args: { target_org: string }; Returns: boolean }
+      is_org_member: { Args: { target_org: string }; Returns: boolean }
     }
     Enums: {
       ai_job_status: "queued" | "running" | "completed" | "failed" | "cancelled"
