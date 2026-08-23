@@ -390,7 +390,7 @@ export async function runDiagnosisEngine(options: {
 
   const factById = new Map(facts.map((f) => [f.id, f]));
 
-  const ai = await chatJson<unknown>({
+  const aiResult = await chatJsonResult<unknown>({
     maxTokens: 4000,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
