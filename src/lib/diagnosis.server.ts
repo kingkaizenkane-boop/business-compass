@@ -7,7 +7,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
-import { chatJson } from "./ai.server";
+import { chatJsonResult } from "./ai.server";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = SupabaseClient<Database>;
@@ -390,8 +390,8 @@ export async function runDiagnosisEngine(options: {
 
   const factById = new Map(facts.map((f) => [f.id, f]));
 
-  const ai = await chatJson<unknown>({
-    maxTokens: 4000,
+  const aiResult = await chatJsonResult<unknown>({
+    maxTokens: 8000,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {
@@ -426,11 +426,11 @@ export async function runDiagnosisEngine(options: {
     ],
   });
 
-  if (ai === null) {
-    throw new Error("The diagnosis service is temporarily unavailable. Please try again shortly.");
+  if (!aiResult.ok) {
+    throw new Error(aiResult.reason);
   }
 
-  const parsed = aiSchema.safeParse(ai);
+  const parsed = aiSchema.safeParse(aiResult.data);
   if (!parsed.success) {
     console.error("[diagnosis] AI response failed validation", parsed.error.issues.slice(0, 5));
     throw new Error("The diagnosis response was malformed and was rejected. Please run the diagnosis again.");
