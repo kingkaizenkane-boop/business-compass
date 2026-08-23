@@ -22,6 +22,7 @@ import { Route as AppExperimentsRouteImport } from './routes/app.experiments'
 import { Route as AppInterviewRouteImport } from './routes/app.interview'
 import { Route as AppLeadsRouteImport } from './routes/app.leads'
 import { Route as AppMetricsRouteImport } from './routes/app.metrics'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
 import { Route as AppOperationsRouteImport } from './routes/app.operations'
 import { Route as AppSeoRouteImport } from './routes/app.seo'
@@ -93,6 +94,11 @@ const AppMetricsRoute = AppMetricsRouteImport.update({
   path: '/metrics',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOffersRoute = AppOffersRouteImport.update({
   id: '/offers',
   path: '/offers',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -151,6 +158,7 @@ export interface FileRoutesByTo {
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -172,6 +180,7 @@ export interface FileRoutesById {
   '/app/interview': typeof AppInterviewRoute
   '/app/leads': typeof AppLeadsRoute
   '/app/metrics': typeof AppMetricsRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/offers': typeof AppOffersRoute
   '/app/operations': typeof AppOperationsRoute
   '/app/seo': typeof AppSeoRoute
@@ -194,6 +203,7 @@ export interface FileRouteTypes {
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
+    | '/app/notifications'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
+    | '/app/notifications'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/app/interview'
     | '/app/leads'
     | '/app/metrics'
+    | '/app/notifications'
     | '/app/offers'
     | '/app/operations'
     | '/app/seo'
@@ -339,6 +351,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMetricsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/offers': {
       id: '/app/offers'
       path: '/offers'
@@ -388,6 +407,7 @@ interface AppRouteChildren {
   AppInterviewRoute: typeof AppInterviewRoute
   AppLeadsRoute: typeof AppLeadsRoute
   AppMetricsRoute: typeof AppMetricsRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOperationsRoute: typeof AppOperationsRoute
   AppSeoRoute: typeof AppSeoRoute
@@ -407,6 +427,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppInterviewRoute: AppInterviewRoute,
   AppLeadsRoute: AppLeadsRoute,
   AppMetricsRoute: AppMetricsRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppOffersRoute: AppOffersRoute,
   AppOperationsRoute: AppOperationsRoute,
   AppSeoRoute: AppSeoRoute,
