@@ -379,7 +379,13 @@ export async function runDiagnosisEngine(options: {
   const readiness = assessReadiness(facts);
 
   if (!readiness.ready) {
-    return { status: "insufficient" as const, readiness, run: null, items: [] as DiagnosisItemView[] };
+    return {
+      status: "insufficient" as const,
+      readiness,
+      run: null,
+      items: [] as DiagnosisItemView[],
+      history: [] as { id: string; createdAt: string; overallScore: number | null }[],
+    };
   }
 
   const factById = new Map(facts.map((f) => [f.id, f]));
