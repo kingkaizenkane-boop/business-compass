@@ -39,6 +39,12 @@ export async function writeMemory(options: {
     ...(options.accounting ? { accounting: options.accounting } : {}),
   });
 
+  // Stored on a 0-100 scale; callers may pass either 0-1 or 0-100.
+  const toScore = (value: number | undefined, fallback: number) => {
+    if (value == null || Number.isNaN(value)) return fallback;
+    return value <= 1 ? Math.round(value * 100) : Math.round(value);
+  };
+
   const row = {
     business_id: memory.businessId,
     memory_type: memory.memoryType,
@@ -47,17 +53,32 @@ export async function writeMemory(options: {
     metadata: (memory.metadata ?? {}) as never,
     source_table: memory.sourceTable ?? null,
     source_id: memory.sourceId ?? null,
-    importance: memory.importance ?? 0.5,
-    confidence: memory.confidence ?? 0.7,
+    importance: toScore(memory.importance, 50),
+    confidence: toScore(memory.confidence, 70),
     embedding: embedded.ok ? (JSON.stringify(embedded.embedding) as unknown as string) : null,
   };
 
-  const { error } =
-    memory.sourceId != null
-      ? await supabase
-          .from("ai_memory")
-          .upsert(row, { onConflict: "business_id,memory_type,source_table,source_id" })
-      : await supabase.from("ai_memory").insert(row);
+  // The uniqueness guarantee is a partial index, which PostgREST cannot target
+  // with ON CONFLICT — so do the idempotent update/insert explicitly.
+  let error: { message: string } | null = null;
+  if (memory.sourceId != null) {
+    const { data: existing } = await supabase
+      .from("ai_memory")
+      .select("id")
+      .eq("business_id", memory.businessId)
+      .eq("memory_type", memory.memoryType)
+      .eq("source_table", memory.sourceTable ?? "")
+      .eq("source_id", memory.sourceId)
+      .maybeSingle();
+    if (existing) {
+      ({ error } = await supabase.from("ai_memory").update(row).eq("id", existing.id));
+    } else {
+      ({ error } = await supabase.from("ai_memory").insert(row));
+    }
+  } else {
+    ({ error } = await supabase.from("ai_memory").insert(row));
+  }
+
 
   if (error) {
     console.error("[memory] write failed", error.message);
