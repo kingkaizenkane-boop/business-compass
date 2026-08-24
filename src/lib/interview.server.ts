@@ -5,6 +5,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { chatJson } from "./ai.server";
+import { AI_MODELS } from "./ai-usage.server";
+import { writeMemory } from "./memory.server";
 import type { Database } from "@/integrations/supabase/types";
 
 export type Client = SupabaseClient<Database>;
@@ -278,30 +280,100 @@ const FACT_TYPES = new Set([
   "observation",
 ]);
 
+export type ExtractionOutcome = {
+  factsCreated: number;
+  factsSuperseded: number;
+  factsUnchanged: number;
+  evidenceLinks: number;
+  memoriesWritten: number;
+  skipped: boolean;
+};
+
+/**
+ * Extracts Brain facts from one interview answer.
+ *
+ * Idempotent: the evidence row is keyed to the interview response, and if facts
+ * already exist for that evidence the run is a no-op — so a retried job never
+ * duplicates Brain facts.
+ * Non-destructive: an existing fact with the same key is superseded (version+1,
+ * supersedes_fact_id chain), never overwritten.
+ */
 export async function extractFactsFromResponse(options: {
   supabase: Client;
   businessId: string;
-  userId: string;
+  userId: string | null;
   questionKey: string;
   questionText: string;
   answer: string;
-}) {
+  responseId?: string | null;
+  organizationId?: string | null;
+  jobId?: string | null;
+}): Promise<ExtractionOutcome> {
   const { supabase, businessId, userId, questionKey, questionText, answer } = options;
+  const responseId = options.responseId ?? null;
 
-  const { data: evidence } = await supabase
-    .from("evidence")
-    .insert({
-      business_id: businessId,
-      evidence_type: "conversation",
-      title: questionText.slice(0, 180),
-      content_text: answer,
-      metadata: { question_key: questionKey },
-      created_by: userId,
-    })
-    .select("id")
-    .single();
+  const empty: ExtractionOutcome = {
+    factsCreated: 0,
+    factsSuperseded: 0,
+    factsUnchanged: 0,
+    evidenceLinks: 0,
+    memoriesWritten: 0,
+    skipped: false,
+  };
+
+  const accounting =
+    options.organizationId != null
+      ? {
+          supabase,
+          context: {
+            organizationId: options.organizationId,
+            businessId,
+            jobId: options.jobId ?? null,
+            operation: "interview_extraction",
+          },
+        }
+      : undefined;
+
+  /* ---------- idempotent evidence row, keyed to the interview response ---------- */
+  let evidenceId: string | null = null;
+  if (responseId) {
+    const { data: existing } = await supabase
+      .from("evidence")
+      .select("id")
+      .eq("business_id", businessId)
+      .eq("metadata->>response_id", responseId)
+      .maybeSingle();
+    evidenceId = existing?.id ?? null;
+  }
+
+  if (!evidenceId) {
+    const { data: created, error: evidenceError } = await supabase
+      .from("evidence")
+      .insert({
+        business_id: businessId,
+        evidence_type: "conversation",
+        title: questionText.slice(0, 180),
+        content_text: answer,
+        metadata: { question_key: questionKey, response_id: responseId },
+        created_by: userId,
+      })
+      .select("id")
+      .single();
+    if (evidenceError) throw evidenceError;
+    evidenceId = created.id;
+  } else {
+    // Already extracted for this answer? Then this is a retry — do nothing.
+    const { count } = await supabase
+      .from("brain_facts")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", businessId)
+      .eq("source_id", evidenceId);
+    if ((count ?? 0) > 0) return { ...empty, skipped: true };
+  }
 
   const extracted = await chatJson<{ facts?: ExtractedFact[] }>({
+    model: AI_MODELS.extraction,
+    ...(accounting ? { accounting } : {}),
     messages: [
       {
         role: "system",
@@ -322,36 +394,125 @@ export async function extractFactsFromResponse(options: {
     ],
   });
 
-  const facts = (extracted?.facts ?? []).filter((f) => f.fact_key && (f.value_text || f.value_number != null));
-  if (facts.length === 0) return 0;
+  const facts = (extracted?.facts ?? []).filter(
+    (f) => f.fact_key && (f.value_text || f.value_number != null),
+  );
+  if (facts.length === 0) return empty;
 
-  const rows = facts.slice(0, 6).map((fact) => {
+  const outcome: ExtractionOutcome = { ...empty };
+  const linkTargets: string[] = [];
+
+  for (const fact of facts.slice(0, 6)) {
     const confidence = clamp(fact.confidence ?? 0.7);
     const factType = FACT_TYPES.has(fact.fact_type ?? "") ? fact.fact_type! : "fact";
-    return {
-      business_id: businessId,
-      category: fact.category ?? "identity",
-      subcategory: fact.subcategory ?? null,
-      fact_key: fact.fact_key!,
-      value_text: fact.value_text ?? null,
-      value_number: fact.value_number ?? null,
-      fact_type: factType as Database["public"]["Enums"]["fact_type"],
-      confidence,
-      confidence_level: confidenceLevel(confidence),
-      verified: false,
-      active: true,
-      source_type: "conversation" as const,
-      source_id: evidence?.id ?? null,
-      created_by: userId,
-    };
-  });
+    const factKey = fact.fact_key!;
 
-  const { error } = await supabase.from("brain_facts").insert(rows);
-  if (error) {
-    console.error("[interview] fact insert failed", error.message);
-    return 0;
+    const { data: previous } = await supabase
+      .from("brain_facts")
+      .select("id, version, value_text, value_number")
+      .eq("business_id", businessId)
+      .eq("fact_key", factKey)
+      .eq("active", true)
+      .order("version", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const sameValue =
+      previous != null &&
+      (previous.value_text ?? null) === (fact.value_text ?? null) &&
+      Number(previous.value_number ?? NaN) === Number(fact.value_number ?? NaN);
+
+    if (previous && sameValue) {
+      outcome.factsUnchanged += 1;
+      linkTargets.push(previous.id);
+      continue;
+    }
+
+    const { data: inserted, error: insertError } = await supabase
+      .from("brain_facts")
+      .insert({
+        business_id: businessId,
+        category: fact.category ?? "identity",
+        subcategory: fact.subcategory ?? null,
+        fact_key: factKey,
+        value_text: fact.value_text ?? null,
+        value_number: fact.value_number ?? null,
+        fact_type: factType as Database["public"]["Enums"]["fact_type"],
+        confidence,
+        confidence_level: confidenceLevel(confidence),
+        verified: false,
+        active: true,
+        source_type: "conversation" as const,
+        source_id: evidenceId,
+        source_response_id: responseId,
+        created_by: userId,
+        version: (previous?.version ?? 0) + 1,
+        supersedes_fact_id: previous?.id ?? null,
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !inserted) {
+      console.error("[interview] fact insert failed", insertError?.message);
+      continue;
+    }
+
+    outcome.factsCreated += 1;
+    linkTargets.push(inserted.id);
+
+    // Preserve history: the old version stays in the table, marked superseded.
+    if (previous) {
+      await supabase
+        .from("brain_facts")
+        .update({
+          active: false,
+          superseded_at: new Date().toISOString(),
+          superseded_by_fact_id: inserted.id,
+        })
+        .eq("id", previous.id);
+      outcome.factsSuperseded += 1;
+    }
+
+    // Durable memory for semantic recall, one per fact (idempotent upsert).
+    const memory = await writeMemory({
+      supabase,
+      memory: {
+        businessId,
+        memoryType: "brain_fact",
+        title: factKey.replace(/_/g, " "),
+        content: [
+          `${fact.category ?? "identity"} · ${factKey}`,
+          fact.value_text ?? (fact.value_number != null ? String(fact.value_number) : ""),
+          `Owner said: ${answer.slice(0, 600)}`,
+        ]
+          .filter(Boolean)
+          .join(" — "),
+        metadata: { question_key: questionKey, fact_type: factType },
+        sourceTable: "brain_facts",
+        sourceId: inserted.id,
+        importance: confidence,
+        confidence,
+      },
+      ...(accounting ? { accounting } : {}),
+    });
+    if (memory.ok) outcome.memoriesWritten += 1;
   }
-  return rows.length;
+
+  /* Evidence linkage — the traceability claim must be backed by the database. */
+  if (evidenceId && linkTargets.length > 0) {
+    const { error: linkError } = await supabase.from("brain_fact_evidence").upsert(
+      linkTargets.map((factId) => ({
+        fact_id: factId,
+        evidence_id: evidenceId!,
+        relevance: 1,
+      })),
+      { onConflict: "fact_id,evidence_id" },
+    );
+    if (linkError) console.error("[interview] evidence linkage failed", linkError.message);
+    else outcome.evidenceLinks = linkTargets.length;
+  }
+
+  return outcome;
 }
 
 function confidenceLevel(value: number): Database["public"]["Enums"]["confidence_level"] {
