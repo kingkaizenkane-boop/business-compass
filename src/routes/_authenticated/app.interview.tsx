@@ -6,6 +6,7 @@ import { ArrowRight, HelpCircle, PauseCircle, SkipForward } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
+import { JobStatusStrip } from "@/components/business-os/job-status";
 import { PageHeader, SectionLabel } from "@/components/business-os/primitives";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -76,8 +77,9 @@ function InterviewPage() {
     onSuccess: (result) => {
       queryClient.setQueryData(["interview", businessId], result.state);
       void queryClient.invalidateQueries({ queryKey: ["brain", businessId] });
-      if (result.factsAdded > 0) {
-        toast.success(`Saved — ${result.factsAdded} fact${result.factsAdded === 1 ? "" : "s"} added to your Brain`);
+      void queryClient.invalidateQueries({ queryKey: ["ai-jobs", businessId] });
+      if (result.job) {
+        toast.success("Saved — Business OS is learning from your answer in the background");
       }
     },
     onError: (error) => toast.error(error instanceof Error ? error.message : "Could not save that answer"),
@@ -104,6 +106,11 @@ function InterviewPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
+      <JobStatusStrip
+        businessId={businessId}
+        jobTypes={["interview_extraction"]}
+        invalidateKeys={[["brain", businessId], ["interview", businessId]]}
+      />
       <PageHeader
         eyebrow="Business DNA"
         title="Let's understand your business."
