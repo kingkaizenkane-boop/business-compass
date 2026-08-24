@@ -32,6 +32,18 @@ export const AUDIT_ACTIONS = [
   "ai_budget.exceeded",
   "ai_limits.updated",
   "ai.resumed",
+  "process.created",
+  "process.updated",
+  "process.activated",
+  "process.paused",
+  "process.archived",
+  "process.execution_started",
+  "process.execution_completed",
+  "process.execution_failed",
+  "process.execution_cancelled",
+  "process.approval_requested",
+  "process.approval_approved",
+  "process.approval_rejected",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

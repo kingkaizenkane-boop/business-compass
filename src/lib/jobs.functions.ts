@@ -8,6 +8,7 @@ const JOB_TYPE = z.enum([
   "diagnosis_run",
   "blueprint_run",
   "action_plan_run",
+  "process_generation",
 ]);
 
 /** Job status for the current business. RLS scopes reads to members. */
@@ -57,7 +58,7 @@ export const enqueueEngineRun = createServerFn({ method: "POST" })
     z
       .object({
         businessId: z.string().uuid(),
-        jobType: z.enum(["diagnosis_run", "blueprint_run", "action_plan_run"]),
+        jobType: z.enum(["diagnosis_run", "blueprint_run", "action_plan_run", "process_generation"]),
       })
       .parse(input),
   )

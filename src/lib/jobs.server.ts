@@ -18,6 +18,7 @@ export const JOB_TYPES = [
   "diagnosis_run",
   "blueprint_run",
   "action_plan_run",
+  "process_generation",
 ] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
@@ -26,6 +27,7 @@ export const JOB_LABELS: Record<JobType, string> = {
   diagnosis_run: "Diagnosing the business",
   blueprint_run: "Writing the strategic blueprint",
   action_plan_run: "Sequencing the 90-day plan",
+  process_generation: "Designing repeatable processes",
 };
 
 export type JobView = {
@@ -230,6 +232,22 @@ async function runJob(db: Client, job: JobRow): Promise<Record<string, unknown>>
         jobId: job.id,
       });
       return { status: (result as { status?: string }).status ?? "completed" };
+    }
+    case "process_generation": {
+      await setProgress(db, job.id, "Identifying repeatable operational systems");
+      const { generateProcesses } = await import("./process.server");
+      const result = await generateProcesses({
+        supabase: db,
+        businessId,
+        userId: input["userId"] ?? "",
+        organizationId,
+        jobId: job.id,
+      });
+      return {
+        status: result.status,
+        created: result.created.length,
+        rejected: result.rejected.length,
+      };
     }
     default:
       throw new Error(`Unknown job type: ${job.job_type}`);
