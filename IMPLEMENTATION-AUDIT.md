@@ -190,3 +190,73 @@ Start with the **AI job queue worker**. It resolves the top-ranked production ri
 
 - Scheduled cron invocation of `/api/public/ai-jobs-worker` still has to be registered against the published URL.
 - Two-tenant RLS verification test and an admin-facing usage dashboard remain outstanding.
+
+---
+
+## P0.1 — Production Hardening Report (verified 2026-08-24)
+
+### 1. AI worker scheduling — DONE (activates on publish)
+- `pg_cron` job `ai-jobs-worker` runs every 2 minutes and POSTs to
+  `/api/public/ai-jobs-worker` with a bearer cron secret; the endpoint URL lives in
+  `public.cron_job_config` (service-role only) and can be disabled without touching SQL.
+- Fixed a real defect: the scheduled command called `extensions.net_http_post`, which does
+  not exist — every run since scheduling had failed. It now calls `net.http_post`.
+  Latest run: `succeeded`, HTTP response received.
+- The configured endpoint is the **published** app URL, so it returns 404 until the project
+  is published for the first time. Nothing else is required after publish.
+- Each run drains a bounded batch (max 5 jobs), so the schedule can never storm.
+
+### 2. Two-tenant RLS — VERIFIED
+A throwaway second tenant (org, business, brain fact, memory, job, usage row, audit row)
+was created and read back while acting as the real signed-in user. Zero cross-tenant rows
+were visible in `organizations`, `businesses`, `brain_facts`, `ai_memory`, `ai_jobs`,
+`ai_usage` or `audit_logs`. Test data was removed afterwards.
+
+### 3. AI memory isolation — VERIFIED
+`match_business_memory` is SECURITY INVOKER and filters on `business_id`, so recall runs
+under the caller's RLS. Cross-tenant memory rows are unreadable (covered by the test above).
+
+### 4. Embeddings — VERIFIED
+All 5 stored memories carry a 1536-dimension vector; `memories_without_embedding = 0`.
+Embedding failures caused by gateway 402/403 pause the organization rather than writing
+silent nulls.
+
+### 5. Cost ceiling and circuit breakers — DONE
+- Per-organization monthly token and USD ceilings in `organization_ai_limits`, enforced in
+  `drainAiJobs` before a job runs; over-budget jobs are cancelled with a human-readable reason.
+- Gateway `402`/`403` pause all AI work for the organization. A paused org gets at most one
+  probe job per drain run so out-of-band recovery (credits topped up) resumes automatically.
+- `429`/`5xx` are retried with bounded backoff; jobs then fall back to the queue's retry budget.
+
+### 6. AI usage visibility — DONE
+`/app/ai-usage` (linked in the sidebar) shows month-to-date spend and tokens against the
+ceiling, breakdowns by model, operation and day, recent failures, and lets an org admin
+edit ceilings or resume paused AI work.
+
+### 7. Job idempotency — DONE
+- Extraction: `extract:<responseId>` — one job per submitted answer, replays deduplicate.
+- Engines: keyed on a `brainStateKey` (fact count + newest fact timestamp), so re-triggering
+  against unchanged knowledge reuses the existing run and new knowledge starts a fresh one.
+- Failed/cancelled jobs are reset in place, so a retry never creates a duplicate row.
+
+### 8. Failure recovery — DONE
+`reclaim_stalled_ai_jobs()` requeues jobs whose heartbeat went stale; attempts are capped by
+`max_attempts` before a job is marked failed, and each drain tracks processed ids so a
+reclaimed job cannot loop within one batch.
+
+### 9. Auth hardening — DONE
+Google sign-in through the managed broker (provider enabled), email/password, and a
+password reset flow at `/reset-password`. Protected routes stay under `_authenticated`.
+
+### 10. Audit logging — DONE
+`audit_logs` now records organization creation, business creation, interview responses,
+fact verification/unverification, AI job enqueue, job completion/failure and AI limit changes.
+
+### 11. Security review — CLEAN (with documented exceptions)
+The linter's remaining findings are intentional and recorded in security memory:
+the `is_*` membership helpers must stay executable by signed-in users because RLS policies
+call them, and `cron_job_config` is deliberately policy-free (service-role only).
+
+### Remaining before launch
+- Publish the app once so the scheduled worker endpoint resolves.
+- Metrics ingestion, experiments and programmatic SEO remain P2 placeholders.
