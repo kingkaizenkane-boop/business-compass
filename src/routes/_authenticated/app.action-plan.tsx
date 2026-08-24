@@ -23,6 +23,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getActionPlan, runActionPlan, updateActionState } from "@/lib/action-plan.functions";
 
 export const Route = createFileRoute("/_authenticated/app/action-plan")({
@@ -95,6 +96,7 @@ function ActionPlanPage() {
   const generate = useServerFn(runActionPlan);
   const setState = useServerFn(updateActionState);
   const queryClient = useQueryClient();
+  const enqueue = useServerFn(enqueueEngineRun);
   const [openAction, setOpenAction] = useState<ActionRow | null>(null);
 
   const query = useQuery({
@@ -104,17 +106,14 @@ function ActionPlanPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: () => generate({ data: { businessId: businessId! } }),
+    mutationFn: () => enqueue({ data: { businessId: businessId!, jobType: "action_plan_run" } }),
     onSuccess: (result) => {
-      queryClient.setQueryData(["action-plan", businessId], result);
-      if (result.status === "ready") {
-        toast.success(`Action plan v${result.planVersion} generated from your diagnosis`);
-      } else {
-        toast.message("Your Brain needs more coverage before a plan can be sequenced.");
-      }
+      void queryClient.invalidateQueries({ queryKey: ["ai-jobs", businessId] });
+      if (result.blocked) toast.error(result.reason ?? "AI work is paused for this organization.");
+      else toast.success("Action plan queued — this runs in the background");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "The action plan could not be generated."),
+      toast.error(error instanceof Error ? error.message : "The action plan could not be queued."),
   });
 
   const stateMutation = useMutation({

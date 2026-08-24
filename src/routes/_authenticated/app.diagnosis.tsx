@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getLatestDiagnosis, runDiagnosis } from "@/lib/diagnosis.functions";
 
 export const Route = createFileRoute("/_authenticated/app/diagnosis")({
@@ -60,6 +61,7 @@ function DiagnosisPage() {
   const fetchDiagnosis = useServerFn(getLatestDiagnosis);
   const run = useServerFn(runDiagnosis);
   const queryClient = useQueryClient();
+  const enqueue = useServerFn(enqueueEngineRun);
   const [evidenceItem, setEvidenceItem] = useState<ItemView | null>(null);
 
   const query = useQuery({
@@ -69,15 +71,14 @@ function DiagnosisPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: () => run({ data: { businessId: businessId! } }),
+    mutationFn: () => enqueue({ data: { businessId: businessId!, jobType: "diagnosis_run" } }),
     onSuccess: (result) => {
-      queryClient.setQueryData(["diagnosis", businessId], result);
-      void queryClient.invalidateQueries({ queryKey: ["diagnosis", businessId] });
-      if (result.status === "ready") toast.success("New diagnosis complete");
-      else toast.info("Your Brain needs more coverage before a diagnosis can be produced");
+      void queryClient.invalidateQueries({ queryKey: ["ai-jobs", businessId] });
+      if (result.blocked) toast.error(result.reason ?? "AI work is paused for this organization.");
+      else toast.success("Diagnosis queued — this runs in the background");
     },
     onError: (error: unknown) =>
-      toast.error(error instanceof Error ? error.message : "The diagnosis could not be produced"),
+      toast.error(error instanceof Error ? error.message : "The diagnosis could not be queued"),
   });
 
   const data = query.data;
