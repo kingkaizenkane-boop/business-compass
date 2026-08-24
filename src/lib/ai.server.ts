@@ -55,14 +55,18 @@ export async function chatJsonResult<T>(options: {
   accounting?: Accounting;
 }): Promise<ChatJsonResult<T>> {
   const totals: TokenUsage = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
-  const finish = async <R extends ChatJsonResult<T>>(result: Omit<R, "usage">): Promise<ChatJsonResult<T>> => {
+  const finish = async (
+    result:
+      | { ok: true; data: T }
+      | { ok: false; reason: string; retryable: boolean },
+  ): Promise<ChatJsonResult<T>> => {
     if (options.accounting && totals.totalTokens > 0) {
       await recordAiUsage({
         supabase: options.accounting.supabase,
         context: options.accounting.context,
         model: options.model ?? AI_MODELS.planning,
         usage: totals,
-        succeeded: (result as { ok: boolean }).ok,
+        succeeded: result.ok,
       });
     }
     return { ...(result as object), usage: totals } as ChatJsonResult<T>;
@@ -143,10 +147,10 @@ export async function chatJsonResult<T>(options: {
         (payload.usage?.prompt_tokens ?? 0) + (payload.usage?.completion_tokens ?? 0);
       const choice = payload.choices?.[0];
       const content = choice?.message?.content;
-      const finish = choice?.finish_reason;
+      const finishReason = choice?.finish_reason;
 
       if (!content || content.trim() === "") {
-        console.error("[ai] empty content", { finish, maxTokens });
+        console.error("[ai] empty content", { finishReason, maxTokens });
         // Reasoning/verbose models can spend the whole budget before emitting text.
         maxTokens = Math.min(maxTokens * 2, 16000);
         lastReason = "The AI ran out of output space before answering.";
@@ -155,8 +159,8 @@ export async function chatJsonResult<T>(options: {
 
       const parsed = parseJsonLoose<T>(content);
       if (parsed === null) {
-        console.error("[ai] unparseable content", { finish, sample: content.slice(0, 400) });
-        if (finish === "length") {
+        console.error("[ai] unparseable content", { finishReason, sample: content.slice(0, 400) });
+        if (finishReason === "length") {
           maxTokens = Math.min(maxTokens * 2, 16000);
           lastReason = "The AI answer was cut off before it was complete.";
           continue;

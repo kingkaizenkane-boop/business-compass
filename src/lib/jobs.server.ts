@@ -239,7 +239,7 @@ export async function drainAiJobs(options?: {
   for (let i = 0; i < limit; i += 1) {
     const { data: claimed, error } = await db.rpc("claim_ai_job", {
       worker_id: workerId,
-      requested_job_types: options?.jobTypes ?? null,
+      requested_job_types: (options?.jobTypes ?? null) as unknown as string[],
     });
     if (error) {
       console.error("[jobs] claim failed", error.message);
