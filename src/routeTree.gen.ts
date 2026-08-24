@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authenticated/app.action-plan'
+import { Route as AuthenticatedAppAiUsageRouteImport } from './routes/_authenticated/app.ai-usage'
 import { Route as AuthenticatedAppBlueprintRouteImport } from './routes/_authenticated/app.blueprint'
 import { Route as AuthenticatedAppBrainRouteImport } from './routes/_authenticated/app.brain'
 import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
@@ -49,6 +51,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
@@ -65,6 +72,11 @@ const AuthenticatedAppActionPlanRoute =
     path: '/action-plan',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppAiUsageRoute = AuthenticatedAppAiUsageRouteImport.update({
+  id: '/ai-usage',
+  path: '/ai-usage',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppBlueprintRoute =
   AuthenticatedAppBlueprintRouteImport.update({
     id: '/blueprint',
@@ -176,8 +188,10 @@ const ApiPublicAiJobsWorkerRoute = ApiPublicAiJobsWorkerRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
@@ -202,7 +216,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
@@ -229,8 +245,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/action-plan': typeof AuthenticatedAppActionPlanRoute
+  '/_authenticated/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/_authenticated/app/brain': typeof AuthenticatedAppBrainRoute
   '/_authenticated/app/customers': typeof AuthenticatedAppCustomersRoute
@@ -257,8 +275,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/app'
     | '/app/action-plan'
+    | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
     | '/app/customers'
@@ -283,7 +303,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/reset-password'
     | '/app/action-plan'
+    | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
     | '/app/customers'
@@ -309,8 +331,10 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/auth'
+    | '/reset-password'
     | '/_authenticated/app'
     | '/_authenticated/app/action-plan'
+    | '/_authenticated/app/ai-usage'
     | '/_authenticated/app/blueprint'
     | '/_authenticated/app/brain'
     | '/_authenticated/app/customers'
@@ -337,6 +361,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
 }
 
@@ -363,6 +388,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
@@ -382,6 +414,13 @@ declare module '@tanstack/react-router' {
       path: '/action-plan'
       fullPath: '/app/action-plan'
       preLoaderRoute: typeof AuthenticatedAppActionPlanRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/ai-usage': {
+      id: '/_authenticated/app/ai-usage'
+      path: '/ai-usage'
+      fullPath: '/app/ai-usage'
+      preLoaderRoute: typeof AuthenticatedAppAiUsageRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/blueprint': {
@@ -522,6 +561,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppActionPlanRoute: typeof AuthenticatedAppActionPlanRoute
+  AuthenticatedAppAiUsageRoute: typeof AuthenticatedAppAiUsageRoute
   AuthenticatedAppBlueprintRoute: typeof AuthenticatedAppBlueprintRoute
   AuthenticatedAppBrainRoute: typeof AuthenticatedAppBrainRoute
   AuthenticatedAppCustomersRoute: typeof AuthenticatedAppCustomersRoute
@@ -543,6 +583,7 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppActionPlanRoute: AuthenticatedAppActionPlanRoute,
+  AuthenticatedAppAiUsageRoute: AuthenticatedAppAiUsageRoute,
   AuthenticatedAppBlueprintRoute: AuthenticatedAppBlueprintRoute,
   AuthenticatedAppBrainRoute: AuthenticatedAppBrainRoute,
   AuthenticatedAppCustomersRoute: AuthenticatedAppCustomersRoute,
@@ -584,6 +625,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
 }
 export const routeTree = rootRouteImport

@@ -67,6 +67,32 @@ async function admin() {
 }
 
 /**
+ * A short, deterministic fingerprint of the Business Brain state an engine run
+ * would consume. Used to build content-addressed idempotency keys so repeated
+ * triggers against unchanged knowledge collapse onto one job.
+ */
+export async function brainStateKey(supabase: Client, businessId: string): Promise<string> {
+  const { count } = await supabase
+    .from("brain_facts")
+    .select("id", { count: "exact", head: true })
+    .eq("business_id", businessId)
+    .eq("active", true);
+
+  const { data: latest } = await supabase
+    .from("brain_facts")
+    .select("updated_at")
+    .eq("business_id", businessId)
+    .eq("active", true)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const stamp = latest?.updated_at ?? "none";
+  return `v${count ?? 0}-${stamp}`;
+}
+
+
+/**
  * Enqueues a job. Idempotent: the same idempotency key returns the existing
  * job instead of creating a duplicate.
  */
@@ -236,6 +262,17 @@ export async function drainAiJobs(options?: {
   const { data: reclaimed } = await db.rpc("reclaim_stalled_ai_jobs");
   summary.reclaimed = Number(reclaimed ?? 0);
 
+  const { writeAudit } = await import("./audit.server");
+  const { GATEWAY_PAUSE_PREFIX } = await import("./ai.server");
+  const { setOrgAiPaused } = await import("./ai-usage.server");
+
+  // Jobs already handled in this run — a job requeued by fail_ai_job must not
+  // be re-claimed inside the same drain, otherwise one bad job burns the batch.
+  const seen = new Set<string>();
+  // At most one probe per drain per paused organization, so an out-of-band
+  // recovery (credits topped up, limit raised) is detected without a storm.
+  const probedOrgs = new Set<string>();
+
   for (let i = 0; i < limit; i += 1) {
     const { data: claimed, error } = await db.rpc("claim_ai_job", {
       worker_id: workerId,
@@ -247,25 +284,52 @@ export async function drainAiJobs(options?: {
     }
     const job = (Array.isArray(claimed) ? claimed[0] : claimed) as JobRow | null;
     if (!job || !job.id) break;
+    if (seen.has(job.id)) break;
+    seen.add(job.id);
     summary.claimed += 1;
 
-    // Circuit breaker: never spend beyond the organization's ceiling.
+    // Circuit breaker: never spend beyond the organization's ceiling, and never
+    // keep spending while the gateway is refusing.
     if (job.organization_id) {
       const budget = await getBudgetState(db, job.organization_id);
       if (!budget.allowed) {
-        await db
-          .from("ai_jobs")
-          .update({
-            status: "cancelled",
-            error_message: budget.reason,
-            last_error_at: new Date().toISOString(),
-            progress: "Paused — AI budget reached",
-            locked_at: null,
-            locked_by: null,
-          })
-          .eq("id", job.id);
-        summary.skipped += 1;
-        continue;
+        const gatewayPause =
+          budget.limits.paused && (budget.limits.pauseReason ?? "").startsWith(GATEWAY_PAUSE_PREFIX);
+        const canProbe = gatewayPause && !probedOrgs.has(job.organization_id);
+
+        if (!canProbe) {
+          await db
+            .from("ai_jobs")
+            .update({
+              status: "cancelled",
+              error_message: budget.reason,
+              last_error_at: new Date().toISOString(),
+              progress: "Paused — AI budget reached",
+              locked_at: null,
+              locked_by: null,
+            })
+            .eq("id", job.id);
+          await writeAudit({
+            action: "ai_budget.exceeded",
+            organizationId: job.organization_id,
+            businessId: job.business_id,
+            actor: "system",
+            entity: "ai_jobs",
+            entityId: job.id,
+            metadata: { jobType: job.job_type, reason: budget.reason },
+          });
+          summary.skipped += 1;
+          continue;
+        }
+
+        // Probe: clear the pause and let this single job attempt the gateway.
+        probedOrgs.add(job.organization_id);
+        await setOrgAiPaused({
+          supabase: db,
+          organizationId: job.organization_id,
+          paused: false,
+          reason: null,
+        });
       }
     }
 
@@ -278,13 +342,32 @@ export async function drainAiJobs(options?: {
       const message = error instanceof Error ? error.message : "Unknown job failure";
       console.error("[jobs] job failed", job.job_type, message);
       await db.rpc("fail_ai_job", { job_id: job.id, error_text: message.slice(0, 1000) });
+      const exhausted = job.attempts >= job.max_attempts;
       await db
         .from("ai_jobs")
-        .update({ last_error_at: new Date().toISOString(), progress: "Retrying" })
+        .update({
+          last_error_at: new Date().toISOString(),
+          progress: exhausted ? "Failed" : "Will retry",
+        })
         .eq("id", job.id);
+      await writeAudit({
+        action: exhausted ? "ai_job.failed" : "ai_job.retried",
+        organizationId: job.organization_id,
+        businessId: job.business_id,
+        actor: "system",
+        entity: "ai_jobs",
+        entityId: job.id,
+        metadata: {
+          jobType: job.job_type,
+          attempts: job.attempts,
+          maxAttempts: job.max_attempts,
+          error: message.slice(0, 500),
+        },
+      });
       summary.failed += 1;
     }
   }
+
 
   return summary;
 }

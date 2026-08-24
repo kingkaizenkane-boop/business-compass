@@ -62,8 +62,9 @@ export const enqueueEngineRun = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { enqueueJob, kickWorker } = await import("./jobs.server");
+    const { enqueueJob, kickWorker, brainStateKey } = await import("./jobs.server");
     const { getBudgetState } = await import("./ai-usage.server");
+    const { writeAudit } = await import("./audit.server");
     const { supabase, userId } = context;
 
     const { data: business } = await supabase
@@ -75,21 +76,27 @@ export const enqueueEngineRun = createServerFn({ method: "POST" })
 
     const budget = await getBudgetState(supabase, business.organization_id);
     if (!budget.allowed) {
+      await writeAudit({
+        action: "ai_budget.exceeded",
+        organizationId: business.organization_id,
+        businessId: data.businessId,
+        userId,
+        metadata: {
+          jobType: data.jobType,
+          reason: budget.reason,
+          tokensUsed: budget.tokensUsed,
+          costUsedUsd: budget.costUsedUsd,
+        },
+      });
       return { job: null, blocked: true, reason: budget.reason };
     }
 
-    // One in-flight run per engine per business; otherwise a new attempt.
-    const { data: active } = await supabase
-      .from("ai_jobs")
-      .select("id, idempotency_key, status")
-      .eq("business_id", data.businessId)
-      .eq("job_type", data.jobType)
-      .in("status", ["queued", "running"])
-      .limit(1)
-      .maybeSingle();
-
-    const idempotencyKey =
-      active?.idempotency_key ?? `${data.jobType}:${data.businessId}:${Date.now()}`;
+    // Deterministic idempotency: the key is derived from the state of the
+    // Business Brain the run would consume, never from a timestamp. Repeated
+    // clicks against unchanged knowledge reuse the same job; new knowledge
+    // produces a genuinely new run.
+    const stateKey = await brainStateKey(supabase, data.businessId);
+    const idempotencyKey = `${data.jobType}:${data.businessId}:${stateKey}`;
 
     const job = await enqueueJob({
       jobType: data.jobType,
@@ -99,6 +106,18 @@ export const enqueueEngineRun = createServerFn({ method: "POST" })
       priority: 5,
       input: { userId },
     });
+
+    await writeAudit({
+      action: "ai_job.enqueued",
+      organizationId: business.organization_id,
+      businessId: data.businessId,
+      userId,
+      entity: "ai_jobs",
+      entityId: job.id,
+      metadata: { jobType: data.jobType, idempotencyKey, status: job.status },
+    });
+
     kickWorker([data.jobType]);
     return { job, blocked: false, reason: null };
   });
+

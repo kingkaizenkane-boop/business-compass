@@ -42,12 +42,25 @@ export async function embedText(options: {
       if (!response.ok) {
         const body = await response.text();
         console.error("[embeddings] gateway error", response.status, body.slice(0, 400));
-        if (response.status === 402) {
-          return { ok: false, reason: "AI credits are exhausted.", retryable: false };
+        if (response.status === 402 || response.status === 403) {
+          const reason =
+            response.status === 402
+              ? "AI credits are exhausted."
+              : "AI usage is blocked by workspace policy.";
+          // Same circuit breaker as chat: pause the whole organization.
+          if (options.accounting) {
+            const { setOrgAiPaused } = await import("./ai-usage.server");
+            const { GATEWAY_PAUSE_PREFIX } = await import("./ai.server");
+            await setOrgAiPaused({
+              supabase: options.accounting.supabase,
+              organizationId: options.accounting.context.organizationId,
+              paused: true,
+              reason: `${GATEWAY_PAUSE_PREFIX}${reason}`,
+            });
+          }
+          return { ok: false, reason, retryable: false };
         }
-        if (response.status === 403) {
-          return { ok: false, reason: "AI usage is blocked by workspace policy.", retryable: false };
-        }
+
         if (response.status === 429 || response.status >= 500) {
           if (attempt < 2) {
             const retryAfter = Number(response.headers.get("retry-after") ?? 0);

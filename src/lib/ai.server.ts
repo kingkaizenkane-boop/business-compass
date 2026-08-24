@@ -10,11 +10,34 @@ import type { Database } from "@/integrations/supabase/types";
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
+/** Marks an org pause that was caused by the AI gateway (recoverable by probe). */
+export const GATEWAY_PAUSE_PREFIX = "AI gateway: ";
+
+
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
 export type ChatJsonResult<T> =
   | { ok: true; data: T; usage: TokenUsage }
-  | { ok: false; reason: string; retryable: boolean; usage: TokenUsage };
+  | {
+      ok: false;
+      reason: string;
+      retryable: boolean;
+      /** Set when the gateway refused for billing/policy reasons (402/403). */
+      blocked?: "credits" | "policy";
+      usage: TokenUsage;
+    };
+
+/** Thrown by engines when the AI gateway hard-blocks the workspace. */
+export class AiBlockedError extends Error {
+  constructor(
+    message: string,
+    readonly kind: "credits" | "policy",
+  ) {
+    super(message);
+    this.name = "AiBlockedError";
+  }
+}
+
 
 export type Accounting = {
   supabase: SupabaseClient<Database>;
@@ -58,7 +81,7 @@ export async function chatJsonResult<T>(options: {
   const finish = async (
     result:
       | { ok: true; data: T }
-      | { ok: false; reason: string; retryable: boolean },
+      | { ok: false; reason: string; retryable: boolean; blocked?: "credits" | "policy" },
   ): Promise<ChatJsonResult<T>> => {
     if (options.accounting && totals.totalTokens > 0) {
       await recordAiUsage({
@@ -69,8 +92,20 @@ export async function chatJsonResult<T>(options: {
         succeeded: result.ok,
       });
     }
+    // Circuit breaker: a billing/policy refusal pauses ALL AI work for the
+    // organization until an owner resumes it or a later probe succeeds.
+    if (!result.ok && result.blocked && options.accounting) {
+      const { setOrgAiPaused } = await import("./ai-usage.server");
+      await setOrgAiPaused({
+        supabase: options.accounting.supabase,
+        organizationId: options.accounting.context.organizationId,
+        paused: true,
+        reason: `${GATEWAY_PAUSE_PREFIX}${result.reason}`,
+      });
+    }
     return { ...(result as object), usage: totals } as ChatJsonResult<T>;
   };
+
 
   const apiKey = process.env["LOVABLE_API_KEY"];
   if (!apiKey) {
@@ -111,13 +146,16 @@ export async function chatJsonResult<T>(options: {
             ok: false,
             reason: "This workspace has run out of AI credits. Add credits in Lovable to continue.",
             retryable: false,
+            blocked: "credits",
           });
         } else if (response.status === 403) {
           return finish({
             ok: false,
             reason: "AI usage is blocked by workspace policy or a credit limit.",
             retryable: false,
+            blocked: "policy",
           });
+
         } else if (response.status >= 500) {
           lastReason = "The AI service had a temporary upstream failure.";
           lastRetryable = true;

@@ -46,6 +46,17 @@ export const getWorkspace = createServerFn({ method: "POST" })
         .single();
       if (readError) throw readError;
 
+      const { writeAudit } = await import("./audit.server");
+      await writeAudit({
+        supabase,
+        action: "organization.created",
+        organizationId: orgId,
+        userId,
+        entity: "organizations",
+        entityId: orgId,
+        after: { name, slug },
+      });
+
       orgs = [org];
     }
 
@@ -106,6 +117,23 @@ export const createBusiness = createServerFn({ method: "POST" })
       .select("id, organization_id, name, slug, industry, business_model, status, created_at")
       .single();
     if (error) throw error;
+
+    const { writeAudit } = await import("./audit.server");
+    await writeAudit({
+      supabase,
+      action: "business.created",
+      organizationId: data.organizationId,
+      businessId: business.id,
+      userId: context.userId,
+      entity: "businesses",
+      entityId: business.id,
+      after: {
+        name: business.name,
+        slug: business.slug,
+        industry: business.industry,
+        businessModel: business.business_model,
+      },
+    });
 
     return business;
   });
