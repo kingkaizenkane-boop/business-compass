@@ -125,8 +125,13 @@ function BlueprintPage() {
             <section className="rounded-xl border border-border bg-card p-6 shadow-quiet">
               <SectionLabel aside={`${readiness.coverage}% coverage`}>Brain readiness</SectionLabel>
               <div className="space-y-3">
-                <MeterRow label="Facts in your Brain" value={readiness.factCount} max={45} />
-                <MeterRow label="Verified facts" value={readiness.verifiedCount} max={Math.max(1, readiness.factCount)} />
+                <MeterRow label="Brain coverage" value={readiness.coverage} hint={`${readiness.factCount} active facts`} />
+                <MeterRow
+                  label="Verified facts"
+                  value={Math.round((readiness.verifiedCount / Math.max(1, readiness.factCount)) * 100)}
+                  hint={`${readiness.verifiedCount} of ${readiness.factCount} verified`}
+                />
+
               </div>
               {readiness.missingCategories.length > 0 ? (
                 <p className="mt-4 text-xs text-muted-foreground">
