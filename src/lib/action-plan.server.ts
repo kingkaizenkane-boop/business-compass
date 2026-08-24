@@ -390,7 +390,7 @@ export async function generateActionPlan(options: {
     target_business: businessId,
     action_name: "action_plan.generate",
     target_table: "tasks",
-    target_record: null,
+    target_record: businessId,
     old_value: null,
     new_value: { plan_version: planVersion, action_count: rows.length },
     actor: "ai",
