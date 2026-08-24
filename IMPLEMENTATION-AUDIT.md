@@ -145,3 +145,48 @@ The single largest production risk is that all four AI engines run synchronously
 ## 5. Recommended next action
 
 Start with the **AI job queue worker**. It resolves the top-ranked production risk, unblocks embeddings and any future long-running generation, and is a prerequisite for honest progress reporting in the UI.
+
+---
+
+## 6. P0 AI infrastructure milestone — delivered 24 August 2026
+
+### 6.1 AI job queue — Implemented
+
+- **Files:** `src/lib/jobs.server.ts`, `src/lib/jobs.functions.ts`, `src/routes/api/public/ai-jobs-worker.ts`, `src/components/business-os/job-status.tsx`
+- Interview extraction, diagnosis, blueprint and action-plan runs are enqueued as `ai_jobs` rows; nothing long-running remains in the request path.
+- Drain path: `drainAiJobs()` reclaims stalled jobs, then claims a bounded batch (max 10) via `claim_ai_job()` with `FOR UPDATE SKIP LOCKED`, and finishes each through `complete_ai_job()` / `fail_ai_job()`.
+- Triggers: an in-request background kick after enqueue, a nudge while the UI polls, and an authenticated cron endpoint at `/api/public/ai-jobs-worker` guarded by the cron bearer secret.
+- Idempotency: every job carries an idempotency key (`extract:<response_id>` for extraction), so retries reuse the same row and never create duplicate Brain facts.
+
+### 6.2 Evidence linkage — Implemented
+
+- Extraction writes one `evidence` row keyed to the interview response and links every resulting fact through `brain_fact_evidence` (upsert on `fact_id, evidence_id`). Unchanged facts are re-linked rather than duplicated.
+
+### 6.3 Fact versioning — Implemented
+
+- A changed answer inserts a new `brain_facts` row with `version + 1` and `supersedes_fact_id`, then marks the prior row `active = false` with `superseded_at` / `superseded_by_fact_id`. Interview answers chain through `supersedes_response_id`. History is never overwritten.
+
+### 6.4 AI memory and embeddings — Implemented
+
+- **Files:** `src/lib/embeddings.server.ts`, `src/lib/memory.server.ts`
+- Every new fact produces a durable `ai_memory` row with a 1536-dimension embedding (`openai/text-embedding-3-small`), deduplicated on `(business_id, memory_type, source_table, source_id)`.
+- Diagnosis, blueprint and action-plan prompts now open with a long-term memory digest retrieved through `match_business_memory()`, scoped strictly to the business.
+
+### 6.5 Observability — Implemented
+
+- `ai_jobs` carries status, progress text, attempts / max attempts, failure reason, heartbeat and lifecycle timestamps. `getJobStatus` exposes them to members, and `JobStatusStrip` shows queued / running / completed / failed / paused state with retry counts on the interview, diagnosis, blueprint and action-plan pages.
+
+### 6.6 Cost controls — Implemented
+
+- **File:** `src/lib/ai-usage.server.ts`
+- Every gateway call records tokens and estimated spend into `ai_usage`. `organization_ai_limits` sets monthly token and spend ceilings; the worker checks the budget before each job and parks work as `cancelled` with a reason when the ceiling is hit.
+- Model routing: extraction and memory use `gemini-2.5-flash-lite`, planning uses `gemini-2.5-flash`, and diagnosis / blueprint reasoning uses `gemini-2.5-pro`.
+
+### 6.7 Security
+
+- RLS unchanged; `ai_jobs`, `ai_usage` and `organization_ai_limits` are readable by members and writable only by the service role. The queue worker uses the service-role client server-side only, and AI credentials are read inside handlers. Tenant isolation is preserved.
+
+### 6.8 Remaining in this area
+
+- Scheduled cron invocation of `/api/public/ai-jobs-worker` still has to be registered against the published URL.
+- Two-tenant RLS verification test and an admin-facing usage dashboard remain outstanding.
