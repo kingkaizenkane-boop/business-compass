@@ -1661,45 +1661,278 @@ export type Database = {
         }
         Relationships: []
       }
+      process_approvals: {
+        Row: {
+          business_id: string
+          created_at: string
+          data_used: Json
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          execution_id: string
+          external_effect: string | null
+          id: string
+          organization_id: string | null
+          process_id: string
+          status: Database["public"]["Enums"]["process_approval_status"]
+          step_id: string | null
+          step_sequence: number | null
+          title: string
+          updated_at: string
+          what_will_happen: string | null
+          why_recommended: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          data_used?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          execution_id: string
+          external_effect?: string | null
+          id?: string
+          organization_id?: string | null
+          process_id: string
+          status?: Database["public"]["Enums"]["process_approval_status"]
+          step_id?: string | null
+          step_sequence?: number | null
+          title: string
+          updated_at?: string
+          what_will_happen?: string | null
+          why_recommended?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          data_used?: Json
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          execution_id?: string
+          external_effect?: string | null
+          id?: string
+          organization_id?: string | null
+          process_id?: string
+          status?: Database["public"]["Enums"]["process_approval_status"]
+          step_id?: string | null
+          step_sequence?: number | null
+          title?: string
+          updated_at?: string
+          what_will_happen?: string | null
+          why_recommended?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_approvals_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_approvals_execution_id_fkey"
+            columns: ["execution_id"]
+            isOneToOne: false
+            referencedRelation: "process_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_approvals_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_approvals_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_approvals_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      process_executions: {
+        Row: {
+          business_id: string
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          current_step_id: string | null
+          current_step_sequence: number | null
+          duration_ms: number | null
+          error: string | null
+          failed: boolean
+          id: string
+          initiated_by: string | null
+          metric_values: Json
+          organization_id: string | null
+          output: Json
+          process_id: string
+          process_version: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["process_execution_status"]
+          step_log: Json
+          success: boolean | null
+          trigger_payload: Json
+          trigger_source: string
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          current_step_sequence?: number | null
+          duration_ms?: number | null
+          error?: string | null
+          failed?: boolean
+          id?: string
+          initiated_by?: string | null
+          metric_values?: Json
+          organization_id?: string | null
+          output?: Json
+          process_id: string
+          process_version?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["process_execution_status"]
+          step_log?: Json
+          success?: boolean | null
+          trigger_payload?: Json
+          trigger_source?: string
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          current_step_id?: string | null
+          current_step_sequence?: number | null
+          duration_ms?: number | null
+          error?: string | null
+          failed?: boolean
+          id?: string
+          initiated_by?: string | null
+          metric_values?: Json
+          organization_id?: string | null
+          output?: Json
+          process_id?: string
+          process_version?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["process_execution_status"]
+          step_log?: Json
+          success?: boolean | null
+          trigger_payload?: Json
+          trigger_source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "process_executions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_executions_current_step_id_fkey"
+            columns: ["current_step_id"]
+            isOneToOne: false
+            referencedRelation: "process_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_executions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "process_executions_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       process_steps: {
         Row: {
           automation_type: string
+          autonomy_level: number
+          condition_definition: Json
           configuration: Json
           created_at: string
           depends_on_step_id: string | null
           description: string | null
           estimated_minutes: number | null
           id: string
+          input_definition: Json
           name: string
+          output_definition: Json
+          owner_id: string | null
+          owner_type: Database["public"]["Enums"]["process_owner_type"]
           process_id: string
+          required: boolean
           responsible_role: string | null
           sequence: number
+          step_type: Database["public"]["Enums"]["process_step_type"]
+          updated_at: string
         }
         Insert: {
           automation_type?: string
+          autonomy_level?: number
+          condition_definition?: Json
           configuration?: Json
           created_at?: string
           depends_on_step_id?: string | null
           description?: string | null
           estimated_minutes?: number | null
           id?: string
+          input_definition?: Json
           name: string
+          output_definition?: Json
+          owner_id?: string | null
+          owner_type?: Database["public"]["Enums"]["process_owner_type"]
           process_id: string
+          required?: boolean
           responsible_role?: string | null
           sequence: number
+          step_type?: Database["public"]["Enums"]["process_step_type"]
+          updated_at?: string
         }
         Update: {
           automation_type?: string
+          autonomy_level?: number
+          condition_definition?: Json
           configuration?: Json
           created_at?: string
           depends_on_step_id?: string | null
           description?: string | null
           estimated_minutes?: number | null
           id?: string
+          input_definition?: Json
           name?: string
+          output_definition?: Json
+          owner_id?: string | null
+          owner_type?: Database["public"]["Enums"]["process_owner_type"]
           process_id?: string
+          required?: boolean
           responsible_role?: string | null
           sequence?: number
+          step_type?: Database["public"]["Enums"]["process_step_type"]
+          updated_at?: string
         }
         Relationships: [
           {
@@ -1721,45 +1954,84 @@ export type Database = {
       processes: {
         Row: {
           automation_score: number | null
+          autonomy_level: number
           business_id: string
           created_at: string
+          created_from_action_id: string | null
+          created_from_blueprint_version: number | null
+          created_from_diagnosis_id: string | null
           description: string | null
           id: string
           metadata: Json
           name: string
+          organization_id: string | null
           owner_dependency_score: number | null
+          owner_id: string | null
+          owner_type: Database["public"]["Enums"]["process_owner_type"]
           owner_user_id: string | null
           process_category: string | null
+          purpose: string | null
           status: Database["public"]["Enums"]["process_status"]
+          success_definition: string | null
+          supersedes_process_id: string | null
+          trigger_definition: Json
+          trigger_type: Database["public"]["Enums"]["process_trigger_type"]
           updated_at: string
+          version: number
         }
         Insert: {
           automation_score?: number | null
+          autonomy_level?: number
           business_id: string
           created_at?: string
+          created_from_action_id?: string | null
+          created_from_blueprint_version?: number | null
+          created_from_diagnosis_id?: string | null
           description?: string | null
           id?: string
           metadata?: Json
           name: string
+          organization_id?: string | null
           owner_dependency_score?: number | null
+          owner_id?: string | null
+          owner_type?: Database["public"]["Enums"]["process_owner_type"]
           owner_user_id?: string | null
           process_category?: string | null
+          purpose?: string | null
           status?: Database["public"]["Enums"]["process_status"]
+          success_definition?: string | null
+          supersedes_process_id?: string | null
+          trigger_definition?: Json
+          trigger_type?: Database["public"]["Enums"]["process_trigger_type"]
           updated_at?: string
+          version?: number
         }
         Update: {
           automation_score?: number | null
+          autonomy_level?: number
           business_id?: string
           created_at?: string
+          created_from_action_id?: string | null
+          created_from_blueprint_version?: number | null
+          created_from_diagnosis_id?: string | null
           description?: string | null
           id?: string
           metadata?: Json
           name?: string
+          organization_id?: string | null
           owner_dependency_score?: number | null
+          owner_id?: string | null
+          owner_type?: Database["public"]["Enums"]["process_owner_type"]
           owner_user_id?: string | null
           process_category?: string | null
+          purpose?: string | null
           status?: Database["public"]["Enums"]["process_status"]
+          success_definition?: string | null
+          supersedes_process_id?: string | null
+          trigger_definition?: Json
+          trigger_type?: Database["public"]["Enums"]["process_trigger_type"]
           updated_at?: string
+          version?: number
         }
         Relationships: [
           {
@@ -1767,6 +2039,34 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processes_created_from_action_id_fkey"
+            columns: ["created_from_action_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processes_created_from_diagnosis_id_fkey"
+            columns: ["created_from_diagnosis_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "processes_supersedes_process_id_fkey"
+            columns: ["supersedes_process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
             referencedColumns: ["id"]
           },
         ]
@@ -2242,7 +2542,40 @@ export type Database = {
       organization_role: "owner" | "admin" | "manager" | "member" | "viewer"
       organization_status: "active" | "trial" | "suspended" | "cancelled"
       priority_level: "critical" | "high" | "medium" | "low"
+      process_approval_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "paused"
+        | "expired"
+      process_execution_status:
+        | "queued"
+        | "running"
+        | "waiting"
+        | "approval_required"
+        | "completed"
+        | "failed"
+        | "cancelled"
+      process_owner_type: "human" | "ai" | "hybrid" | "system"
       process_status: "draft" | "active" | "archived"
+      process_step_type:
+        | "action"
+        | "decision"
+        | "wait"
+        | "approval"
+        | "notification"
+        | "data_capture"
+        | "ai_generation"
+        | "integration"
+        | "end"
+      process_trigger_type:
+        | "manual"
+        | "scheduled"
+        | "event"
+        | "inbound_lead"
+        | "customer_action"
+        | "metric_threshold"
+        | "ai_recommendation"
       question_type:
         | "text"
         | "long_text"
@@ -2482,7 +2815,44 @@ export const Constants = {
       organization_role: ["owner", "admin", "manager", "member", "viewer"],
       organization_status: ["active", "trial", "suspended", "cancelled"],
       priority_level: ["critical", "high", "medium", "low"],
+      process_approval_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "paused",
+        "expired",
+      ],
+      process_execution_status: [
+        "queued",
+        "running",
+        "waiting",
+        "approval_required",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+      process_owner_type: ["human", "ai", "hybrid", "system"],
       process_status: ["draft", "active", "archived"],
+      process_step_type: [
+        "action",
+        "decision",
+        "wait",
+        "approval",
+        "notification",
+        "data_capture",
+        "ai_generation",
+        "integration",
+        "end",
+      ],
+      process_trigger_type: [
+        "manual",
+        "scheduled",
+        "event",
+        "inbound_lead",
+        "customer_action",
+        "metric_threshold",
+        "ai_recommendation",
+      ],
       question_type: [
         "text",
         "long_text",
