@@ -7,6 +7,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 
 import { chatJsonResult } from "./ai.server";
+import { AI_MODELS } from "./ai-usage.server";
+import { formatMemoryDigest, recallMemory } from "./memory.server";
 import { assertBusinessAccess, assessReadiness, loadBrain } from "./diagnosis.server";
 import type { BrainReadiness } from "./diagnosis.server";
 import type { Database } from "@/integrations/supabase/types";
@@ -207,6 +209,8 @@ export async function generateActionPlan(options: {
   supabase: Client;
   businessId: string;
   userId: string;
+  organizationId?: string | null;
+  jobId?: string | null;
 }): Promise<ActionPlanPayload> {
   const { supabase, businessId } = options;
   const business = await assertBusinessAccess(supabase, businessId);
@@ -273,13 +277,41 @@ export async function generateActionPlan(options: {
         .join("\n")
     : "No blueprint exists yet.";
 
+  const accounting =
+    options.organizationId != null
+      ? {
+          supabase,
+          context: {
+            organizationId: options.organizationId,
+            businessId,
+            jobId: options.jobId ?? null,
+            operation: "action_plan_run",
+          },
+        }
+      : undefined;
+
+  const memories = await recallMemory({
+    supabase,
+    businessId,
+    query: "action plan run — constraints, revenue, customers, offers, operations, goals",
+    matchCount: 12,
+    threshold: 0.5,
+    ...(accounting ? { accounting } : {}),
+  });
+  const memoryDigest = formatMemoryDigest(memories);
+
   const aiResult = await chatJsonResult<unknown>({
+    model: AI_MODELS.planning,
+    ...(accounting ? { accounting } : {}),
     maxTokens: 9000,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {
         role: "user",
         content: [
+          memoryDigest
+            ? `LONG-TERM MEMORY OF THIS BUSINESS:\n${memoryDigest}\n`
+            : "",
           `BUSINESS: ${business.name}`,
           `Industry: ${business.industry ?? "unknown"} | Model: ${business.business_model ?? "unknown"} | Customers: ${business.customer_model ?? "unknown"} | Team size: ${business.employee_count ?? "unknown"}`,
           "",

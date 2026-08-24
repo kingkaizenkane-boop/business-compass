@@ -29,7 +29,8 @@ export const submitInterviewResponse = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { loadInterviewState, extractFactsFromResponse } = await import("./interview.server");
+    const { loadInterviewState } = await import("./interview.server");
+    const { enqueueJob, kickWorker } = await import("./jobs.server");
     const { supabase, userId } = context;
 
     const status =
@@ -46,31 +47,68 @@ export const submitInterviewResponse = createServerFn({ method: "POST" })
       throw new Error("An answer is required to continue.");
     }
 
-    const { error } = await supabase.from("interview_responses").insert({
-      session_id: data.sessionId,
-      question_id: data.questionId,
-      question_key: data.questionKey,
-      raw_response: answer.length > 0 ? answer : null,
-      status,
-      confidence: status === "answered" ? 0.9 : null,
-      answered_at: new Date().toISOString(),
-    });
+    // Supersession chain: link this answer to the one it replaces.
+    const { data: prior } = await supabase
+      .from("interview_responses")
+      .select("id")
+      .eq("session_id", data.sessionId)
+      .eq("question_key", data.questionKey)
+      .order("answered_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    const { data: inserted, error } = await supabase
+      .from("interview_responses")
+      .insert({
+        session_id: data.sessionId,
+        question_id: data.questionId,
+        question_key: data.questionKey,
+        raw_response: answer.length > 0 ? answer : null,
+        status,
+        confidence: status === "answered" ? 0.9 : null,
+        answered_at: new Date().toISOString(),
+        supersedes_response_id: prior?.id ?? null,
+      })
+      .select("id")
+      .single();
     if (error) throw error;
 
-    let factsAdded = 0;
+    if (prior) {
+      await supabase
+        .from("interview_responses")
+        .update({ status: "superseded" })
+        .eq("id", prior.id);
+    }
+
+    // Extraction is an AI job, never a blocking call in this request.
+    let job: Awaited<ReturnType<typeof enqueueJob>> | null = null;
     if (status === "answered") {
-      factsAdded = await extractFactsFromResponse({
-        supabase,
-        businessId: data.businessId,
-        userId,
-        questionKey: data.questionKey,
-        questionText: data.questionText,
-        answer,
-      });
+      const { data: business } = await supabase
+        .from("businesses")
+        .select("organization_id")
+        .eq("id", data.businessId)
+        .maybeSingle();
+      if (business?.organization_id) {
+        job = await enqueueJob({
+          jobType: "interview_extraction",
+          organizationId: business.organization_id,
+          businessId: data.businessId,
+          idempotencyKey: `extract:${inserted.id}`,
+          priority: 7,
+          input: {
+            userId,
+            responseId: inserted.id,
+            questionKey: data.questionKey,
+            questionText: data.questionText,
+            answer,
+          },
+        });
+        kickWorker(["interview_extraction"]);
+      }
     }
 
     const state = await loadInterviewState(supabase, data.businessId, userId);
-    return { state, factsAdded };
+    return { state, job };
   });
 
 export const pauseInterview = createServerFn({ method: "POST" })

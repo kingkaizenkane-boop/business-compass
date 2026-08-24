@@ -6,11 +6,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState, MeterRow, PageHeader, SectionLabel } from "@/components/business-os/primitives";
+import { JobStatusStrip } from "@/components/business-os/job-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useWorkspace } from "@/hooks/use-workspace";
+import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getBlueprint, runBlueprint } from "@/lib/blueprint.functions";
 
 export const Route = createFileRoute("/_authenticated/app/blueprint")({
@@ -59,6 +61,7 @@ function BlueprintPage() {
   const fetchBlueprint = useServerFn(getBlueprint);
   const generate = useServerFn(runBlueprint);
   const queryClient = useQueryClient();
+  const enqueue = useServerFn(enqueueEngineRun);
   const [openSection, setOpenSection] = useState<SectionView | null>(null);
 
   const query = useQuery({
@@ -68,17 +71,14 @@ function BlueprintPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: () => generate({ data: { businessId: businessId! } }),
+    mutationFn: () => enqueue({ data: { businessId: businessId!, jobType: "blueprint_run" } }),
     onSuccess: (result) => {
-      queryClient.setQueryData(["blueprint", businessId], result);
-      if (result.status === "ready") {
-        toast.success(`Blueprint v${result.blueprint.version} generated from your Brain`);
-      } else {
-        toast.message("Your Brain needs more coverage before a blueprint can be written.");
-      }
+      void queryClient.invalidateQueries({ queryKey: ["ai-jobs", businessId] });
+      if (result.blocked) toast.error(result.reason ?? "AI work is paused for this organization.");
+      else toast.success("Blueprint queued — this runs in the background");
     },
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "The blueprint could not be generated."),
+      toast.error(error instanceof Error ? error.message : "The blueprint could not be queued."),
   });
 
   if (loading || (businessId && query.isLoading)) {
@@ -113,6 +113,11 @@ function BlueprintPage() {
 
   return (
     <div className="space-y-9">
+      <JobStatusStrip
+        businessId={businessId}
+        jobTypes={["blueprint_run"]}
+        invalidateKeys={[["blueprint", businessId], ["brain", businessId]]}
+      />
       <PageHeader
         eyebrow="Strategy"
         title="Your Business Blueprint"

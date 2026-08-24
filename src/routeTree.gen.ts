@@ -33,6 +33,7 @@ import { Route as AuthenticatedAppServicesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenticated/app.settings'
 import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenticated/business.new'
 import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
+import { Route as ApiPublicAiJobsWorkerRouteImport } from './routes/api/public/ai-jobs-worker'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -166,6 +167,11 @@ const AuthenticatedBusinessSelectRoute =
     path: '/business/select',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicAiJobsWorkerRoute = ApiPublicAiJobsWorkerRouteImport.update({
+  id: '/api/public/ai-jobs-worker',
+  path: '/api/public/ai-jobs-worker',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -190,6 +196,7 @@ export interface FileRoutesByFullPath {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/business/new': typeof AuthenticatedBusinessNewRoute
   '/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -214,6 +221,7 @@ export interface FileRoutesByTo {
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/business/new': typeof AuthenticatedBusinessNewRoute
   '/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRoutesById {
@@ -241,6 +249,7 @@ export interface FileRoutesById {
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/business/new': typeof AuthenticatedBusinessNewRoute
   '/_authenticated/business/select': typeof AuthenticatedBusinessSelectRoute
+  '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
 }
 export interface FileRouteTypes {
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/business/new'
     | '/business/select'
+    | '/api/public/ai-jobs-worker'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/app/settings'
     | '/business/new'
     | '/business/select'
+    | '/api/public/ai-jobs-worker'
     | '/app'
   id:
     | '__root__'
@@ -318,6 +329,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/settings'
     | '/_authenticated/business/new'
     | '/_authenticated/business/select'
+    | '/api/public/ai-jobs-worker'
     | '/_authenticated/app/'
   fileRoutesById: FileRoutesById
 }
@@ -325,6 +337,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -497,6 +510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBusinessSelectRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/ai-jobs-worker': {
+      id: '/api/public/ai-jobs-worker'
+      path: '/api/public/ai-jobs-worker'
+      fullPath: '/api/public/ai-jobs-worker'
+      preLoaderRoute: typeof ApiPublicAiJobsWorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -564,6 +584,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

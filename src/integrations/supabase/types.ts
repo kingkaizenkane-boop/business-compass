@@ -66,14 +66,19 @@ export type Database = {
           completed_at: string | null
           created_at: string
           error_message: string | null
+          heartbeat_at: string | null
           id: string
+          idempotency_key: string | null
           input_data: Json
           job_type: string
+          last_error_at: string | null
           locked_at: string | null
           locked_by: string | null
           max_attempts: number
+          organization_id: string | null
           output_data: Json | null
           priority: number
+          progress: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["ai_job_status"]
         }
@@ -83,14 +88,19 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           error_message?: string | null
+          heartbeat_at?: string | null
           id?: string
+          idempotency_key?: string | null
           input_data?: Json
           job_type: string
+          last_error_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_attempts?: number
+          organization_id?: string | null
           output_data?: Json | null
           priority?: number
+          progress?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ai_job_status"]
         }
@@ -100,14 +110,19 @@ export type Database = {
           completed_at?: string | null
           created_at?: string
           error_message?: string | null
+          heartbeat_at?: string | null
           id?: string
+          idempotency_key?: string | null
           input_data?: Json
           job_type?: string
+          last_error_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_attempts?: number
+          organization_id?: string | null
           output_data?: Json | null
           priority?: number
+          progress?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ai_job_status"]
         }
@@ -117,6 +132,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_jobs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -211,6 +233,76 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage: {
+        Row: {
+          business_id: string | null
+          completion_tokens: number
+          created_at: string
+          estimated_cost_usd: number
+          id: string
+          job_id: string | null
+          metadata: Json
+          model: string
+          operation: string
+          organization_id: string
+          prompt_tokens: number
+          succeeded: boolean
+          total_tokens: number
+        }
+        Insert: {
+          business_id?: string | null
+          completion_tokens?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          model: string
+          operation: string
+          organization_id: string
+          prompt_tokens?: number
+          succeeded?: boolean
+          total_tokens?: number
+        }
+        Update: {
+          business_id?: string | null
+          completion_tokens?: number
+          created_at?: string
+          estimated_cost_usd?: number
+          id?: string
+          job_id?: string | null
+          metadata?: Json
+          model?: string
+          operation?: string
+          organization_id?: string
+          prompt_tokens?: number
+          succeeded?: boolean
+          total_tokens?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "ai_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -373,8 +465,12 @@ export type Database = {
           fact_type: Database["public"]["Enums"]["fact_type"]
           id: string
           source_id: string | null
+          source_response_id: string | null
           source_type: Database["public"]["Enums"]["evidence_type"] | null
           subcategory: string | null
+          superseded_at: string | null
+          superseded_by_fact_id: string | null
+          supersedes_fact_id: string | null
           updated_at: string
           valid_from: string | null
           valid_until: string | null
@@ -397,8 +493,12 @@ export type Database = {
           fact_type?: Database["public"]["Enums"]["fact_type"]
           id?: string
           source_id?: string | null
+          source_response_id?: string | null
           source_type?: Database["public"]["Enums"]["evidence_type"] | null
           subcategory?: string | null
+          superseded_at?: string | null
+          superseded_by_fact_id?: string | null
+          supersedes_fact_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
@@ -421,8 +521,12 @@ export type Database = {
           fact_type?: Database["public"]["Enums"]["fact_type"]
           id?: string
           source_id?: string | null
+          source_response_id?: string | null
           source_type?: Database["public"]["Enums"]["evidence_type"] | null
           subcategory?: string | null
+          superseded_at?: string | null
+          superseded_by_fact_id?: string | null
+          supersedes_fact_id?: string | null
           updated_at?: string
           valid_from?: string | null
           valid_until?: string | null
@@ -439,6 +543,27 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brain_facts_source_response_id_fkey"
+            columns: ["source_response_id"]
+            isOneToOne: false
+            referencedRelation: "interview_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brain_facts_superseded_by_fact_id_fkey"
+            columns: ["superseded_by_fact_id"]
+            isOneToOne: false
+            referencedRelation: "brain_facts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "brain_facts_supersedes_fact_id_fkey"
+            columns: ["supersedes_fact_id"]
+            isOneToOne: false
+            referencedRelation: "brain_facts"
             referencedColumns: ["id"]
           },
         ]
@@ -1400,6 +1525,47 @@ export type Database = {
           },
         ]
       }
+      organization_ai_limits: {
+        Row: {
+          created_at: string
+          monthly_cost_limit_usd: number
+          monthly_token_limit: number
+          organization_id: string
+          pause_reason: string | null
+          paused: boolean
+          paused_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          monthly_cost_limit_usd?: number
+          monthly_token_limit?: number
+          organization_id: string
+          pause_reason?: string | null
+          paused?: boolean
+          paused_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          monthly_cost_limit_usd?: number
+          monthly_token_limit?: number
+          organization_id?: string
+          pause_reason?: string | null
+          paused?: boolean
+          paused_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_ai_limits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_members: {
         Row: {
           created_at: string
@@ -1903,14 +2069,19 @@ export type Database = {
           completed_at: string | null
           created_at: string
           error_message: string | null
+          heartbeat_at: string | null
           id: string
+          idempotency_key: string | null
           input_data: Json
           job_type: string
+          last_error_at: string | null
           locked_at: string | null
           locked_by: string | null
           max_attempts: number
+          organization_id: string | null
           output_data: Json | null
           priority: number
+          progress: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["ai_job_status"]
         }
@@ -1953,6 +2124,10 @@ export type Database = {
           similarity: number
           title: string
         }[]
+      }
+      reclaim_stalled_ai_jobs: {
+        Args: { stale_seconds?: number }
+        Returns: number
       }
       update_interview_progress: {
         Args: {
