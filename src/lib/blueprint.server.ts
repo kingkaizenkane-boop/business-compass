@@ -359,7 +359,7 @@ export async function generateBlueprint(options: {
         sections: sectionMeta,
         priorities,
         open_questions: openQuestions,
-      },
+      } as unknown as Database["public"]["Tables"]["business_blueprints"]["Insert"]["blueprint_data"],
     })
     .select("id")
     .single();
