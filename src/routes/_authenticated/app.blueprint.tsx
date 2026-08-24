@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState, MeterRow, PageHeader, SectionLabel } from "@/components/business-os/primitives";
+import { JobStatusStrip } from "@/components/business-os/job-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -112,6 +113,11 @@ function BlueprintPage() {
 
   return (
     <div className="space-y-9">
+      <JobStatusStrip
+        businessId={businessId}
+        jobTypes={["blueprint_run"]}
+        invalidateKeys={[["blueprint", businessId], ["brain", businessId]]}
+      />
       <PageHeader
         eyebrow="Strategy"
         title="Your Business Blueprint"

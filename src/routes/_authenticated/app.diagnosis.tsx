@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState, MeterRow, PageHeader, SectionLabel, StatBlock } from "@/components/business-os/primitives";
+import { JobStatusStrip } from "@/components/business-os/job-status";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,6 +124,11 @@ function DiagnosisPage() {
 
   return (
     <div className="space-y-9">
+      <JobStatusStrip
+        businessId={businessId}
+        jobTypes={["diagnosis_run"]}
+        invalidateKeys={[["diagnosis", businessId], ["brain", businessId]]}
+      />
       <PageHeader
         eyebrow="Diagnosis"
         title="Your Business Diagnosis"

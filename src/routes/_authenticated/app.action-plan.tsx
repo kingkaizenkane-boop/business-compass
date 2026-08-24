@@ -12,6 +12,7 @@ import {
   PageHeader,
   SectionLabel,
 } from "@/components/business-os/primitives";
+import { JobStatusStrip } from "@/components/business-os/job-status";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -167,6 +168,11 @@ function ActionPlanPage() {
 
   return (
     <div className="space-y-9">
+      <JobStatusStrip
+        businessId={businessId}
+        jobTypes={["action_plan_run"]}
+        invalidateKeys={[["action-plan", businessId], ["brain", businessId]]}
+      />
       <PageHeader
         eyebrow="Execution"
         title="Your 90-day action plan"
