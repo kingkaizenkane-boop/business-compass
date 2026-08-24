@@ -80,14 +80,28 @@ export const submitInterviewResponse = createServerFn({ method: "POST" })
         .eq("id", prior.id);
     }
 
+    const { data: business } = await supabase
+      .from("businesses")
+      .select("organization_id")
+      .eq("id", data.businessId)
+      .maybeSingle();
+
+    const { writeAudit } = await import("./audit.server");
+    await writeAudit({
+      supabase,
+      action: "interview.response_submitted",
+      organizationId: business?.organization_id ?? null,
+      businessId: data.businessId,
+      userId,
+      entity: "interview_responses",
+      entityId: inserted.id,
+      after: { questionKey: data.questionKey, status, length: answer.length },
+      metadata: { supersedesResponseId: prior?.id ?? null },
+    });
+
     // Extraction is an AI job, never a blocking call in this request.
     let job: Awaited<ReturnType<typeof enqueueJob>> | null = null;
     if (status === "answered") {
-      const { data: business } = await supabase
-        .from("businesses")
-        .select("organization_id")
-        .eq("id", data.businessId)
-        .maybeSingle();
       if (business?.organization_id) {
         job = await enqueueJob({
           jobType: "interview_extraction",

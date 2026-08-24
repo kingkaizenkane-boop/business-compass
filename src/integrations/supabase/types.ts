@@ -950,6 +950,33 @@ export type Database = {
           },
         ]
       }
+      cron_job_config: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          endpoint_url: string
+          name: string
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          endpoint_url: string
+          name: string
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          endpoint_url?: string
+          name?: string
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       customers: {
         Row: {
           business_id: string

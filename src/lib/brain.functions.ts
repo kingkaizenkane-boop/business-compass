@@ -64,10 +64,43 @@ export const verifyFact = createServerFn({ method: "POST" })
     z.object({ factId: z.string().uuid(), verified: z.boolean() }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase
+    const { supabase, userId } = context;
+
+    // Read first so the audit row records what actually changed, and so a fact
+    // outside the caller's tenant fails here rather than silently no-opping.
+    const { data: fact, error: readError } = await supabase
+      .from("brain_facts")
+      .select("id, business_id, fact_key, verified")
+      .eq("id", data.factId)
+      .maybeSingle();
+    if (readError) throw readError;
+    if (!fact) throw new Error("That fact is not available in this workspace.");
+
+    const { error } = await supabase
       .from("brain_facts")
       .update({ verified: data.verified })
       .eq("id", data.factId);
     if (error) throw error;
+
+    const { writeAudit } = await import("./audit.server");
+    const { data: business } = await supabase
+      .from("businesses")
+      .select("organization_id")
+      .eq("id", fact.business_id)
+      .maybeSingle();
+
+    await writeAudit({
+      supabase,
+      action: data.verified ? "brain_fact.verified" : "brain_fact.unverified",
+      organizationId: business?.organization_id ?? null,
+      businessId: fact.business_id,
+      userId,
+      entity: "brain_facts",
+      entityId: fact.id,
+      before: { verified: fact.verified },
+      after: { verified: data.verified },
+      metadata: { factKey: fact.fact_key },
+    });
+
     return { ok: true };
   });

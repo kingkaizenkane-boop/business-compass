@@ -57,6 +57,7 @@ const SECONDARY_NAV: NavItem[] = [
   { label: "SEO", to: "/app/seo", icon: Search },
   { label: "Experiments", to: "/app/experiments", icon: FlaskConical },
   { label: "Metrics", to: "/app/metrics", icon: Gauge },
+  { label: "AI usage", to: "/app/ai-usage", icon: Sparkles },
 ];
 
 function NavList({ items, onNavigate }: { items: NavItem[]; onNavigate?: (() => void) | undefined }) {
