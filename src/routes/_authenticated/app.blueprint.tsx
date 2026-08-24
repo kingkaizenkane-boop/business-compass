@@ -34,13 +34,23 @@ export const Route = createFileRoute("/_authenticated/app/blueprint")({
   component: BlueprintPage,
 });
 
-type SectionView = NonNullable<
-  Awaited<ReturnType<typeof getBlueprint>> extends { blueprint: infer B }
-    ? B extends { sections: (infer S)[] }
-      ? S
-      : never
-    : never
->;
+type SectionView = {
+  key: string;
+  label: string;
+  content: string | null;
+  rationale: string | null;
+  assumptions: string[];
+  confidence: number | null;
+  facts: {
+    factId: string;
+    factKey: string;
+    category: string;
+    value: string;
+    factType: string;
+    verified: boolean;
+  }[];
+};
+
 
 function BlueprintPage() {
   const { activeBusiness, loading } = useWorkspace();
