@@ -123,10 +123,10 @@ function OperationsPage() {
       />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatBlock label="Active processes" value={String(counts.active)} note="Runnable today" />
-        <StatBlock label="Drafts" value={String(counts.draft)} note="Awaiting your review" />
-        <StatBlock label="Paused" value={String(counts.paused)} note="Held or archived" />
-        <StatBlock label="Awaiting approval" value={String(counts.approvals)} note="Runs stopped for a decision" />
+        <StatBlock label="Active processes" value={String(counts.active)} caption="Runnable today" />
+        <StatBlock label="Drafts" value={String(counts.draft)} caption="Awaiting your review" />
+        <StatBlock label="Paused" value={String(counts.paused)} caption="Held or archived" />
+        <StatBlock label="Awaiting approval" value={String(counts.approvals)} caption="Runs stopped for a decision" />
       </section>
 
       {(data?.approvals ?? []).length > 0 ? (
