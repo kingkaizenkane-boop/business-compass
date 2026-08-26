@@ -36,6 +36,7 @@ import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
 import { Route as ApiPublicAiJobsWorkerRouteImport } from './routes/api/public/ai-jobs-worker'
 import { Route as AuthenticatedAppOperationsIndexRouteImport } from './routes/_authenticated/app.operations.index'
+import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './routes/_authenticated/app.operations.$processId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -184,6 +185,12 @@ const AuthenticatedAppOperationsIndexRoute =
     path: '/operations/',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppOperationsProcessIdRoute =
+  AuthenticatedAppOperationsProcessIdRouteImport.update({
+    id: '/operations/$processId',
+    path: '/operations/$processId',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -238,6 +246,7 @@ export interface FileRoutesByTo {
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRoutesById {
@@ -268,6 +277,7 @@ export interface FileRoutesById {
   '/_authenticated/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -298,6 +308,7 @@ export interface FileRouteTypes {
     | '/business/select'
     | '/api/public/ai-jobs-worker'
     | '/app/'
+    | '/app/operations/$processId'
     | '/app/operations/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -325,6 +336,7 @@ export interface FileRouteTypes {
     | '/business/select'
     | '/api/public/ai-jobs-worker'
     | '/app'
+    | '/app/operations/$processId'
     | '/app/operations'
   id:
     | '__root__'
@@ -354,6 +366,7 @@ export interface FileRouteTypes {
     | '/_authenticated/business/select'
     | '/api/public/ai-jobs-worker'
     | '/_authenticated/app/'
+    | '/_authenticated/app/operations/$processId'
     | '/_authenticated/app/operations/'
   fileRoutesById: FileRoutesById
 }
@@ -556,6 +569,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOperationsIndexRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/operations/$processId': {
+      id: '/_authenticated/app/operations/$processId'
+      path: '/operations/$processId'
+      fullPath: '/app/operations/$processId'
+      preLoaderRoute: typeof AuthenticatedAppOperationsProcessIdRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
   }
 }
 
@@ -578,6 +598,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppServicesRoute: typeof AuthenticatedAppServicesRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppOperationsProcessIdRoute: typeof AuthenticatedAppOperationsProcessIdRoute
   AuthenticatedAppOperationsIndexRoute: typeof AuthenticatedAppOperationsIndexRoute
 }
 
@@ -600,6 +621,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppServicesRoute: AuthenticatedAppServicesRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppOperationsProcessIdRoute:
+    AuthenticatedAppOperationsProcessIdRoute,
   AuthenticatedAppOperationsIndexRoute: AuthenticatedAppOperationsIndexRoute,
 }
 
