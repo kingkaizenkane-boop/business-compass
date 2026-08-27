@@ -21,9 +21,9 @@ The single largest production risk is that all four AI engines run synchronously
 | Evidence & versioning | Partial |
 | Authentication & security | Partial |
 | Audit logging | Partial |
-| AI job queue | Missing |
-| AI memory & embeddings | Missing |
-| Processes / workflow execution | Missing |
+| AI job queue | Missing → **Implemented** (§6.1) |
+| AI memory & embeddings | Missing → **Implemented** (§6.4) |
+| Processes / workflow execution | Missing → **Implemented** (§7) |
 | Metrics ingestion | Missing |
 | Experiments | Missing |
 | Programmatic SEO | Missing |
