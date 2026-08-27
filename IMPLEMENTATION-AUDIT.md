@@ -21,9 +21,9 @@ The single largest production risk is that all four AI engines run synchronously
 | Evidence & versioning | Partial |
 | Authentication & security | Partial |
 | Audit logging | Partial |
-| AI job queue | Missing |
-| AI memory & embeddings | Missing |
-| Processes / workflow execution | Missing |
+| AI job queue | Missing → **Implemented** (§6.1) |
+| AI memory & embeddings | Missing → **Implemented** (§6.4) |
+| Processes / workflow execution | Missing → **Implemented** (§7) |
 | Metrics ingestion | Missing |
 | Experiments | Missing |
 | Programmatic SEO | Missing |
@@ -260,3 +260,94 @@ call them, and `cron_job_config` is deliberately policy-free (service-role only)
 ### Remaining before launch
 - Publish the app once so the scheduled worker endpoint resolves.
 - Metrics ingestion, experiments and programmatic SEO remain P2 placeholders.
+
+---
+
+## 7. P1 Operations / Process Engine milestone — delivered 27 August 2026
+
+The loop is now **Brain → Diagnosis → Blueprint → Action Plan → Processes → Execution**.
+One-time actions stay in `tasks`; anything repeatable becomes a versioned process definition
+with typed steps, an owner, an autonomy ceiling and an execution history.
+
+### 7.1 Data model — Implemented
+
+- `processes` extended with `organization_id`, `purpose`, `trigger_type` / `trigger_definition`,
+  `owner_type` / `owner_id`, `autonomy_level`, `success_definition`, provenance
+  (`created_from_action_id`, `created_from_diagnosis_id`, `created_from_blueprint_version`)
+  and versioning (`version`, `supersedes_process_id`).
+- `process_steps` extended with `step_type` (action, decision, wait, approval, notification,
+  data_capture, ai_generation, integration, end), `owner_type` / `owner_id`, `autonomy_level`,
+  `input_definition`, `output_definition`, `condition_definition`, `required`.
+- New: `process_executions` (status, trigger source/payload, current step, step log, output,
+  duration, metric values) and `process_approvals` (what will happen, why recommended,
+  data used, external effect, decision + decider).
+- RLS: every new table and column is scoped through `is_business_member` /
+  `is_business_manager`; writes are manager-only, execution rows are service-role written.
+
+### 7.2 Generation engine — Implemented
+
+- **Files:** `src/lib/process.server.ts`, `src/lib/process.functions.ts`
+- Process generation is evidence-bound: prompts are built from Brain facts, the latest
+  diagnosis findings, blueprint sections and the originating action — never generic advice.
+- Runs through the existing async queue as the `process_generation` job type, so it inherits
+  idempotency, retries, heartbeats, budget ceilings and model routing.
+- Deterministic validation rejects malformed graphs (missing terminal step, broken
+  dependencies, duplicate sequences, unknown step types) before anything is persisted.
+- Autonomy defaults are conservative: anything with an external effect is capped so it
+  requires human approval unless an owner deliberately raises the ceiling.
+
+### 7.3 Versioning — Implemented
+
+- Editing an **active** process never mutates the running definition: it writes a new version
+  with `supersedes_process_id` set, leaving in-flight executions on the version they started on.
+- Draft processes are edited in place.
+
+### 7.4 Execution engine — Implemented
+
+- Start, resume, pause and cancel; step-by-step advance with a persisted `step_log`, current
+  step pointer, output payload and duration.
+- Approval gate: a step whose autonomy is below its requirement parks the execution as
+  `approval_required` and opens a `process_approvals` row describing what will happen, why it
+  was recommended, the data used and the external effect. Approve resumes, reject stops.
+
+### 7.5 Operations UI — Implemented
+
+- **Files:** `src/routes/_authenticated/app.operations.index.tsx`,
+  `src/routes/_authenticated/app.operations.$processId.tsx`
+- Overview: process library with status, autonomy, owner, version, step count, run statistics
+  and diagnosis provenance; inline pending-approval cards (approve / pause / reject); AI
+  generation trigger with live job status; active/draft/paused/approval counts; recent runs;
+  empty state that routes back to the Action Plan.
+- Detail: definition and trigger editing, autonomy ceiling control, full step builder
+  (add / edit / reorder / delete with type, owner, autonomy, inputs, outputs, conditions),
+  version-safe save, activate / pause / archive / duplicate / run-now, execution history with
+  resume and cancel, approval decisions, and the evidence behind the process.
+
+### 7.6 Audit logging — Implemented
+
+`process.created`, `process.updated`, `process.activated`, `process.paused`, `process.archived`,
+`process.execution_started` / `_completed` / `_failed` / `_cancelled`,
+`process.approval_requested` / `_approved` / `_rejected`.
+
+### 7.7 Remaining in this area
+
+- Real integration step handlers (email, messaging, CRM) — steps are typed and gated, but
+  outbound side effects still need connectors.
+- Scheduled and event triggers are stored but not yet dispatched automatically; runs are
+  started manually or from the queue.
+- Process-level metrics (`metric_values`) are captured per execution but not yet aggregated
+  into the Metrics page.
+
+### 7.8 Status after P1
+
+| Area | Status |
+| --- | --- |
+| Processes / workflow execution | Implemented |
+| Metrics ingestion | Missing (P2) |
+| Experiments | Missing (P2) |
+| Programmatic SEO | Missing (P2) |
+| Evidence upload to storage | Missing (P2) |
+
+**Recommended next action:** metrics ingestion, so process and action-plan outcomes can be
+measured rather than asserted — it is the last piece that closes the learning loop back into
+the Brain.
