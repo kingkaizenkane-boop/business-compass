@@ -73,9 +73,9 @@ export type StepView = {
   ownerId: string | null;
   responsibleRole: string | null;
   autonomyLevel: number;
-  inputDefinition: Record<string, unknown>;
-  outputDefinition: Record<string, unknown>;
-  conditionDefinition: Record<string, unknown>;
+  inputDefinition: JsonRecord;
+  outputDefinition: JsonRecord;
+  conditionDefinition: JsonRecord;
   estimatedMinutes: number | null;
   required: boolean;
 };
@@ -106,7 +106,7 @@ export type ProcessView = {
   purpose: string | null;
   category: string | null;
   triggerType: TriggerType;
-  triggerDefinition: Record<string, unknown>;
+  triggerDefinition: JsonRecord;
   status: ProcessStatus;
   ownerType: OwnerType;
   ownerId: string | null;
@@ -137,8 +137,8 @@ export type ExecutionView = {
   durationMs: number | null;
   success: boolean | null;
   error: string | null;
-  output: Record<string, unknown>;
-  metricValues: Record<string, unknown>;
+  output: JsonRecord;
+  metricValues: JsonRecord;
   stepLog: { sequence: number; name: string; stepType: string; outcome: string; note?: string; at: string }[];
   createdAt: string;
 };
@@ -153,7 +153,7 @@ export type ApprovalView = {
   title: string;
   whatWillHappen: string | null;
   whyRecommended: string | null;
-  dataUsed: Record<string, unknown>;
+  dataUsed: JsonRecord;
   externalEffect: string | null;
   decidedAt: string | null;
   decisionNote: string | null;
@@ -162,9 +162,12 @@ export type ApprovalView = {
 
 /* ------------------------------------------------------------------ helpers */
 
-function obj(value: unknown): Record<string, unknown> {
+export type JsonValue = string | number | boolean | null | JsonValue[] | { [key: string]: JsonValue };
+export type JsonRecord = { [key: string]: JsonValue };
+
+function obj(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
+    ? (value as JsonRecord)
     : {};
 }
 
@@ -616,6 +619,12 @@ export async function generateProcesses(options: {
 }): Promise<GenerationResult> {
   const { supabase, businessId } = options;
   const business = await assertBusinessAccess(supabase, businessId);
+  const { data: orgRow } = await supabase
+    .from("businesses")
+    .select("organization_id")
+    .eq("id", businessId)
+    .single();
+  const businessOrgId = orgRow?.organization_id ?? null;
   const { facts } = await loadBrain(supabase, businessId);
   const readiness = assessReadiness(facts);
   if (!readiness.ready) {
@@ -814,7 +823,7 @@ export async function generateProcesses(options: {
       .from("processes")
       .insert({
         business_id: businessId,
-        organization_id: options.organizationId ?? business.organization_id,
+        organization_id: options.organizationId ?? businessOrgId,
         name: candidate.name,
         description: candidate.description || null,
         purpose: candidate.purpose,
@@ -874,7 +883,7 @@ export async function generateProcesses(options: {
 
     await writeAudit({
       action: "process.created",
-      organizationId: options.organizationId ?? business.organization_id,
+      organizationId: options.organizationId ?? businessOrgId,
       businessId,
       userId: options.userId,
       actor: "system",

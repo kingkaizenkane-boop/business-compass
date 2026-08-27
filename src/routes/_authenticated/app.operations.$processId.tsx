@@ -302,7 +302,7 @@ function ProcessDetailPage() {
       <PageHeader
         eyebrow={`Process · v${process.version} · ${label(process.status)}`}
         title={process.name}
-        subtitle={process.purpose ?? undefined}
+        {...(process.purpose ? { subtitle: process.purpose } : {})}
         actions={
           <>
             <Button
