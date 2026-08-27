@@ -92,7 +92,7 @@ export const saveProcessDefinition = createServerFn({ method: "POST" })
       businessId: data.businessId,
       userId: context.userId,
       processId: data.processId,
-      patch: data.patch,
+      patch: data.patch as Parameters<typeof saveProcess>[0]["patch"],
       ...(data.steps ? { steps: data.steps } : {}),
     });
   });
