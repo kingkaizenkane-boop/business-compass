@@ -1093,16 +1093,30 @@ export async function setProcessStatus(options: {
     options.status === "active" ? "active" : options.status === "archived" ? "archived" : "draft";
 
   if (options.status === "active") {
-    // Activating a newer version retires the version it supersedes.
-    if (current.supersedes_process_id) {
-      await db.from("processes").update({ status: "archived" }).eq("id", current.supersedes_process_id);
-    }
-    // A process must have steps before it can run.
+    // Quality gate — a definition must be complete before it can go live.
     const { count } = await db
       .from("process_steps")
       .select("id", { count: "exact", head: true })
       .eq("process_id", processId);
-    if (!count) throw new Error("Add at least one step before activating this process.");
+
+    const triggerDescription = String(obj(current.trigger_definition)["description"] ?? "").trim();
+    const problems: string[] = [];
+    if (!current.name || current.name.trim().length < 3) problems.push("a clear name");
+    if (!current.purpose || current.purpose.trim().length < 10) problems.push("a purpose");
+    if (!triggerDescription) problems.push("a trigger description");
+    if (!current.success_definition || current.success_definition.trim().length < 5)
+      problems.push("a success definition");
+    if (!count) problems.push("at least one step");
+    if (current.autonomy_level < 0 || current.autonomy_level > 4)
+      problems.push("a valid autonomy level (0-4)");
+    if (problems.length > 0) {
+      throw new Error(`This process needs ${problems.join(", ")} before it can be activated.`);
+    }
+
+    // Activating a newer version retires the version it supersedes.
+    if (current.supersedes_process_id) {
+      await db.from("processes").update({ status: "archived" }).eq("id", current.supersedes_process_id);
+    }
   }
 
   const { error } = await db
