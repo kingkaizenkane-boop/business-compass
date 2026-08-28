@@ -1676,3 +1676,117 @@ export async function decideApproval(options: {
 
   return { ok: true, execution: null };
 }
+
+/* -------------------------------------------------- manual process creation */
+
+/**
+ * Creates an empty draft process, optionally derived from an Action Plan item.
+ * The action itself is never duplicated — only referenced.
+ */
+export async function createProcessDraft(options: {
+  supabase: Client;
+  businessId: string;
+  userId: string;
+  name?: string;
+  fromTaskId?: string;
+}): Promise<{ processId: string }> {
+  const { supabase, businessId } = options;
+  await assertBusinessAccess(supabase, businessId);
+
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .select("organization_id")
+    .eq("id", businessId)
+    .maybeSingle();
+  if (businessError) throw businessError;
+  if (!business) throw new Error("That business does not exist.");
+
+  let task: { id: string; title: string; metadata: unknown } | null = null;
+  if (options.fromTaskId) {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("id, title, metadata")
+      .eq("id", options.fromTaskId)
+      .eq("business_id", businessId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("That action does not exist in this business.");
+    task = data;
+
+    const { data: existing } = await supabase
+      .from("processes")
+      .select("id")
+      .eq("business_id", businessId)
+      .eq("created_from_action_id", data.id)
+      .neq("status", "archived")
+      .limit(1)
+      .maybeSingle();
+    if (existing) return { processId: existing.id };
+  }
+
+  const { data: runRow } = await supabase
+    .from("diagnosis_runs")
+    .select("id")
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: blueprintRow } = await supabase
+    .from("business_blueprints")
+    .select("version")
+    .eq("business_id", businessId)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const taskMeta = obj(task?.metadata ?? {});
+  const db = await admin();
+  const { data: inserted, error } = await db
+    .from("processes")
+    .insert({
+      business_id: businessId,
+      organization_id: business.organization_id,
+      name: options.name?.trim() || task?.title || "Untitled process",
+      description: null,
+      purpose: typeof taskMeta["outcome"] === "string" ? (taskMeta["outcome"] as string) : null,
+      process_category: null,
+      trigger_type: "manual",
+      trigger_definition: { description: "" } as never,
+      status: "draft",
+      owner_type: "human",
+      autonomy_level: DEFAULT_PROCESS_AUTONOMY,
+      success_definition:
+        typeof taskMeta["success_metric"] === "string" ? (taskMeta["success_metric"] as string) : null,
+      created_from_action_id: task?.id ?? null,
+      created_from_diagnosis_id: runRow?.id ?? null,
+      created_from_blueprint_version: blueprintRow?.version ?? null,
+      version: 1,
+      metadata: {
+        source: task ? "action_plan_conversion" : "manual",
+        created_at: new Date().toISOString(),
+        ...(Array.isArray(taskMeta["diagnosis_titles"])
+          ? { evidence: { diagnosis_titles: taskMeta["diagnosis_titles"], facts: taskMeta["facts"] ?? [] } }
+          : {}),
+      } as never,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  await writeAudit({
+    action: "process.created",
+    organizationId: business.organization_id,
+    businessId,
+    userId: options.userId,
+    entity: "processes",
+    entityId: inserted.id,
+    after: {
+      name: options.name ?? task?.title ?? "Untitled process",
+      from_action_id: task?.id ?? null,
+      autonomy: DEFAULT_PROCESS_AUTONOMY,
+    },
+  });
+
+  return { processId: inserted.id };
+}
