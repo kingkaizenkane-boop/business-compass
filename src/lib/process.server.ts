@@ -451,15 +451,19 @@ export async function loadProcess(
 
 /* ------------------------------------------------------------------ AI schema */
 
+/** Models regularly emit null for "no value" text fields; treat it as empty. */
+const aiText = (max: number) =>
+  z.preprocess((v) => (v == null ? "" : v), z.string().max(max).catch("")).default("");
+
 const aiStepSchema = z.object({
   name: z.string().min(2).max(160),
-  description: z.string().max(800).default(""),
+  description: aiText(800),
   step_type: z.enum(STEP_TYPES),
   owner_type: z.enum(OWNER_TYPES).default("human"),
   autonomy_level: z.number().int().min(0).max(4).default(1),
-  input: z.string().max(400).default(""),
-  output: z.string().max(400).default(""),
-  condition: z.string().max(400).default(""),
+  input: aiText(400),
+  output: aiText(400),
+  condition: aiText(400),
   estimated_minutes: z.number().int().min(0).max(10080).nullable().default(null),
   required: z.boolean().default(true),
 });
@@ -467,10 +471,10 @@ const aiStepSchema = z.object({
 const aiProcessSchema = z.object({
   name: z.string().min(3).max(160),
   purpose: z.string().min(10).max(1000),
-  description: z.string().max(1500).default(""),
-  category: z.string().max(80).default("operations"),
+  description: aiText(1500),
+  category: z.preprocess((v) => (v == null || v === "" ? "operations" : v), z.string().max(80)).default("operations"),
   trigger_type: z.enum(TRIGGER_TYPES),
-  trigger_description: z.string().max(500).default(""),
+  trigger_description: aiText(500),
   owner_type: z.enum(OWNER_TYPES).default("human"),
   recommended_autonomy: z.number().int().min(0).max(4).default(1),
   success_definition: z.string().min(5).max(600),
@@ -483,7 +487,7 @@ const aiProcessSchema = z.object({
 });
 
 const aiSchema = z.object({
-  summary: z.string().max(2000).default(""),
+  summary: aiText(2000),
   processes: z.array(aiProcessSchema).max(6).default([]),
 });
 
