@@ -1,6 +1,6 @@
 # Business OS — Implementation Audit
 
-**Date:** 24 August 2026
+**Date:** 28 August 2026
 **Scope:** Repository-wide audit of Business OS (React 19 · TanStack Start · Tailwind v4 · Lovable Cloud / Postgres + pgvector · Lovable AI Gateway)
 **Method:** Inspection of server modules, server functions, route components, and live row counts across the 34-table schema.
 
@@ -338,11 +338,85 @@ with typed steps, an owner, an autonomy ceiling and an execution history.
 - Process-level metrics (`metric_values`) are captured per execution but not yet aggregated
   into the Metrics page.
 
-### 7.8 Status after P1
+---
+
+## 8. P1.1 — Process Engine Foundation milestone — delivered 28 August 2026
+
+P1.1 hardens the hand-off from the 90-day Action Plan into repeatable, evidence-bound
+processes. It keeps the existing strategic core untouched and focuses on activation quality,
+library discoverability, and safe autonomy defaults.
+
+### 8.1 Action Plan ↔ Process connection — Implemented
+
+- **Files:** `src/lib/action-plan.server.ts`, `src/lib/process.server.ts`,
+  `src/routes/_authenticated/app.action-plan.tsx`
+- Every action card in the Action Plan now shows a linked process once one exists, and a
+  **Convert to process** button when none exists.
+- Conversion calls `createProcessDraft({ fromTaskId })`, which creates a draft process
+  referencing the action via `processes.created_from_action_id` without duplicating the task.
+- Re-converting the same action returns the existing non-archived process, so accidental
+  double-clicks never spawn duplicates.
+- The Action Plan view loads the newest non-archived process per source action and surfaces
+  its name, status, and version.
+
+### 8.2 Process Library updates — Implemented
+
+- **File:** `src/routes/_authenticated/app.operations.index.tsx`
+- Search by name, purpose, category, or description.
+- Status filter tabs: All / Active / Draft / Paused / Archived.
+- Manual **Create process** button that inserts an empty draft for the active business.
+- Statistics refreshed from `processes`, `process_steps`, `process_executions` and
+  `process_approvals`.
+
+### 8.3 Activation Quality Gate — Implemented
+
+- **File:** `src/lib/process.server.ts` (`setProcessStatus`)
+- A process cannot be activated until it passes a strict validation gate:
+  - name ≥ 3 characters,
+  - purpose ≥ 10 characters,
+  - trigger description present,
+  - success definition ≥ 5 characters,
+  - at least one step,
+  - autonomy level between 0 and 4.
+- The user receives a single human-readable sentence listing everything still missing.
+- Activating a newer version automatically archives the version it supersedes.
+
+### 8.4 Evidence-bound generation — Implemented
+
+- Process generation (`process_generation` job type) builds prompts from Brain facts, latest
+  diagnosis findings, blueprint sections, and the originating action.
+- Generated drafts carry provenance columns (`created_from_action_id`,
+  `created_from_diagnosis_id`, `created_from_blueprint_version`) so the Operations detail page
+  can render the exact evidence behind each process.
+- Deterministic validation rejects malformed AI output before persistence.
+
+### 8.5 Autonomy Safety — Implemented
+
+- Conservative default autonomy (`DEFAULT_PROCESS_AUTONOMY = 1`, Recommend).
+- External-effect step types (email, messaging, integration, payment) are typed but gated:
+  no outbound side effect is executed automatically in this milestone; they require approval
+  regardless of the autonomy ceiling.
+- The builder lets owners raise autonomy up to level 4 only after the definition is complete;
+  the engine still pauses for approval on any step whose requirement exceeds the execution
+  context's ceiling.
+
+### 8.6 Reliability — Implemented
+
+- **Files:** `src/lib/process.server.ts`, `src/routes/_authenticated/app.operations.$processId.tsx`
+- Versioned saving: active definitions are never overwritten; edits spawn a new version.
+- Simple step builder: add, edit, reorder, delete steps with type, owner, autonomy, inputs,
+  outputs, and conditions.
+- Generation runs asynchronously through the existing `ai_jobs` queue, inheriting retries,
+  heartbeats, budget ceilings, and job-status polling.
+- Audit logging covers `process.created` for both manual and AI-generated processes.
+
+### 8.7 Remaining after P1.1
 
 | Area | Status |
 | --- | --- |
 | Processes / workflow execution | Implemented |
+| Real outbound connectors (email, CRM, etc.) | Missing (P2) |
+| Scheduled / event triggers | Missing (P2) |
 | Metrics ingestion | Missing (P2) |
 | Experiments | Missing (P2) |
 | Programmatic SEO | Missing (P2) |
