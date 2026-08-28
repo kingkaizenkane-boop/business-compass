@@ -35,6 +35,7 @@ import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenticated/business.new'
 import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
 import { Route as ApiPublicAiJobsWorkerRouteImport } from './routes/api/public/ai-jobs-worker'
+import { Route as AuthenticatedAppMetricsIndexRouteImport } from './routes/_authenticated/app.metrics.index'
 import { Route as AuthenticatedAppOperationsIndexRouteImport } from './routes/_authenticated/app.operations.index'
 import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './routes/_authenticated/app.operations.$processId'
 
@@ -179,6 +180,12 @@ const ApiPublicAiJobsWorkerRoute = ApiPublicAiJobsWorkerRouteImport.update({
   path: '/api/public/ai-jobs-worker',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAppMetricsIndexRoute =
+  AuthenticatedAppMetricsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppMetricsRoute,
+  } as any)
 const AuthenticatedAppOperationsIndexRoute =
   AuthenticatedAppOperationsIndexRouteImport.update({
     id: '/operations/',
@@ -208,7 +215,7 @@ export interface FileRoutesByFullPath {
   '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/interview': typeof AuthenticatedAppInterviewRoute
   '/app/leads': typeof AuthenticatedAppLeadsRoute
-  '/app/metrics': typeof AuthenticatedAppMetricsRoute
+  '/app/metrics': typeof AuthenticatedAppMetricsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/offers': typeof AuthenticatedAppOffersRoute
   '/app/seo': typeof AuthenticatedAppSeoRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByFullPath {
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -236,7 +244,6 @@ export interface FileRoutesByTo {
   '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/interview': typeof AuthenticatedAppInterviewRoute
   '/app/leads': typeof AuthenticatedAppLeadsRoute
-  '/app/metrics': typeof AuthenticatedAppMetricsRoute
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/offers': typeof AuthenticatedAppOffersRoute
   '/app/seo': typeof AuthenticatedAppSeoRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRoutesById {
@@ -267,7 +275,7 @@ export interface FileRoutesById {
   '/_authenticated/app/help': typeof AuthenticatedAppHelpRoute
   '/_authenticated/app/interview': typeof AuthenticatedAppInterviewRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRoute
-  '/_authenticated/app/metrics': typeof AuthenticatedAppMetricsRoute
+  '/_authenticated/app/metrics': typeof AuthenticatedAppMetricsRouteWithChildren
   '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/app/offers': typeof AuthenticatedAppOffersRoute
   '/_authenticated/app/seo': typeof AuthenticatedAppSeoRoute
@@ -278,6 +286,7 @@ export interface FileRoutesById {
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
 }
 export interface FileRouteTypes {
@@ -309,6 +318,7 @@ export interface FileRouteTypes {
     | '/api/public/ai-jobs-worker'
     | '/app/'
     | '/app/operations/$processId'
+    | '/app/metrics/'
     | '/app/operations/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -326,7 +336,6 @@ export interface FileRouteTypes {
     | '/app/help'
     | '/app/interview'
     | '/app/leads'
-    | '/app/metrics'
     | '/app/notifications'
     | '/app/offers'
     | '/app/seo'
@@ -337,6 +346,7 @@ export interface FileRouteTypes {
     | '/api/public/ai-jobs-worker'
     | '/app'
     | '/app/operations/$processId'
+    | '/app/metrics'
     | '/app/operations'
   id:
     | '__root__'
@@ -367,6 +377,7 @@ export interface FileRouteTypes {
     | '/api/public/ai-jobs-worker'
     | '/_authenticated/app/'
     | '/_authenticated/app/operations/$processId'
+    | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
   fileRoutesById: FileRoutesById
 }
@@ -562,6 +573,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiJobsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/app/metrics/': {
+      id: '/_authenticated/app/metrics/'
+      path: '/'
+      fullPath: '/app/metrics/'
+      preLoaderRoute: typeof AuthenticatedAppMetricsIndexRouteImport
+      parentRoute: typeof AuthenticatedAppMetricsRoute
+    }
     '/_authenticated/app/operations/': {
       id: '/_authenticated/app/operations/'
       path: '/operations'
@@ -579,6 +597,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAppMetricsRouteChildren {
+  AuthenticatedAppMetricsIndexRoute: typeof AuthenticatedAppMetricsIndexRoute
+}
+
+const AuthenticatedAppMetricsRouteChildren: AuthenticatedAppMetricsRouteChildren =
+  {
+    AuthenticatedAppMetricsIndexRoute: AuthenticatedAppMetricsIndexRoute,
+  }
+
+const AuthenticatedAppMetricsRouteWithChildren =
+  AuthenticatedAppMetricsRoute._addFileChildren(
+    AuthenticatedAppMetricsRouteChildren,
+  )
+
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppActionPlanRoute: typeof AuthenticatedAppActionPlanRoute
   AuthenticatedAppAiUsageRoute: typeof AuthenticatedAppAiUsageRoute
@@ -591,7 +623,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
   AuthenticatedAppInterviewRoute: typeof AuthenticatedAppInterviewRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
-  AuthenticatedAppMetricsRoute: typeof AuthenticatedAppMetricsRoute
+  AuthenticatedAppMetricsRoute: typeof AuthenticatedAppMetricsRouteWithChildren
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOffersRoute: typeof AuthenticatedAppOffersRoute
   AuthenticatedAppSeoRoute: typeof AuthenticatedAppSeoRoute
@@ -614,7 +646,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
   AuthenticatedAppInterviewRoute: AuthenticatedAppInterviewRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
-  AuthenticatedAppMetricsRoute: AuthenticatedAppMetricsRoute,
+  AuthenticatedAppMetricsRoute: AuthenticatedAppMetricsRouteWithChildren,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOffersRoute: AuthenticatedAppOffersRoute,
   AuthenticatedAppSeoRoute: AuthenticatedAppSeoRoute,
