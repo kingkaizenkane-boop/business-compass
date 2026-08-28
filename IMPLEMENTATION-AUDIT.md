@@ -140,7 +140,7 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 
 ## 5. Recommended next action
 
-Start with the **AI job queue worker**. It resolves the top-ranked production risk, unblocks embeddings and any future long-running generation, and is a prerequisite for honest progress reporting in the UI.
+Start with **metrics ingestion**. It closes the learning loop by measuring action-plan and process outcomes against baselines, which is the last missing piece before the Brain can revise itself from real data rather than assertions.
 
 ---
 
