@@ -483,7 +483,7 @@ const aiProcessSchema = z.object({
   diagnosis_titles: z.array(z.string().max(300)).default([]),
   blueprint_sections: z.array(z.string().max(120)).default([]),
   evidence_fact_ids: z.array(z.string()).default([]),
-  steps: z.array(aiStepSchema).min(3).max(14),
+  steps: z.array(aiStepSchema).min(3).max(40),
 });
 
 const aiSchema = z.object({
@@ -563,6 +563,11 @@ function validateProcesses(
     if (candidate.success_definition.trim().length < 5) {
       fail("No success definition was provided.");
       continue;
+    }
+    // Long definitions are trimmed rather than rejected; the owner can extend later.
+    if (candidate.steps.length > 14) {
+      const tail = candidate.steps.filter((s) => s.step_type === "end").slice(-1);
+      candidate.steps = [...candidate.steps.slice(0, tail.length > 0 ? 13 : 14), ...tail];
     }
     if (candidate.steps.length < 3) {
       fail("A process needs at least three ordered steps.");
