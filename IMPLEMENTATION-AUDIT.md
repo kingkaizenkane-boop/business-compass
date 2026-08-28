@@ -57,26 +57,25 @@ The single largest production risk is that all four AI engines run synchronously
 - **Files:** `src/lib/action-plan.server.ts`, `src/lib/action-plan.functions.ts`, `src/routes/_authenticated/app.action-plan.tsx`
 - **Tables:** `tasks`
 - Three horizons (Now / Next / Later), deterministic sequencing and priority assignment, due dates, Approve → Start → Done workflow, stale-version retirement that preserves in-progress and completed work.
-- **Gap:** generated processes are not written to the `processes` table, so the Operations page stays empty.
+- **Gap closed in P1.1:** actions can be converted into evidence-linked draft processes; the Action Plan surfaces the linked process status and version. See §8.1.
 
 ### 2.5 Evidence & versioning — Partial
 
-- **Tables:** `evidence` (populated), `brain_fact_evidence` (**0 rows**), `brain_facts.version`
-- Evidence rows are created during extraction, but the join table linking facts to evidence is not written. `brain_facts.version` does not increment when an owner re-answers a question, so there is no supersession history in practice.
-- **Production risk:** the UI presents findings as traceable to evidence; that claim is currently only partially backed by the database. This is the highest-trust-cost gap in the system.
-- **Missing entirely:** owner-facing evidence upload (documents, screenshots, financials) into a storage bucket.
+- **Tables:** `evidence`, `brain_fact_evidence`, `brain_facts.version`
+- **Gap closed in P0:** extraction writes `evidence` rows and links every resulting fact through `brain_fact_evidence`; changed answers create new `brain_facts` versions with a supersession chain. See §6.2 and §6.3.
+- **Remaining gap:** owner-facing evidence upload (documents, screenshots, financials) into a storage bucket is still P2.
 
-### 2.6 Authentication & security — Partial
+### 2.6 Authentication & security — Implemented
 
 - **Files:** `src/routes/auth.tsx`, `src/routes/_authenticated/route.tsx`, `src/integrations/supabase/auth-middleware.ts`, `src/start.ts`
-- Email/password auth works; every server function is behind `requireSupabaseAuth`; RLS is enabled on all 34 tables with org/business membership helpers; CSRF middleware is installed; no privileged key reaches the client bundle.
-- **Missing:** Google sign-in, password reset, email confirmation flow, session-expiry UX, per-org AI spend ceilings, and a two-tenant RLS verification test.
+- Email/password auth, Google OAuth, password reset, and email confirmation are in place. Every server function is behind `requireSupabaseAuth`; RLS is enabled on all 34 tables with org/business membership helpers; CSRF middleware is installed; no privileged key reaches the client bundle.
+- Per-org AI spend ceilings and two-tenant RLS isolation were verified in P0.1. See §6.6 and §6.7.
 
-### 2.7 Audit logging — Partial
+### 2.7 Audit logging — Implemented
 
 - **Table / RPC:** `audit_logs`, `write_audit_log()`
-- Wired for diagnosis, blueprint and action-plan runs.
-- **Missing:** business creation, interview submissions, fact verification, and any surfacing of the log in the UI for org admins.
+- Wired for organization creation, business creation, interview responses, fact verification/unverification, AI job enqueue/completion/failure, AI limit changes, and the full process lifecycle. See §6.10 and §7.6.
+- **Remaining gap:** an admin-facing audit log view in the UI is not yet built (P2).
 
 ### 2.8 AI job queue — Missing
 
