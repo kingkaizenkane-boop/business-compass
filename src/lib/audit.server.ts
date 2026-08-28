@@ -86,10 +86,13 @@ async function adminClient(): Promise<Client> {
 export async function writeAudit(entry: AuditEntry & { supabase?: Client }): Promise<void> {
   try {
     const db = entry.supabase ?? (await adminClient());
+    /** Worker contexts sometimes carry "" instead of an id; uuid columns reject that. */
+    const uuid = (value: string | null | undefined) =>
+      value && value.trim().length > 0 ? value : null;
     const { error } = await db.from("audit_logs").insert({
-      organization_id: entry.organizationId ?? null,
-      business_id: entry.businessId ?? null,
-      user_id: entry.userId ?? null,
+      organization_id: uuid(entry.organizationId),
+      business_id: uuid(entry.businessId),
+      user_id: uuid(entry.userId),
       actor_type: entry.actor ?? "user",
       action: entry.action,
       table_name: entry.entity ?? null,
