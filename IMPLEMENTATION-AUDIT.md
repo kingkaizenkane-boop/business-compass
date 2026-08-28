@@ -120,23 +120,21 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 
 ## 4. Prioritized roadmap
 
-### P0 — Stability and traceability
-1. **AI job queue worker.** Enqueue diagnosis, blueprint, action-plan and extraction runs; drain via a public cron route; report status in the UI. Removes the timeout class of failure entirely.
-2. **Evidence linkage.** Write `brain_fact_evidence` on every extraction; increment `brain_facts.version` with a supersession chain on re-answer.
-3. **Google sign-in** plus password reset and email confirmation.
-
-### P1 — Operationalization
-4. **Embeddings and AI memory.** Generate and persist embeddings; use `match_business_memory()` for per-business recall in every engine prompt.
-5. **Processes engine.** Write action-plan-derived processes into `processes` and make the Operations page live.
-6. **Metrics ingestion.** Manual entry first, so the plan can be measured against outcomes.
-7. **Audit completeness** plus an admin-facing audit view.
-8. **Cost controls.** Per-org token ceilings and explicit model routing (cheap extraction, expensive reasoning only at diagnosis/blueprint).
+### Completed milestones
+- **P0 — Stability and traceability:** AI job queue, evidence linkage, fact versioning, Google sign-in, password reset, email confirmation. See §6.
+- **P0.1 — Production hardening:** scheduled worker, RLS verification, AI memory isolation, cost ceilings, idempotency, failure recovery, audit completeness. See §P0.1.
+- **P1 — Operations / Process Engine:** process data model, evidence-bound generation, versioning, execution engine, approvals, Operations UI. See §7.
+- **P1.1 — Process Engine Foundation:** Action Plan ↔ Process conversion, library search/filter, manual creation, activation quality gate, autonomy safety. See §8.
 
 ### P2 — Scale and expansion
-9. CRUD for offers, leads and customers.
-10. Programmatic SEO execution: opportunity scoring → generation → quality gate → publish.
-11. Experiments module with hypothesis tracking and outcome learning.
-12. Evidence upload with storage bucket, plus Brain/blueprint/plan data export.
+1. **Metrics ingestion.** Manual entry first, so the plan can be measured against outcomes and fed back into the Brain.
+2. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
+3. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
+4. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
+5. **Experiments module.** Hypothesis tracking, outcome capture, and learning loop back into the Brain.
+6. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
+7. **CRM surface.** CRUD for offers, leads, and customers.
+8. **Admin audit view.** Read-only audit log for organization admins.
 
 ---
 
