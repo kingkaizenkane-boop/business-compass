@@ -134,3 +134,14 @@ export const addMetricObservation = createServerFn({ method: "POST" })
       input: data as Parameters<typeof recordObservation>[0]["input"],
     });
   });
+
+/** Metrics attached to one process — the business outcome of running it. */
+export const getProcessMetrics = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    businessInput.extend({ processId: z.string().uuid() }).parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { loadProcessMetrics } = await import("./metrics.server");
+    return loadProcessMetrics(context.supabase, data.businessId, data.processId);
+  });
