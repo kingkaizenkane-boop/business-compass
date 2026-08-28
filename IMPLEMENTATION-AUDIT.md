@@ -17,16 +17,16 @@ The single largest production risk is that all four AI engines run synchronously
 | Business Brain | Implemented |
 | Diagnosis Engine | Implemented |
 | Blueprint Engine | Implemented |
-| Action Plan Engine | Implemented |
-| Evidence & versioning | Partial |
-| Authentication & security | Partial |
-| Audit logging | Partial |
-| AI job queue | Missing → **Implemented** (§6.1) |
-| AI memory & embeddings | Missing → **Implemented** (§6.4) |
-| Processes / workflow execution | Missing → **Implemented** (§7) |
-| Metrics ingestion | Missing |
-| Experiments | Missing |
-| Programmatic SEO | Missing |
+| Action Plan Engine | Implemented (process linkage in §8.1) |
+| Evidence & versioning | Partial (storage upload still P2) |
+| Authentication & security | Implemented (§6.7 / P0.1) |
+| Audit logging | Implemented (§6.10 / P0.1) |
+| AI job queue | Implemented (§6.1) |
+| AI memory & embeddings | Implemented (§6.4) |
+| Processes / workflow execution | Implemented (§7 / §8) |
+| Metrics ingestion | Missing (P2) |
+| Experiments | Missing (P2) |
+| Programmatic SEO | Missing (P2) |
 
 ---
 
