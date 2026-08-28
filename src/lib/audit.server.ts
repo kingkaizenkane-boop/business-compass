@@ -96,7 +96,7 @@ export async function writeAudit(entry: AuditEntry & { supabase?: Client }): Pro
       actor_type: entry.actor ?? "user",
       action: entry.action,
       table_name: entry.entity ?? null,
-      record_id: entry.entityId ?? null,
+      record_id: uuid(entry.entityId),
       old_data: scrub(entry.before) as never,
       new_data: scrub(entry.after) as never,
       metadata: (scrub(entry.metadata) ?? {}) as never,
