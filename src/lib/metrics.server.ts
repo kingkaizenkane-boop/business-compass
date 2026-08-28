@@ -784,7 +784,11 @@ export async function recordObservation(options: {
   const detail = await loadMetric(supabase, input.businessId, def.id);
   let memoryWritten = false;
   if (detail) {
-    memoryWritten = await maybeWriteOutcomeMemory({ supabase, view: detail.metric });
+    memoryWritten = await maybeWriteOutcomeMemory({
+      supabase,
+      businessId: input.businessId,
+      view: detail.metric,
+    });
   }
 
   return {
@@ -801,9 +805,10 @@ export async function recordObservation(options: {
  */
 async function maybeWriteOutcomeMemory(options: {
   supabase: Client;
+  businessId: string;
   view: MetricView;
 }): Promise<boolean> {
-  const { supabase, view } = options;
+  const { supabase, businessId, view } = options;
   if (view.observationCount < 2) return false;
   if (view.baselineValue == null || view.currentValue == null) return false;
   const percent = view.changeFromBaselinePercent;
@@ -829,7 +834,7 @@ async function maybeWriteOutcomeMemory(options: {
   const result = await writeMemory({
     supabase,
     memory: {
-      businessId: view.links.task ? view.links.task.id && "" || "" : "",
+      businessId,
       memoryType: "metric_outcome",
       title: `${view.name} outcome`,
       content,

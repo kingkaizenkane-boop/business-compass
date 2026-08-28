@@ -44,6 +44,12 @@ export const AUDIT_ACTIONS = [
   "process.approval_requested",
   "process.approval_approved",
   "process.approval_rejected",
+  "metric.created",
+  "metric.updated",
+  "metric.baseline_established",
+  "metric.observation_added",
+  "metric.target_changed",
+  "metric.archived",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
