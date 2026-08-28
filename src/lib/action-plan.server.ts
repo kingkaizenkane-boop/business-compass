@@ -486,6 +486,7 @@ export async function loadActionPlan(
 
   const actions = planTasks
     .map(toView)
+    .map((view) => ({ ...view, process: processByAction.get(view.id) ?? null }))
     .sort((a, b) => HORIZONS.indexOf(a.horizon) - HORIZONS.indexOf(b.horizon) || (b.score ?? 0) - (a.score ?? 0));
 
   const latest = planTasks
