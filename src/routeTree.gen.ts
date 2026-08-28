@@ -36,6 +36,7 @@ import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
 import { Route as ApiPublicAiJobsWorkerRouteImport } from './routes/api/public/ai-jobs-worker'
 import { Route as AuthenticatedAppMetricsIndexRouteImport } from './routes/_authenticated/app.metrics.index'
+import { Route as AuthenticatedAppMetricsMetricIdRouteImport } from './routes/_authenticated/app.metrics.$metricId'
 import { Route as AuthenticatedAppOperationsIndexRouteImport } from './routes/_authenticated/app.operations.index'
 import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './routes/_authenticated/app.operations.$processId'
 
@@ -186,6 +187,12 @@ const AuthenticatedAppMetricsIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAppMetricsRoute,
   } as any)
+const AuthenticatedAppMetricsMetricIdRoute =
+  AuthenticatedAppMetricsMetricIdRouteImport.update({
+    id: '/$metricId',
+    path: '/$metricId',
+    getParentRoute: () => AuthenticatedAppMetricsRoute,
+  } as any)
 const AuthenticatedAppOperationsIndexRoute =
   AuthenticatedAppOperationsIndexRouteImport.update({
     id: '/operations/',
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app/': typeof AuthenticatedAppIndexRoute
+  '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -253,6 +261,7 @@ export interface FileRoutesByTo {
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/app': typeof AuthenticatedAppIndexRoute
+  '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
@@ -285,6 +294,7 @@ export interface FileRoutesById {
   '/_authenticated/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
+  '/_authenticated/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -317,6 +327,7 @@ export interface FileRouteTypes {
     | '/business/select'
     | '/api/public/ai-jobs-worker'
     | '/app/'
+    | '/app/metrics/$metricId'
     | '/app/operations/$processId'
     | '/app/metrics/'
     | '/app/operations/'
@@ -345,6 +356,7 @@ export interface FileRouteTypes {
     | '/business/select'
     | '/api/public/ai-jobs-worker'
     | '/app'
+    | '/app/metrics/$metricId'
     | '/app/operations/$processId'
     | '/app/metrics'
     | '/app/operations'
@@ -376,6 +388,7 @@ export interface FileRouteTypes {
     | '/_authenticated/business/select'
     | '/api/public/ai-jobs-worker'
     | '/_authenticated/app/'
+    | '/_authenticated/app/metrics/$metricId'
     | '/_authenticated/app/operations/$processId'
     | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
@@ -580,6 +593,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppMetricsIndexRouteImport
       parentRoute: typeof AuthenticatedAppMetricsRoute
     }
+    '/_authenticated/app/metrics/$metricId': {
+      id: '/_authenticated/app/metrics/$metricId'
+      path: '/$metricId'
+      fullPath: '/app/metrics/$metricId'
+      preLoaderRoute: typeof AuthenticatedAppMetricsMetricIdRouteImport
+      parentRoute: typeof AuthenticatedAppMetricsRoute
+    }
     '/_authenticated/app/operations/': {
       id: '/_authenticated/app/operations/'
       path: '/operations'
@@ -598,11 +618,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppMetricsRouteChildren {
+  AuthenticatedAppMetricsMetricIdRoute: typeof AuthenticatedAppMetricsMetricIdRoute
   AuthenticatedAppMetricsIndexRoute: typeof AuthenticatedAppMetricsIndexRoute
 }
 
 const AuthenticatedAppMetricsRouteChildren: AuthenticatedAppMetricsRouteChildren =
   {
+    AuthenticatedAppMetricsMetricIdRoute: AuthenticatedAppMetricsMetricIdRoute,
     AuthenticatedAppMetricsIndexRoute: AuthenticatedAppMetricsIndexRoute,
   }
 
