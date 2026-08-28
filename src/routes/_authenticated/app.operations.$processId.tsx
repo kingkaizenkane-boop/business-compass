@@ -137,6 +137,13 @@ function ProcessDetailPage() {
     enabled: businessId !== null,
   });
 
+  const fetchProcessMetrics = useServerFn(getProcessMetrics);
+  const { data: processMetrics } = useQuery({
+    queryKey: ["process-metrics", businessId, processId],
+    queryFn: () => fetchProcessMetrics({ data: { businessId: businessId!, processId } }),
+    enabled: businessId !== null,
+  });
+
   const [steps, setSteps] = useState<DraftStep[]>([]);
   const [meta, setMeta] = useState({
     name: "",
