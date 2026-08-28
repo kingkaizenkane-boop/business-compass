@@ -13,6 +13,18 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { writeAudit } from "./audit.server";
 import type { Database } from "@/integrations/supabase/types";
+import type {
+  MetricAlert,
+  MetricConfidence,
+  MetricDirection,
+  MetricFrequency,
+  MetricLinks,
+  MetricObservation,
+  MetricSource,
+  MetricTrend,
+  MetricView,
+  MetricsPayload,
+} from "./metrics-types";
 
 type Client = SupabaseClient<Database>;
 

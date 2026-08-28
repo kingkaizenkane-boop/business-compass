@@ -1,4 +1,4 @@
-import type { MetricTrend } from "@/lib/metrics.server";
+import type { MetricTrend } from "@/lib/metrics-types";
 
 export function formatMetricValue(value: number | null | undefined, unit: string | null) {
   if (value == null) return "—";
