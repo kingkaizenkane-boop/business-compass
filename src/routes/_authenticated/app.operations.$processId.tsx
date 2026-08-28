@@ -16,6 +16,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { AutonomyBadge, PageHeader, SectionLabel } from "@/components/business-os/primitives";
+import { formatMetricValue } from "@/components/business-os/metric-format";
+import { getProcessMetrics } from "@/lib/metrics.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,6 +134,13 @@ function ProcessDetailPage() {
   const { data, isLoading, error } = useQuery({
     queryKey,
     queryFn: () => fetchProcess({ data: { businessId: businessId!, processId } }),
+    enabled: businessId !== null,
+  });
+
+  const fetchProcessMetrics = useServerFn(getProcessMetrics);
+  const { data: processMetrics } = useQuery({
+    queryKey: ["process-metrics", businessId, processId],
+    queryFn: () => fetchProcessMetrics({ data: { businessId: businessId!, processId } }),
     enabled: businessId !== null,
   });
 
@@ -490,6 +499,30 @@ function ProcessDetailPage() {
                 <dd className="numeric mt-1 text-foreground">{process.stats.failed}</dd>
               </div>
             </dl>
+
+            {processMetrics && processMetrics.length > 0 ? (
+              <ul className="mt-5 space-y-3 border-t border-border pt-4">
+                {processMetrics.map((metric) => (
+                  <li key={metric.id}>
+                    <Link
+                      to="/app/metrics/$metricId"
+                      params={{ metricId: metric.id }}
+                      className="block text-xs hover:text-primary"
+                    >
+                      <span className="text-foreground">{metric.name}</span>
+                      <span className="mt-1 block text-muted-foreground">
+                        {formatMetricValue(metric.currentValue, metric.unit)} · {metric.trendLabel}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 border-t border-border pt-4 text-xs leading-relaxed text-muted-foreground">
+                No business metric is attached to this process yet, so its business impact cannot be
+                measured — only its run reliability.
+              </p>
+            )}
           </div>
         </div>
       </section>

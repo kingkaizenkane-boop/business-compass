@@ -708,10 +708,13 @@ export type Database = {
       business_metrics: {
         Row: {
           business_id: string
+          created_by: string | null
           id: string
           metadata: Json
+          metric_id: string | null
           metric_key: string
           metric_name: string
+          notes: string | null
           period_end: string | null
           period_start: string | null
           recorded_at: string
@@ -721,10 +724,13 @@ export type Database = {
         }
         Insert: {
           business_id: string
+          created_by?: string | null
           id?: string
           metadata?: Json
+          metric_id?: string | null
           metric_key: string
           metric_name: string
+          notes?: string | null
           period_end?: string | null
           period_start?: string | null
           recorded_at?: string
@@ -734,10 +740,13 @@ export type Database = {
         }
         Update: {
           business_id?: string
+          created_by?: string | null
           id?: string
           metadata?: Json
+          metric_id?: string | null
           metric_key?: string
           metric_name?: string
+          notes?: string | null
           period_end?: string | null
           period_start?: string | null
           recorded_at?: string
@@ -751,6 +760,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_metrics_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "metric_definitions"
             referencedColumns: ["id"]
           },
         ]
@@ -1548,6 +1564,158 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      metric_definitions: {
+        Row: {
+          active: boolean
+          baseline_at: string | null
+          baseline_value: number | null
+          business_id: string
+          category: string | null
+          created_at: string
+          created_by: string | null
+          current_recorded_at: string | null
+          current_value: number | null
+          description: string | null
+          diagnosis_item_id: string | null
+          direction: Database["public"]["Enums"]["metric_direction"]
+          frequency: Database["public"]["Enums"]["metric_frequency"]
+          goal_id: string | null
+          hypothesis: string | null
+          id: string
+          intervention: string | null
+          metadata: Json
+          metric_key: string
+          name: string
+          organization_id: string | null
+          process_execution_id: string | null
+          process_id: string | null
+          rationale: string | null
+          source: Database["public"]["Enums"]["metric_source"]
+          target_max: number | null
+          target_min: number | null
+          target_value: number | null
+          task_id: string | null
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          baseline_at?: string | null
+          baseline_value?: number | null
+          business_id: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_recorded_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          diagnosis_item_id?: string | null
+          direction?: Database["public"]["Enums"]["metric_direction"]
+          frequency?: Database["public"]["Enums"]["metric_frequency"]
+          goal_id?: string | null
+          hypothesis?: string | null
+          id?: string
+          intervention?: string | null
+          metadata?: Json
+          metric_key: string
+          name: string
+          organization_id?: string | null
+          process_execution_id?: string | null
+          process_id?: string | null
+          rationale?: string | null
+          source?: Database["public"]["Enums"]["metric_source"]
+          target_max?: number | null
+          target_min?: number | null
+          target_value?: number | null
+          task_id?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          baseline_at?: string | null
+          baseline_value?: number | null
+          business_id?: string
+          category?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_recorded_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          diagnosis_item_id?: string | null
+          direction?: Database["public"]["Enums"]["metric_direction"]
+          frequency?: Database["public"]["Enums"]["metric_frequency"]
+          goal_id?: string | null
+          hypothesis?: string | null
+          id?: string
+          intervention?: string | null
+          metadata?: Json
+          metric_key?: string
+          name?: string
+          organization_id?: string | null
+          process_execution_id?: string | null
+          process_id?: string | null
+          rationale?: string | null
+          source?: Database["public"]["Enums"]["metric_source"]
+          target_max?: number | null
+          target_min?: number | null
+          target_value?: number | null
+          task_id?: string | null
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metric_definitions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_diagnosis_item_id_fkey"
+            columns: ["diagnosis_item_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "business_goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_process_execution_id_fkey"
+            columns: ["process_execution_id"]
+            isOneToOne: false
+            referencedRelation: "process_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "metric_definitions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
@@ -2532,6 +2700,15 @@ export type Database = {
         | "won"
         | "lost"
         | "archived"
+      metric_direction: "higher_is_better" | "lower_is_better" | "target_range"
+      metric_frequency: "daily" | "weekly" | "monthly" | "quarterly" | "custom"
+      metric_source:
+        | "manual"
+        | "process"
+        | "integration"
+        | "import"
+        | "system"
+        | "ai"
       opportunity_status:
         | "identified"
         | "validated"
@@ -2803,6 +2980,16 @@ export const Constants = {
         "won",
         "lost",
         "archived",
+      ],
+      metric_direction: ["higher_is_better", "lower_is_better", "target_range"],
+      metric_frequency: ["daily", "weekly", "monthly", "quarterly", "custom"],
+      metric_source: [
+        "manual",
+        "process",
+        "integration",
+        "import",
+        "system",
+        "ai",
       ],
       opportunity_status: [
         "identified",

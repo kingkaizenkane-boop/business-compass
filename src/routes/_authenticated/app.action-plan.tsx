@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, ClipboardList, RefreshCw, Sparkles, Workflow } from "lucide-react";
+import { CheckCircle2, ClipboardList, Gauge, RefreshCw, Sparkles, Workflow } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -14,6 +14,7 @@ import {
 } from "@/components/business-os/primitives";
 import { JobStatusStrip } from "@/components/business-os/job-status";
 import { Badge } from "@/components/ui/badge";
+import { getMetrics } from "@/lib/metrics.functions";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -103,6 +104,18 @@ function ActionPlanPage() {
   const convert = useServerFn(createProcess);
   const navigate = useNavigate();
   const [openAction, setOpenAction] = useState<ActionRow | null>(null);
+
+  const fetchMetrics = useServerFn(getMetrics);
+  const metricsQuery = useQuery({
+    queryKey: ["metrics", businessId],
+    queryFn: () => fetchMetrics({ data: { businessId: businessId! } }),
+    enabled: businessId !== null,
+  });
+  const metricByTask = new Map(
+    (metricsQuery.data?.metrics ?? [])
+      .filter((metric) => metric.links.task)
+      .map((metric) => [metric.links.task!.id, metric] as const),
+  );
 
   const query = useQuery({
     queryKey: ["action-plan", businessId],
@@ -368,6 +381,17 @@ function ActionPlanPage() {
                               ) : (
                                 <span className="text-xs text-positive">Completed</span>
                               )}
+                              {metricByTask.get(action.id) ? (
+                                <Link
+                                  to="/app/metrics/$metricId"
+                                  params={{ metricId: metricByTask.get(action.id)!.id }}
+                                  className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+                                >
+                                  <Gauge className="size-3.5" aria-hidden />
+                                  {metricByTask.get(action.id)!.name}:{" "}
+                                  {metricByTask.get(action.id)!.trendLabel}
+                                </Link>
+                              ) : null}
                               {action.process ? (
                                 <Link
                                   to="/app/operations/$processId"
