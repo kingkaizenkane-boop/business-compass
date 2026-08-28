@@ -71,6 +71,7 @@ type ActionRow = {
   owner: string;
   successMetric: string;
   dueAt: string | null;
+  process: { id: string; name: string; status: string; version: number } | null;
   diagnosisTitles: string[];
   facts: {
     factId: string;
