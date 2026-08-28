@@ -8,9 +8,9 @@
 
 ## 1. Executive summary
 
-The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and has been verified end to end against real interview data. What is missing is the *infrastructure beneath it* (async job execution, embeddings, evidence linkage) and the *operational surface above it* (metrics, processes, experiments, SEO execution).
+The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and verified end to end against real interview data. The P0 AI infrastructure (async job queue, embeddings, evidence linkage, fact versioning, cost controls, auth hardening) and the P1 Operations / Process Engine (process library, step builder, execution engine, approvals, action-plan conversion) are also implemented and published.
 
-The single largest production risk is that all four AI engines run synchronously inside the request path with 8k–16k token budgets. The single largest trust risk is that evidence linkage is claimed in the UI but not yet fully persisted.
+What remains is the *measurement and growth surface* (metrics ingestion, experiments, programmatic SEO, evidence uploads) and real outbound connectors for process steps.
 
 | Area | Status |
 | --- | --- |
