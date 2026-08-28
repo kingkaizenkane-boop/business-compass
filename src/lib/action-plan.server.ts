@@ -90,6 +90,8 @@ export type ActionView = {
   planVersion: number | null;
   diagnosisTitles: string[];
   facts: ActionFactRef[];
+  /** Process created from this action, when one exists. */
+  process: { id: string; name: string; status: string; version: number } | null;
 };
 
 export type ActionPlanPayload = {
@@ -181,6 +183,7 @@ function toView(row: Database["public"]["Tables"]["tasks"]["Row"]): ActionView {
     planVersion: num(meta["plan_version"]),
     diagnosisTitles: strList(meta["diagnosis_titles"]),
     facts: Array.isArray(meta["facts"]) ? (meta["facts"] as ActionFactRef[]) : [],
+    process: null,
   };
 }
 
