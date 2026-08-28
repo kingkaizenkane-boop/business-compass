@@ -1,6 +1,6 @@
 # Business OS — Implementation Audit
 
-**Date:** 24 August 2026
+**Date:** 28 August 2026
 **Scope:** Repository-wide audit of Business OS (React 19 · TanStack Start · Tailwind v4 · Lovable Cloud / Postgres + pgvector · Lovable AI Gateway)
 **Method:** Inspection of server modules, server functions, route components, and live row counts across the 34-table schema.
 
@@ -8,25 +8,25 @@
 
 ## 1. Executive summary
 
-The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and has been verified end to end against real interview data. What is missing is the *infrastructure beneath it* (async job execution, embeddings, evidence linkage) and the *operational surface above it* (metrics, processes, experiments, SEO execution).
+The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and verified end to end against real interview data. The P0 AI infrastructure (async job queue, embeddings, evidence linkage, fact versioning, cost controls, auth hardening) and the P1 Operations / Process Engine (process library, step builder, execution engine, approvals, action-plan conversion) are also implemented and published.
 
-The single largest production risk is that all four AI engines run synchronously inside the request path with 8k–16k token budgets. The single largest trust risk is that evidence linkage is claimed in the UI but not yet fully persisted.
+What remains is the *measurement and growth surface* (metrics ingestion, experiments, programmatic SEO, evidence uploads) and real outbound connectors for process steps.
 
 | Area | Status |
 | --- | --- |
 | Business Brain | Implemented |
 | Diagnosis Engine | Implemented |
 | Blueprint Engine | Implemented |
-| Action Plan Engine | Implemented |
-| Evidence & versioning | Partial |
-| Authentication & security | Partial |
-| Audit logging | Partial |
-| AI job queue | Missing → **Implemented** (§6.1) |
-| AI memory & embeddings | Missing → **Implemented** (§6.4) |
-| Processes / workflow execution | Missing → **Implemented** (§7) |
-| Metrics ingestion | Missing |
-| Experiments | Missing |
-| Programmatic SEO | Missing |
+| Action Plan Engine | Implemented (process linkage in §8.1) |
+| Evidence & versioning | Partial (storage upload still P2) |
+| Authentication & security | Implemented (§6.7 / P0.1) |
+| Audit logging | Implemented (§6.10 / P0.1) |
+| AI job queue | Implemented (§6.1) |
+| AI memory & embeddings | Implemented (§6.4) |
+| Processes / workflow execution | Implemented (§7 / §8) |
+| Metrics ingestion | Missing (P2) |
+| Experiments | Missing (P2) |
+| Programmatic SEO | Missing (P2) |
 
 ---
 
@@ -57,26 +57,25 @@ The single largest production risk is that all four AI engines run synchronously
 - **Files:** `src/lib/action-plan.server.ts`, `src/lib/action-plan.functions.ts`, `src/routes/_authenticated/app.action-plan.tsx`
 - **Tables:** `tasks`
 - Three horizons (Now / Next / Later), deterministic sequencing and priority assignment, due dates, Approve → Start → Done workflow, stale-version retirement that preserves in-progress and completed work.
-- **Gap:** generated processes are not written to the `processes` table, so the Operations page stays empty.
+- **Gap closed in P1.1:** actions can be converted into evidence-linked draft processes; the Action Plan surfaces the linked process status and version. See §8.1.
 
 ### 2.5 Evidence & versioning — Partial
 
-- **Tables:** `evidence` (populated), `brain_fact_evidence` (**0 rows**), `brain_facts.version`
-- Evidence rows are created during extraction, but the join table linking facts to evidence is not written. `brain_facts.version` does not increment when an owner re-answers a question, so there is no supersession history in practice.
-- **Production risk:** the UI presents findings as traceable to evidence; that claim is currently only partially backed by the database. This is the highest-trust-cost gap in the system.
-- **Missing entirely:** owner-facing evidence upload (documents, screenshots, financials) into a storage bucket.
+- **Tables:** `evidence`, `brain_fact_evidence`, `brain_facts.version`
+- **Gap closed in P0:** extraction writes `evidence` rows and links every resulting fact through `brain_fact_evidence`; changed answers create new `brain_facts` versions with a supersession chain. See §6.2 and §6.3.
+- **Remaining gap:** owner-facing evidence upload (documents, screenshots, financials) into a storage bucket is still P2.
 
-### 2.6 Authentication & security — Partial
+### 2.6 Authentication & security — Implemented
 
 - **Files:** `src/routes/auth.tsx`, `src/routes/_authenticated/route.tsx`, `src/integrations/supabase/auth-middleware.ts`, `src/start.ts`
-- Email/password auth works; every server function is behind `requireSupabaseAuth`; RLS is enabled on all 34 tables with org/business membership helpers; CSRF middleware is installed; no privileged key reaches the client bundle.
-- **Missing:** Google sign-in, password reset, email confirmation flow, session-expiry UX, per-org AI spend ceilings, and a two-tenant RLS verification test.
+- Email/password auth, Google OAuth, password reset, and email confirmation are in place. Every server function is behind `requireSupabaseAuth`; RLS is enabled on all 34 tables with org/business membership helpers; CSRF middleware is installed; no privileged key reaches the client bundle.
+- Per-org AI spend ceilings and two-tenant RLS isolation were verified in P0.1. See §6.6 and §6.7.
 
-### 2.7 Audit logging — Partial
+### 2.7 Audit logging — Implemented
 
 - **Table / RPC:** `audit_logs`, `write_audit_log()`
-- Wired for diagnosis, blueprint and action-plan runs.
-- **Missing:** business creation, interview submissions, fact verification, and any surfacing of the log in the UI for org admins.
+- Wired for organization creation, business creation, interview responses, fact verification/unverification, AI job enqueue/completion/failure, AI limit changes, and the full process lifecycle. See §6.10 and §7.6.
+- **Remaining gap:** an admin-facing audit log view in the UI is not yet built (P2).
 
 ### 2.8 AI job queue — Missing
 
@@ -109,42 +108,39 @@ The single largest production risk is that all four AI engines run synchronously
 
 ## 3. Production risks, ranked
 
-1. **Synchronous AI in the request path.** Timeouts on diagnosis/blueprint under real load; no retry or partial recovery.
-2. **Unbacked traceability claim.** `brain_fact_evidence` empty while the UI promises evidence-linked reasoning.
-3. **No cost ceiling.** Unbounded AI spend per organization; no model routing enforcement.
-4. **No embeddings.** Long-term recall dead; each session reasons from scratch.
-5. **Auth surface incomplete.** No password reset or email confirmation; account recovery is impossible today.
-6. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
-7. **Silent audit gaps** on the mutations that matter most for multi-seat and agency use.
-8. **Fact versioning inert.** Corrections overwrite rather than supersede, so conflict history is lost.
+1. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
+2. **No metrics ingestion.** Outcomes are asserted, not measured, so the learning loop back into the Brain is not closed.
+3. **No real outbound connectors.** Email, CRM, and messaging steps are typed and gated but not yet executable.
+4. **No scheduled / event triggers.** Processes must be started manually or from the queue today.
+5. **No programmatic SEO execution.** Templates exist but no opportunity scoring, generation, or publish path.
+6. **No evidence upload.** Owners cannot attach documents, screenshots, or financials to Brain facts.
+7. **P0/P1 risks resolved:** synchronous AI, unbacked traceability, cost ceilings, embeddings, auth surface, audit gaps, and fact versioning are all implemented.
 
 ---
 
 ## 4. Prioritized roadmap
 
-### P0 — Stability and traceability
-1. **AI job queue worker.** Enqueue diagnosis, blueprint, action-plan and extraction runs; drain via a public cron route; report status in the UI. Removes the timeout class of failure entirely.
-2. **Evidence linkage.** Write `brain_fact_evidence` on every extraction; increment `brain_facts.version` with a supersession chain on re-answer.
-3. **Google sign-in** plus password reset and email confirmation.
-
-### P1 — Operationalization
-4. **Embeddings and AI memory.** Generate and persist embeddings; use `match_business_memory()` for per-business recall in every engine prompt.
-5. **Processes engine.** Write action-plan-derived processes into `processes` and make the Operations page live.
-6. **Metrics ingestion.** Manual entry first, so the plan can be measured against outcomes.
-7. **Audit completeness** plus an admin-facing audit view.
-8. **Cost controls.** Per-org token ceilings and explicit model routing (cheap extraction, expensive reasoning only at diagnosis/blueprint).
+### Completed milestones
+- **P0 — Stability and traceability:** AI job queue, evidence linkage, fact versioning, Google sign-in, password reset, email confirmation. See §6.
+- **P0.1 — Production hardening:** scheduled worker, RLS verification, AI memory isolation, cost ceilings, idempotency, failure recovery, audit completeness. See §6.5–6.10.
+- **P1 — Operations / Process Engine:** process data model, evidence-bound generation, versioning, execution engine, approvals, Operations UI. See §7.
+- **P1.1 — Process Engine Foundation:** Action Plan ↔ Process conversion, library search/filter, manual creation, activation quality gate, autonomy safety. See §8.
 
 ### P2 — Scale and expansion
-9. CRUD for offers, leads and customers.
-10. Programmatic SEO execution: opportunity scoring → generation → quality gate → publish.
-11. Experiments module with hypothesis tracking and outcome learning.
-12. Evidence upload with storage bucket, plus Brain/blueprint/plan data export.
+1. **Metrics ingestion.** Manual entry first, so the plan can be measured against outcomes and fed back into the Brain.
+2. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
+3. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
+4. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
+5. **Experiments module.** Hypothesis tracking, outcome capture, and learning loop back into the Brain.
+6. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
+7. **CRM surface.** CRUD for offers, leads, and customers.
+8. **Admin audit view.** Read-only audit log for organization admins.
 
 ---
 
 ## 5. Recommended next action
 
-Start with the **AI job queue worker**. It resolves the top-ranked production risk, unblocks embeddings and any future long-running generation, and is a prerequisite for honest progress reporting in the UI.
+Start with **metrics ingestion**. It closes the learning loop by measuring action-plan and process outcomes against baselines, which is the last missing piece before the Brain can revise itself from real data rather than assertions.
 
 ---
 
@@ -338,11 +334,85 @@ with typed steps, an owner, an autonomy ceiling and an execution history.
 - Process-level metrics (`metric_values`) are captured per execution but not yet aggregated
   into the Metrics page.
 
-### 7.8 Status after P1
+---
+
+## 8. P1.1 — Process Engine Foundation milestone — delivered 28 August 2026
+
+P1.1 hardens the hand-off from the 90-day Action Plan into repeatable, evidence-bound
+processes. It keeps the existing strategic core untouched and focuses on activation quality,
+library discoverability, and safe autonomy defaults.
+
+### 8.1 Action Plan ↔ Process connection — Implemented
+
+- **Files:** `src/lib/action-plan.server.ts`, `src/lib/process.server.ts`,
+  `src/routes/_authenticated/app.action-plan.tsx`
+- Every action card in the Action Plan now shows a linked process once one exists, and a
+  **Convert to process** button when none exists.
+- Conversion calls `createProcessDraft({ fromTaskId })`, which creates a draft process
+  referencing the action via `processes.created_from_action_id` without duplicating the task.
+- Re-converting the same action returns the existing non-archived process, so accidental
+  double-clicks never spawn duplicates.
+- The Action Plan view loads the newest non-archived process per source action and surfaces
+  its name, status, and version.
+
+### 8.2 Process Library updates — Implemented
+
+- **File:** `src/routes/_authenticated/app.operations.index.tsx`
+- Search by name, purpose, category, or description.
+- Status filter tabs: All / Active / Draft / Paused / Archived.
+- Manual **Create process** button that inserts an empty draft for the active business.
+- Statistics refreshed from `processes`, `process_steps`, `process_executions` and
+  `process_approvals`.
+
+### 8.3 Activation Quality Gate — Implemented
+
+- **File:** `src/lib/process.server.ts` (`setProcessStatus`)
+- A process cannot be activated until it passes a strict validation gate:
+  - name ≥ 3 characters,
+  - purpose ≥ 10 characters,
+  - trigger description present,
+  - success definition ≥ 5 characters,
+  - at least one step,
+  - autonomy level between 0 and 4.
+- The user receives a single human-readable sentence listing everything still missing.
+- Activating a newer version automatically archives the version it supersedes.
+
+### 8.4 Evidence-bound generation — Implemented
+
+- Process generation (`process_generation` job type) builds prompts from Brain facts, latest
+  diagnosis findings, blueprint sections, and the originating action.
+- Generated drafts carry provenance columns (`created_from_action_id`,
+  `created_from_diagnosis_id`, `created_from_blueprint_version`) so the Operations detail page
+  can render the exact evidence behind each process.
+- Deterministic validation rejects malformed AI output before persistence.
+
+### 8.5 Autonomy Safety — Implemented
+
+- Conservative default autonomy (`DEFAULT_PROCESS_AUTONOMY = 1`, Recommend).
+- External-effect step types (email, messaging, integration, payment) are typed but gated:
+  no outbound side effect is executed automatically in this milestone; they require approval
+  regardless of the autonomy ceiling.
+- The builder lets owners raise autonomy up to level 4 only after the definition is complete;
+  the engine still pauses for approval on any step whose requirement exceeds the execution
+  context's ceiling.
+
+### 8.6 Reliability — Implemented
+
+- **Files:** `src/lib/process.server.ts`, `src/routes/_authenticated/app.operations.$processId.tsx`
+- Versioned saving: active definitions are never overwritten; edits spawn a new version.
+- Simple step builder: add, edit, reorder, delete steps with type, owner, autonomy, inputs,
+  outputs, and conditions.
+- Generation runs asynchronously through the existing `ai_jobs` queue, inheriting retries,
+  heartbeats, budget ceilings, and job-status polling.
+- Audit logging covers `process.created` for both manual and AI-generated processes.
+
+### 8.7 Remaining after P1.1
 
 | Area | Status |
 | --- | --- |
 | Processes / workflow execution | Implemented |
+| Real outbound connectors (email, CRM, etc.) | Missing (P2) |
+| Scheduled / event triggers | Missing (P2) |
 | Metrics ingestion | Missing (P2) |
 | Experiments | Missing (P2) |
 | Programmatic SEO | Missing (P2) |
