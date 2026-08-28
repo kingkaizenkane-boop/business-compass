@@ -26,7 +26,6 @@ import { Route as AuthenticatedAppExperimentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAppHelpRouteImport } from './routes/_authenticated/app.help'
 import { Route as AuthenticatedAppInterviewRouteImport } from './routes/_authenticated/app.interview'
 import { Route as AuthenticatedAppLeadsRouteImport } from './routes/_authenticated/app.leads'
-import { Route as AuthenticatedAppMetricsRouteImport } from './routes/_authenticated/app.metrics'
 import { Route as AuthenticatedAppNotificationsRouteImport } from './routes/_authenticated/app.notifications'
 import { Route as AuthenticatedAppOffersRouteImport } from './routes/_authenticated/app.offers'
 import { Route as AuthenticatedAppSeoRouteImport } from './routes/_authenticated/app.seo'
@@ -131,11 +130,6 @@ const AuthenticatedAppLeadsRoute = AuthenticatedAppLeadsRouteImport.update({
   path: '/leads',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
-const AuthenticatedAppMetricsRoute = AuthenticatedAppMetricsRouteImport.update({
-  id: '/metrics',
-  path: '/metrics',
-  getParentRoute: () => AuthenticatedAppRoute,
-} as any)
 const AuthenticatedAppNotificationsRoute =
   AuthenticatedAppNotificationsRouteImport.update({
     id: '/notifications',
@@ -183,15 +177,15 @@ const ApiPublicAiJobsWorkerRoute = ApiPublicAiJobsWorkerRouteImport.update({
 } as any)
 const AuthenticatedAppMetricsIndexRoute =
   AuthenticatedAppMetricsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AuthenticatedAppMetricsRoute,
+    id: '/metrics/',
+    path: '/metrics/',
+    getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppMetricsMetricIdRoute =
   AuthenticatedAppMetricsMetricIdRouteImport.update({
-    id: '/$metricId',
-    path: '/$metricId',
-    getParentRoute: () => AuthenticatedAppMetricsRoute,
+    id: '/metrics/$metricId',
+    path: '/metrics/$metricId',
+    getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppOperationsIndexRoute =
   AuthenticatedAppOperationsIndexRouteImport.update({
@@ -222,7 +216,6 @@ export interface FileRoutesByFullPath {
   '/app/help': typeof AuthenticatedAppHelpRoute
   '/app/interview': typeof AuthenticatedAppInterviewRoute
   '/app/leads': typeof AuthenticatedAppLeadsRoute
-  '/app/metrics': typeof AuthenticatedAppMetricsRouteWithChildren
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/offers': typeof AuthenticatedAppOffersRoute
   '/app/seo': typeof AuthenticatedAppSeoRoute
@@ -284,7 +277,6 @@ export interface FileRoutesById {
   '/_authenticated/app/help': typeof AuthenticatedAppHelpRoute
   '/_authenticated/app/interview': typeof AuthenticatedAppInterviewRoute
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRoute
-  '/_authenticated/app/metrics': typeof AuthenticatedAppMetricsRouteWithChildren
   '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/app/offers': typeof AuthenticatedAppOffersRoute
   '/_authenticated/app/seo': typeof AuthenticatedAppSeoRoute
@@ -317,7 +309,6 @@ export interface FileRouteTypes {
     | '/app/help'
     | '/app/interview'
     | '/app/leads'
-    | '/app/metrics'
     | '/app/notifications'
     | '/app/offers'
     | '/app/seo'
@@ -378,7 +369,6 @@ export interface FileRouteTypes {
     | '/_authenticated/app/help'
     | '/_authenticated/app/interview'
     | '/_authenticated/app/leads'
-    | '/_authenticated/app/metrics'
     | '/_authenticated/app/notifications'
     | '/_authenticated/app/offers'
     | '/_authenticated/app/seo'
@@ -523,13 +513,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppLeadsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
-    '/_authenticated/app/metrics': {
-      id: '/_authenticated/app/metrics'
-      path: '/metrics'
-      fullPath: '/app/metrics'
-      preLoaderRoute: typeof AuthenticatedAppMetricsRouteImport
-      parentRoute: typeof AuthenticatedAppRoute
-    }
     '/_authenticated/app/notifications': {
       id: '/_authenticated/app/notifications'
       path: '/notifications'
@@ -588,17 +571,17 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/app/metrics/': {
       id: '/_authenticated/app/metrics/'
-      path: '/'
+      path: '/metrics'
       fullPath: '/app/metrics/'
       preLoaderRoute: typeof AuthenticatedAppMetricsIndexRouteImport
-      parentRoute: typeof AuthenticatedAppMetricsRoute
+      parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/metrics/$metricId': {
       id: '/_authenticated/app/metrics/$metricId'
-      path: '/$metricId'
+      path: '/metrics/$metricId'
       fullPath: '/app/metrics/$metricId'
       preLoaderRoute: typeof AuthenticatedAppMetricsMetricIdRouteImport
-      parentRoute: typeof AuthenticatedAppMetricsRoute
+      parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/operations/': {
       id: '/_authenticated/app/operations/'
@@ -617,22 +600,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedAppMetricsRouteChildren {
-  AuthenticatedAppMetricsMetricIdRoute: typeof AuthenticatedAppMetricsMetricIdRoute
-  AuthenticatedAppMetricsIndexRoute: typeof AuthenticatedAppMetricsIndexRoute
-}
-
-const AuthenticatedAppMetricsRouteChildren: AuthenticatedAppMetricsRouteChildren =
-  {
-    AuthenticatedAppMetricsMetricIdRoute: AuthenticatedAppMetricsMetricIdRoute,
-    AuthenticatedAppMetricsIndexRoute: AuthenticatedAppMetricsIndexRoute,
-  }
-
-const AuthenticatedAppMetricsRouteWithChildren =
-  AuthenticatedAppMetricsRoute._addFileChildren(
-    AuthenticatedAppMetricsRouteChildren,
-  )
-
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppActionPlanRoute: typeof AuthenticatedAppActionPlanRoute
   AuthenticatedAppAiUsageRoute: typeof AuthenticatedAppAiUsageRoute
@@ -645,14 +612,15 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppHelpRoute: typeof AuthenticatedAppHelpRoute
   AuthenticatedAppInterviewRoute: typeof AuthenticatedAppInterviewRoute
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
-  AuthenticatedAppMetricsRoute: typeof AuthenticatedAppMetricsRouteWithChildren
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOffersRoute: typeof AuthenticatedAppOffersRoute
   AuthenticatedAppSeoRoute: typeof AuthenticatedAppSeoRoute
   AuthenticatedAppServicesRoute: typeof AuthenticatedAppServicesRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
+  AuthenticatedAppMetricsMetricIdRoute: typeof AuthenticatedAppMetricsMetricIdRoute
   AuthenticatedAppOperationsProcessIdRoute: typeof AuthenticatedAppOperationsProcessIdRoute
+  AuthenticatedAppMetricsIndexRoute: typeof AuthenticatedAppMetricsIndexRoute
   AuthenticatedAppOperationsIndexRoute: typeof AuthenticatedAppOperationsIndexRoute
 }
 
@@ -668,15 +636,16 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppHelpRoute: AuthenticatedAppHelpRoute,
   AuthenticatedAppInterviewRoute: AuthenticatedAppInterviewRoute,
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
-  AuthenticatedAppMetricsRoute: AuthenticatedAppMetricsRouteWithChildren,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOffersRoute: AuthenticatedAppOffersRoute,
   AuthenticatedAppSeoRoute: AuthenticatedAppSeoRoute,
   AuthenticatedAppServicesRoute: AuthenticatedAppServicesRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
+  AuthenticatedAppMetricsMetricIdRoute: AuthenticatedAppMetricsMetricIdRoute,
   AuthenticatedAppOperationsProcessIdRoute:
     AuthenticatedAppOperationsProcessIdRoute,
+  AuthenticatedAppMetricsIndexRoute: AuthenticatedAppMetricsIndexRoute,
   AuthenticatedAppOperationsIndexRoute: AuthenticatedAppOperationsIndexRoute,
 }
 
