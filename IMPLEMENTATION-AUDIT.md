@@ -122,7 +122,7 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 
 ### Completed milestones
 - **P0 — Stability and traceability:** AI job queue, evidence linkage, fact versioning, Google sign-in, password reset, email confirmation. See §6.
-- **P0.1 — Production hardening:** scheduled worker, RLS verification, AI memory isolation, cost ceilings, idempotency, failure recovery, audit completeness. See §P0.1.
+- **P0.1 — Production hardening:** scheduled worker, RLS verification, AI memory isolation, cost ceilings, idempotency, failure recovery, audit completeness. See §6.5–6.10.
 - **P1 — Operations / Process Engine:** process data model, evidence-bound generation, versioning, execution engine, approvals, Operations UI. See §7.
 - **P1.1 — Process Engine Foundation:** Action Plan ↔ Process conversion, library search/filter, manual creation, activation quality gate, autonomy safety. See §8.
 
