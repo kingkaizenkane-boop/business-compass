@@ -90,6 +90,8 @@ export type ActionView = {
   planVersion: number | null;
   diagnosisTitles: string[];
   facts: ActionFactRef[];
+  /** Process created from this action, when one exists. */
+  process: { id: string; name: string; status: string; version: number } | null;
 };
 
 export type ActionPlanPayload = {
@@ -181,6 +183,7 @@ function toView(row: Database["public"]["Tables"]["tasks"]["Row"]): ActionView {
     planVersion: num(meta["plan_version"]),
     diagnosisTitles: strList(meta["diagnosis_titles"]),
     facts: Array.isArray(meta["facts"]) ? (meta["facts"] as ActionFactRef[]) : [],
+    process: null,
   };
 }
 
@@ -438,22 +441,44 @@ export async function loadActionPlan(
   businessId: string,
   readiness: BrainReadiness,
 ): Promise<ActionPlanPayload> {
-  const [{ data: taskRows, error }, { data: runRow }, { data: blueprintRow }] = await Promise.all([
-    supabase
-      .from("tasks")
-      .select("*")
-      .eq("business_id", businessId)
-      .neq("status", "cancelled")
-      .order("due_at", { ascending: true, nullsFirst: false }),
-    supabase.from("diagnosis_runs").select("id").eq("business_id", businessId).limit(1).maybeSingle(),
-    supabase
-      .from("business_blueprints")
-      .select("id")
-      .eq("business_id", businessId)
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const [{ data: taskRows, error }, { data: runRow }, { data: blueprintRow }, { data: processRows }] =
+    await Promise.all([
+      supabase
+        .from("tasks")
+        .select("*")
+        .eq("business_id", businessId)
+        .neq("status", "cancelled")
+        .order("due_at", { ascending: true, nullsFirst: false }),
+      supabase.from("diagnosis_runs").select("id").eq("business_id", businessId).limit(1).maybeSingle(),
+      supabase
+        .from("business_blueprints")
+        .select("id")
+        .eq("business_id", businessId)
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from("processes")
+        .select("id, name, status, version, created_from_action_id")
+        .eq("business_id", businessId)
+        .not("created_from_action_id", "is", null)
+        .order("version", { ascending: false }),
+    ]);
   if (error) throw error;
+
+  /* Newest live version per source action; archived versions never win. */
+  const processByAction = new Map<string, { id: string; name: string; status: string; version: number }>();
+  for (const row of processRows ?? []) {
+    const key = row.created_from_action_id;
+    if (!key) continue;
+    const existing = processByAction.get(key);
+    if (existing && (existing.status !== "archived" || row.status === "archived")) continue;
+    processByAction.set(key, {
+      id: row.id,
+      name: row.name,
+      status: row.status,
+      version: row.version,
+    });
+  }
 
   const planTasks = (taskRows ?? []).filter(
     (row) => ((row.metadata ?? {}) as Record<string, unknown>)["source"] === "action_plan",
@@ -461,6 +486,7 @@ export async function loadActionPlan(
 
   const actions = planTasks
     .map(toView)
+    .map((view) => ({ ...view, process: processByAction.get(view.id) ?? null }))
     .sort((a, b) => HORIZONS.indexOf(a.horizon) - HORIZONS.indexOf(b.horizon) || (b.score ?? 0) - (a.score ?? 0));
 
   const latest = planTasks

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, ClipboardList, RefreshCw, Sparkles } from "lucide-react";
+import { CheckCircle2, ClipboardList, RefreshCw, Sparkles, Workflow } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -26,6 +26,7 @@ import {
 import { useWorkspace } from "@/hooks/use-workspace";
 import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getActionPlan, runActionPlan, updateActionState } from "@/lib/action-plan.functions";
+import { createProcess } from "@/lib/process.functions";
 
 export const Route = createFileRoute("/_authenticated/app/action-plan")({
   head: () => ({
@@ -70,6 +71,7 @@ type ActionRow = {
   owner: string;
   successMetric: string;
   dueAt: string | null;
+  process: { id: string; name: string; status: string; version: number } | null;
   diagnosisTitles: string[];
   facts: {
     factId: string;
@@ -98,6 +100,8 @@ function ActionPlanPage() {
   const setState = useServerFn(updateActionState);
   const queryClient = useQueryClient();
   const enqueue = useServerFn(enqueueEngineRun);
+  const convert = useServerFn(createProcess);
+  const navigate = useNavigate();
   const [openAction, setOpenAction] = useState<ActionRow | null>(null);
 
   const query = useQuery({
@@ -132,6 +136,17 @@ function ActionPlanPage() {
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "That action could not be updated."),
+  });
+
+  const convertMutation = useMutation({
+    mutationFn: (taskId: string) => convert({ data: { businessId: businessId!, fromTaskId: taskId } }),
+    onSuccess: (result) => {
+      void queryClient.invalidateQueries({ queryKey: ["action-plan", businessId] });
+      toast.success("Draft process created from this action.");
+      void navigate({ to: "/app/operations/$processId", params: { processId: result.processId } });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "The process could not be created."),
   });
 
   if (loading || (businessId && query.isLoading)) {
@@ -352,6 +367,26 @@ function ActionPlanPage() {
                                 </Button>
                               ) : (
                                 <span className="text-xs text-positive">Completed</span>
+                              )}
+                              {action.process ? (
+                                <Link
+                                  to="/app/operations/$processId"
+                                  params={{ processId: action.process.id }}
+                                  className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+                                >
+                                  <Workflow className="size-3.5" aria-hidden />
+                                  Process created: {action.process.name} (v{action.process.version})
+                                </Link>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  disabled={convertMutation.isPending}
+                                  onClick={() => convertMutation.mutate(action.id)}
+                                >
+                                  <Workflow className="size-4" aria-hidden />
+                                  Convert to process
+                                </Button>
                               )}
                             </div>
                           </li>

@@ -451,15 +451,19 @@ export async function loadProcess(
 
 /* ------------------------------------------------------------------ AI schema */
 
+/** Models regularly emit null for "no value" text fields; treat it as empty. */
+const aiText = (max: number) =>
+  z.preprocess((v) => (v == null ? "" : v), z.string().max(max).catch("")).default("");
+
 const aiStepSchema = z.object({
   name: z.string().min(2).max(160),
-  description: z.string().max(800).default(""),
+  description: aiText(800),
   step_type: z.enum(STEP_TYPES),
   owner_type: z.enum(OWNER_TYPES).default("human"),
   autonomy_level: z.number().int().min(0).max(4).default(1),
-  input: z.string().max(400).default(""),
-  output: z.string().max(400).default(""),
-  condition: z.string().max(400).default(""),
+  input: aiText(400),
+  output: aiText(400),
+  condition: aiText(400),
   estimated_minutes: z.number().int().min(0).max(10080).nullable().default(null),
   required: z.boolean().default(true),
 });
@@ -467,10 +471,10 @@ const aiStepSchema = z.object({
 const aiProcessSchema = z.object({
   name: z.string().min(3).max(160),
   purpose: z.string().min(10).max(1000),
-  description: z.string().max(1500).default(""),
-  category: z.string().max(80).default("operations"),
+  description: aiText(1500),
+  category: z.preprocess((v) => (v == null || v === "" ? "operations" : v), z.string().max(80)).default("operations"),
   trigger_type: z.enum(TRIGGER_TYPES),
-  trigger_description: z.string().max(500).default(""),
+  trigger_description: aiText(500),
   owner_type: z.enum(OWNER_TYPES).default("human"),
   recommended_autonomy: z.number().int().min(0).max(4).default(1),
   success_definition: z.string().min(5).max(600),
@@ -479,11 +483,11 @@ const aiProcessSchema = z.object({
   diagnosis_titles: z.array(z.string().max(300)).default([]),
   blueprint_sections: z.array(z.string().max(120)).default([]),
   evidence_fact_ids: z.array(z.string()).default([]),
-  steps: z.array(aiStepSchema).min(3).max(14),
+  steps: z.array(aiStepSchema).min(3).max(40),
 });
 
 const aiSchema = z.object({
-  summary: z.string().max(2000).default(""),
+  summary: aiText(2000),
   processes: z.array(aiProcessSchema).max(6).default([]),
 });
 
@@ -559,6 +563,11 @@ function validateProcesses(
     if (candidate.success_definition.trim().length < 5) {
       fail("No success definition was provided.");
       continue;
+    }
+    // Long definitions are trimmed rather than rejected; the owner can extend later.
+    if (candidate.steps.length > 14) {
+      const tail = candidate.steps.filter((s) => s.step_type === "end").slice(-1);
+      candidate.steps = [...candidate.steps.slice(0, tail.length > 0 ? 13 : 14), ...tail];
     }
     if (candidate.steps.length < 3) {
       fail("A process needs at least three ordered steps.");
@@ -1093,16 +1102,30 @@ export async function setProcessStatus(options: {
     options.status === "active" ? "active" : options.status === "archived" ? "archived" : "draft";
 
   if (options.status === "active") {
-    // Activating a newer version retires the version it supersedes.
-    if (current.supersedes_process_id) {
-      await db.from("processes").update({ status: "archived" }).eq("id", current.supersedes_process_id);
-    }
-    // A process must have steps before it can run.
+    // Quality gate — a definition must be complete before it can go live.
     const { count } = await db
       .from("process_steps")
       .select("id", { count: "exact", head: true })
       .eq("process_id", processId);
-    if (!count) throw new Error("Add at least one step before activating this process.");
+
+    const triggerDescription = String(obj(current.trigger_definition)["description"] ?? "").trim();
+    const problems: string[] = [];
+    if (!current.name || current.name.trim().length < 3) problems.push("a clear name");
+    if (!current.purpose || current.purpose.trim().length < 10) problems.push("a purpose");
+    if (!triggerDescription) problems.push("a trigger description");
+    if (!current.success_definition || current.success_definition.trim().length < 5)
+      problems.push("a success definition");
+    if (!count) problems.push("at least one step");
+    if (current.autonomy_level < 0 || current.autonomy_level > 4)
+      problems.push("a valid autonomy level (0-4)");
+    if (problems.length > 0) {
+      throw new Error(`This process needs ${problems.join(", ")} before it can be activated.`);
+    }
+
+    // Activating a newer version retires the version it supersedes.
+    if (current.supersedes_process_id) {
+      await db.from("processes").update({ status: "archived" }).eq("id", current.supersedes_process_id);
+    }
   }
 
   const { error } = await db
@@ -1661,4 +1684,118 @@ export async function decideApproval(options: {
   }
 
   return { ok: true, execution: null };
+}
+
+/* -------------------------------------------------- manual process creation */
+
+/**
+ * Creates an empty draft process, optionally derived from an Action Plan item.
+ * The action itself is never duplicated — only referenced.
+ */
+export async function createProcessDraft(options: {
+  supabase: Client;
+  businessId: string;
+  userId: string;
+  name?: string;
+  fromTaskId?: string;
+}): Promise<{ processId: string }> {
+  const { supabase, businessId } = options;
+  await assertBusinessAccess(supabase, businessId);
+
+  const { data: business, error: businessError } = await supabase
+    .from("businesses")
+    .select("organization_id")
+    .eq("id", businessId)
+    .maybeSingle();
+  if (businessError) throw businessError;
+  if (!business) throw new Error("That business does not exist.");
+
+  let task: { id: string; title: string; metadata: unknown } | null = null;
+  if (options.fromTaskId) {
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("id, title, metadata")
+      .eq("id", options.fromTaskId)
+      .eq("business_id", businessId)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) throw new Error("That action does not exist in this business.");
+    task = data;
+
+    const { data: existing } = await supabase
+      .from("processes")
+      .select("id")
+      .eq("business_id", businessId)
+      .eq("created_from_action_id", data.id)
+      .neq("status", "archived")
+      .limit(1)
+      .maybeSingle();
+    if (existing) return { processId: existing.id };
+  }
+
+  const { data: runRow } = await supabase
+    .from("diagnosis_runs")
+    .select("id")
+    .eq("business_id", businessId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const { data: blueprintRow } = await supabase
+    .from("business_blueprints")
+    .select("version")
+    .eq("business_id", businessId)
+    .order("version", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const taskMeta = obj(task?.metadata ?? {});
+  const db = await admin();
+  const { data: inserted, error } = await db
+    .from("processes")
+    .insert({
+      business_id: businessId,
+      organization_id: business.organization_id,
+      name: options.name?.trim() || task?.title || "Untitled process",
+      description: null,
+      purpose: typeof taskMeta["outcome"] === "string" ? (taskMeta["outcome"] as string) : null,
+      process_category: null,
+      trigger_type: "manual",
+      trigger_definition: { description: "" } as never,
+      status: "draft",
+      owner_type: "human",
+      autonomy_level: DEFAULT_PROCESS_AUTONOMY,
+      success_definition:
+        typeof taskMeta["success_metric"] === "string" ? (taskMeta["success_metric"] as string) : null,
+      created_from_action_id: task?.id ?? null,
+      created_from_diagnosis_id: runRow?.id ?? null,
+      created_from_blueprint_version: blueprintRow?.version ?? null,
+      version: 1,
+      metadata: {
+        source: task ? "action_plan_conversion" : "manual",
+        created_at: new Date().toISOString(),
+        ...(Array.isArray(taskMeta["diagnosis_titles"])
+          ? { evidence: { diagnosis_titles: taskMeta["diagnosis_titles"], facts: taskMeta["facts"] ?? [] } }
+          : {}),
+      } as never,
+    })
+    .select("id")
+    .single();
+  if (error) throw error;
+
+  await writeAudit({
+    action: "process.created",
+    organizationId: business.organization_id,
+    businessId,
+    userId: options.userId,
+    entity: "processes",
+    entityId: inserted.id,
+    after: {
+      name: options.name ?? task?.title ?? "Untitled process",
+      from_action_id: task?.id ?? null,
+      autonomy: DEFAULT_PROCESS_AUTONOMY,
+    },
+  });
+
+  return { processId: inserted.id };
 }

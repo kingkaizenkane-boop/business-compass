@@ -201,3 +201,25 @@ export const decideProcessApproval = createServerFn({ method: "POST" })
       ...(data.note ? { note: data.note } : {}),
     });
   });
+
+/** Creates an empty draft process, or converts an Action Plan item into one. */
+export const createProcess = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    businessInput
+      .extend({
+        name: z.string().min(3).max(160).optional(),
+        fromTaskId: z.string().uuid().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { createProcessDraft } = await import("./process.server");
+    return createProcessDraft({
+      supabase: context.supabase,
+      businessId: data.businessId,
+      userId: context.userId,
+      ...(data.name ? { name: data.name } : {}),
+      ...(data.fromTaskId ? { fromTaskId: data.fromTaskId } : {}),
+    });
+  });

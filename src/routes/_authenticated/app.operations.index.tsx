@@ -1,16 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { ArrowRight, ShieldCheck, Sparkles, Workflow } from "lucide-react";
+import { ArrowRight, Plus, ShieldCheck, Sparkles, Workflow } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { JobStatusStrip } from "@/components/business-os/job-status";
 import { AutonomyBadge, EmptyState, PageHeader, SectionLabel, StatBlock } from "@/components/business-os/primitives";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useWorkspace } from "@/hooks/use-workspace";
 import { enqueueEngineRun } from "@/lib/jobs.functions";
-import { decideProcessApproval, getOperations } from "@/lib/process.functions";
+import { createProcess, decideProcessApproval, getOperations } from "@/lib/process.functions";
 import type { AutonomyLevel } from "@/lib/business-os";
 
 export const Route = createFileRoute("/_authenticated/app/operations/")({
@@ -64,6 +66,10 @@ function OperationsPage() {
   const fetchOperations = useServerFn(getOperations);
   const enqueue = useServerFn(enqueueEngineRun);
   const decide = useServerFn(decideProcessApproval);
+  const create = useServerFn(createProcess);
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "draft" | "archived">("all");
 
   const queryKey = ["operations", businessId];
   const { data, isLoading } = useQuery({
@@ -85,6 +91,15 @@ function OperationsPage() {
     onError: (error: Error) => toast.error(error.message),
   });
 
+  const createDraft = useMutation({
+    mutationFn: () => create({ data: { businessId: businessId! } }),
+    onSuccess: (result) => {
+      toast.success("Draft process created.");
+      void navigate({ to: "/app/operations/$processId", params: { processId: result.processId } });
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
   const approve = useMutation({
     mutationFn: (input: { approvalId: string; decision: "approve" | "reject" | "pause" }) =>
       decide({ data: { businessId: businessId!, ...input } }),
@@ -99,7 +114,16 @@ function OperationsPage() {
     return <div className="p-2 text-sm text-muted-foreground">Loading operations…</div>;
   }
 
-  const processes = data?.processes ?? [];
+  const allProcesses = data?.processes ?? [];
+  const term = search.trim().toLowerCase();
+  const processes = allProcesses.filter((process) => {
+    if (statusFilter !== "all" && process.status !== statusFilter) return false;
+    if (!term) return true;
+    return [process.name, process.purpose ?? "", process.description ?? "", process.category ?? ""]
+      .join(" ")
+      .toLowerCase()
+      .includes(term);
+  });
   const counts = data?.counts ?? { active: 0, draft: 0, paused: 0, approvals: 0 };
 
   return (
@@ -109,10 +133,20 @@ function OperationsPage() {
         title="Operations"
         subtitle="A process is a system that repeatedly produces a business outcome. Business OS designs them from your diagnosis, blueprint and action plan — then runs the internal steps and stops for your approval before anything leaves the business."
         actions={
-          <Button onClick={() => generate.mutate()} disabled={generate.isPending || !businessId}>
-            <Sparkles className="mr-2 h-4 w-4" />
-            {processes.length > 0 ? "Find new processes" : "Design my processes"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={() => createDraft.mutate()}
+              disabled={createDraft.isPending || !businessId}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Create process
+            </Button>
+            <Button onClick={() => generate.mutate()} disabled={generate.isPending || !businessId}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              {allProcesses.length > 0 ? "Generate from action plan" : "Design my processes"}
+            </Button>
+          </div>
         }
       />
 
@@ -197,11 +231,38 @@ function OperationsPage() {
       ) : null}
 
       <section>
-        <SectionLabel aside={`${processes.length} process${processes.length === 1 ? "" : "es"}`}>
+        <SectionLabel aside={`${processes.length} of ${allProcesses.length} shown`}>
           Process library
         </SectionLabel>
 
-        {processes.length === 0 ? (
+        {allProcesses.length > 0 ? (
+          <div className="mb-4 flex flex-wrap items-center gap-2">
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search processes by name, purpose or category"
+              className="max-w-sm"
+            />
+            <div className="flex gap-1">
+              {(["all", "active", "draft", "archived"] as const).map((option) => (
+                <Button
+                  key={option}
+                  size="sm"
+                  variant={statusFilter === option ? "secondary" : "ghost"}
+                  onClick={() => setStatusFilter(option)}
+                >
+                  {option === "all" ? "All" : option === "archived" ? "Paused / archived" : statusLabel(option, false)}
+                </Button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {allProcesses.length > 0 && processes.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border p-6 text-sm text-muted-foreground">
+            No process matches that search or filter.
+          </p>
+        ) : processes.length === 0 ? (
           <EmptyState
             icon={Workflow}
             title="No processes designed yet"
