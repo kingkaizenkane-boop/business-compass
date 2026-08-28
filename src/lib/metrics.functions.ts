@@ -102,7 +102,11 @@ export const saveMetric = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { upsertMetric } = await import("./metrics.server");
-    return upsertMetric({ supabase: context.supabase, userId: context.userId, input: data });
+    return upsertMetric({
+      supabase: context.supabase,
+      userId: context.userId,
+      input: data as Parameters<typeof upsertMetric>[0]["input"],
+    });
   });
 
 /** Append one manual observation. */
@@ -124,5 +128,9 @@ export const addMetricObservation = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { recordObservation } = await import("./metrics.server");
-    return recordObservation({ supabase: context.supabase, userId: context.userId, input: data });
+    return recordObservation({
+      supabase: context.supabase,
+      userId: context.userId,
+      input: data as Parameters<typeof recordObservation>[0]["input"],
+    });
   });

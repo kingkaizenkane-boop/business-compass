@@ -322,8 +322,14 @@ async function loadObservations(supabase: Client, metricIds: string[]) {
 
 async function resolveLinks(supabase: Client, rows: DefRow[]) {
   const links = new Map<string, MetricLinks>();
-  const ids = <K extends keyof DefRow>(key: K) =>
-    Array.from(new Set(rows.map((r) => r[key]).filter((v): v is string => typeof v === "string")));
+  const ids = (key: "goal_id" | "diagnosis_item_id" | "task_id" | "process_id") =>
+    Array.from(
+      new Set(
+        rows
+          .map((r) => r[key])
+          .filter((value): value is string => typeof value === "string" && value.length > 0),
+      ),
+    );
 
   const goalIds = ids("goal_id");
   const diagIds = ids("diagnosis_item_id");
@@ -736,6 +742,7 @@ export async function recordObservation(options: {
     metric: detail?.metric ?? null,
     alerts: detail?.alerts ?? [],
     memoryWritten,
+    outcome: detail?.metric.outcomeSummary ?? "Observation recorded.",
   };
 }
 
