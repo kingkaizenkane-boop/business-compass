@@ -108,14 +108,13 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 
 ## 3. Production risks, ranked
 
-1. **Synchronous AI in the request path.** Timeouts on diagnosis/blueprint under real load; no retry or partial recovery.
-2. **Unbacked traceability claim.** `brain_fact_evidence` empty while the UI promises evidence-linked reasoning.
-3. **No cost ceiling.** Unbounded AI spend per organization; no model routing enforcement.
-4. **No embeddings.** Long-term recall dead; each session reasons from scratch.
-5. **Auth surface incomplete.** No password reset or email confirmation; account recovery is impossible today.
-6. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
-7. **Silent audit gaps** on the mutations that matter most for multi-seat and agency use.
-8. **Fact versioning inert.** Corrections overwrite rather than supersede, so conflict history is lost.
+1. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
+2. **No metrics ingestion.** Outcomes are asserted, not measured, so the learning loop back into the Brain is not closed.
+3. **No real outbound connectors.** Email, CRM, and messaging steps are typed and gated but not yet executable.
+4. **No scheduled / event triggers.** Processes must be started manually or from the queue today.
+5. **No programmatic SEO execution.** Templates exist but no opportunity scoring, generation, or publish path.
+6. **No evidence upload.** Owners cannot attach documents, screenshots, or financials to Brain facts.
+7. **P0/P1 risks resolved:** synchronous AI, unbacked traceability, cost ceilings, embeddings, auth surface, audit gaps, and fact versioning are all implemented.
 
 ---
 
