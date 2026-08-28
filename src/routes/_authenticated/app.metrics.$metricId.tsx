@@ -15,7 +15,7 @@ import {
 } from "recharts";
 import { toast } from "sonner";
 
-import { MetricForm } from "@/components/business-os/metric-form";
+import { MetricForm, type MetricFormValues } from "@/components/business-os/metric-form";
 import {
   formatMetricValue,
   formatSignedPercent,
@@ -91,7 +91,7 @@ function MetricDetailPage() {
   };
 
   const addObservation = useMutation({
-    mutationFn: (input: { value: number; recordedAt?: string; notes?: string | null }) =>
+    mutationFn: (input: { value: number; recordedAt?: string | undefined; notes: string | null }) =>
       record({ data: { businessId: businessId!, metricId, ...input } }),
     onSuccess: (result) => {
       toast.success(result.outcome ?? "Observation recorded.");
@@ -103,7 +103,8 @@ function MetricDetailPage() {
   });
 
   const save = useMutation({
-    mutationFn: (input: Parameters<typeof persist>[0]["data"]) => persist({ data: input }),
+    mutationFn: (input: MetricFormValues & { businessId: string; metricId: string }) =>
+      persist({ data: input }),
     onSuccess: () => {
       toast.success("Metric updated.");
       setEditing(false);
@@ -156,7 +157,9 @@ function MetricDetailPage() {
       <PageHeader
         eyebrow={metric.category ?? "Measure"}
         title={metric.name}
-        subtitle={metric.rationale ?? metric.description ?? undefined}
+        {...(metric.rationale ?? metric.description
+          ? { subtitle: (metric.rationale ?? metric.description)! }
+          : {})}
         actions={
           <>
             <Badge variant="outline" className={`rounded-full ${trendTone(metric.trend)}`}>

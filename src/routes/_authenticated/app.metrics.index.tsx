@@ -6,7 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmptyState, PageHeader, SectionLabel, StatBlock } from "@/components/business-os/primitives";
-import { MetricForm } from "@/components/business-os/metric-form";
+import { MetricForm, type MetricFormValues } from "@/components/business-os/metric-form";
 import { formatMetricValue, trendTone } from "@/components/business-os/metric-format";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -62,7 +62,7 @@ function MetricsPage() {
   });
 
   const create = useMutation({
-    mutationFn: (input: Parameters<typeof persist>[0]["data"]) => persist({ data: input }),
+    mutationFn: (input: MetricFormValues & { businessId: string }) => persist({ data: input }),
     onSuccess: () => {
       toast.success("Metric created.");
       setCreating(false);
