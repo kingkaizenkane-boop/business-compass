@@ -261,6 +261,20 @@ function ProcessDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Draft an experiment that measures whether this process actually works.
+  const testMutation = useMutation({
+    mutationFn: () => draft({ data: { businessId: businessId!, processId } }),
+    onSuccess: (result) => {
+      toast.success("Experiment drafted for this process.");
+      void navigate({
+        to: "/app/experiments/$experimentId",
+        params: { experimentId: result.experimentId },
+      });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "The experiment could not be drafted."),
+  });
+
   const duplicateMutation = useMutation({
     mutationFn: () => duplicate({ data: { businessId: businessId!, processId } }),
     onSuccess: (result) => {
