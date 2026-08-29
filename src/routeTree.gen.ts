@@ -35,6 +35,7 @@ import { Route as AuthenticatedAppSettingsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedBusinessNewRouteImport } from './routes/_authenticated/business.new'
 import { Route as AuthenticatedBusinessSelectRouteImport } from './routes/_authenticated/business.select'
 import { Route as ApiPublicAiJobsWorkerRouteImport } from './routes/api/public/ai-jobs-worker'
+import { Route as SitesSiteIdSlugRouteImport } from './routes/sites.$siteId.$slug'
 import { Route as AuthenticatedAppExperimentsIndexRouteImport } from './routes/_authenticated/app.experiments.index'
 import { Route as AuthenticatedAppExperimentsExperimentIdRouteImport } from './routes/_authenticated/app.experiments.$experimentId'
 import { Route as AuthenticatedAppMetricsIndexRouteImport } from './routes/_authenticated/app.metrics.index'
@@ -187,6 +188,11 @@ const ApiPublicAiJobsWorkerRoute = ApiPublicAiJobsWorkerRouteImport.update({
   path: '/api/public/ai-jobs-worker',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitesSiteIdSlugRoute = SitesSiteIdSlugRouteImport.update({
+  id: '/sites/$siteId/$slug',
+  path: '/sites/$siteId/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppExperimentsIndexRoute =
   AuthenticatedAppExperimentsIndexRouteImport.update({
     id: '/experiments/',
@@ -279,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/business/new': typeof AuthenticatedBusinessNewRoute
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
+  '/sites/$siteId/$slug': typeof SitesSiteIdSlugRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
@@ -315,6 +322,7 @@ export interface FileRoutesByTo {
   '/business/new': typeof AuthenticatedBusinessNewRoute
   '/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
+  '/sites/$siteId/$slug': typeof SitesSiteIdSlugRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
@@ -355,6 +363,7 @@ export interface FileRoutesById {
   '/_authenticated/business/new': typeof AuthenticatedBusinessNewRoute
   '/_authenticated/business/select': typeof AuthenticatedBusinessSelectRoute
   '/api/public/ai-jobs-worker': typeof ApiPublicAiJobsWorkerRoute
+  '/sites/$siteId/$slug': typeof SitesSiteIdSlugRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/_authenticated/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
@@ -395,6 +404,7 @@ export interface FileRouteTypes {
     | '/business/new'
     | '/business/select'
     | '/api/public/ai-jobs-worker'
+    | '/sites/$siteId/$slug'
     | '/app/'
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
@@ -431,6 +441,7 @@ export interface FileRouteTypes {
     | '/business/new'
     | '/business/select'
     | '/api/public/ai-jobs-worker'
+    | '/sites/$siteId/$slug'
     | '/app'
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
@@ -470,6 +481,7 @@ export interface FileRouteTypes {
     | '/_authenticated/business/new'
     | '/_authenticated/business/select'
     | '/api/public/ai-jobs-worker'
+    | '/sites/$siteId/$slug'
     | '/_authenticated/app/'
     | '/_authenticated/app/experiments/$experimentId'
     | '/_authenticated/app/metrics/$metricId'
@@ -492,6 +504,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   BusinessOsForSlugRoute: typeof BusinessOsForSlugRoute
   ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
+  SitesSiteIdSlugRoute: typeof SitesSiteIdSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -678,6 +691,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiJobsWorkerRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sites/$siteId/$slug': {
+      id: '/sites/$siteId/$slug'
+      path: '/sites/$siteId/$slug'
+      fullPath: '/sites/$siteId/$slug'
+      preLoaderRoute: typeof SitesSiteIdSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/experiments/': {
       id: '/_authenticated/app/experiments/'
       path: '/experiments'
@@ -855,6 +875,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   BusinessOsForSlugRoute: BusinessOsForSlugRoute,
   ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
+  SitesSiteIdSlugRoute: SitesSiteIdSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
