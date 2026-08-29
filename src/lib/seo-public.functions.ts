@@ -20,8 +20,6 @@ export const getPublishedSeoPage = createServerFn({ method: "GET" })
       ...(data.siteId ? { siteId: data.siteId } : {}),
     });
     if (!page) return null;
-    return {
-      ...page,
-      schema: (page.schema ?? null) as unknown as string | null,
-    };
+    // Serialised so the JSON-LD travels as a plain string to the route head.
+    return { ...page, schema: page.schema ? JSON.stringify(page.schema) : null };
   });
