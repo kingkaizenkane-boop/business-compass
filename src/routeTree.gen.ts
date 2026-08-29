@@ -13,7 +13,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as BusinessOsForSlugRouteImport } from './routes/business-os-for.$slug'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authenticated/app.action-plan'
 import { Route as AuthenticatedAppAiUsageRouteImport } from './routes/_authenticated/app.ai-usage'
@@ -39,6 +41,11 @@ import { Route as AuthenticatedAppMetricsIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedAppMetricsMetricIdRouteImport } from './routes/_authenticated/app.metrics.$metricId'
 import { Route as AuthenticatedAppOperationsIndexRouteImport } from './routes/_authenticated/app.operations.index'
 import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './routes/_authenticated/app.operations.$processId'
+import { Route as AuthenticatedAppSeoIndexRouteImport } from './routes/_authenticated/app.seo.index'
+import { Route as AuthenticatedAppSeoLibraryRouteImport } from './routes/_authenticated/app.seo.library'
+import { Route as AuthenticatedAppSeoOpportunitiesRouteImport } from './routes/_authenticated/app.seo.opportunities'
+import { Route as AuthenticatedAppSeoPlatformRouteImport } from './routes/_authenticated/app.seo.platform'
+import { Route as AuthenticatedAppSeoPagesPageIdRouteImport } from './routes/_authenticated/app.seo.pages.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,10 +66,20 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const BusinessOsForSlugRoute = BusinessOsForSlugRouteImport.update({
+  id: '/business-os-for/$slug',
+  path: '/business-os-for/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
@@ -206,12 +223,44 @@ const AuthenticatedAppOperationsProcessIdRoute =
     path: '/operations/$processId',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppSeoIndexRoute =
+  AuthenticatedAppSeoIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
+const AuthenticatedAppSeoLibraryRoute =
+  AuthenticatedAppSeoLibraryRouteImport.update({
+    id: '/library',
+    path: '/library',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
+const AuthenticatedAppSeoOpportunitiesRoute =
+  AuthenticatedAppSeoOpportunitiesRouteImport.update({
+    id: '/opportunities',
+    path: '/opportunities',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
+const AuthenticatedAppSeoPlatformRoute =
+  AuthenticatedAppSeoPlatformRouteImport.update({
+    id: '/platform',
+    path: '/platform',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
+const AuthenticatedAppSeoPagesPageIdRoute =
+  AuthenticatedAppSeoPagesPageIdRouteImport.update({
+    id: '/pages/$pageId',
+    path: '/pages/$pageId',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -224,7 +273,7 @@ export interface FileRoutesByFullPath {
   '/app/leads': typeof AuthenticatedAppLeadsRoute
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/offers': typeof AuthenticatedAppOffersRoute
-  '/app/seo': typeof AuthenticatedAppSeoRoute
+  '/app/seo': typeof AuthenticatedAppSeoRouteWithChildren
   '/app/services': typeof AuthenticatedAppServicesRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/business/new': typeof AuthenticatedBusinessNewRoute
@@ -234,14 +283,21 @@ export interface FileRoutesByFullPath {
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
+  '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
+  '/app/seo/': typeof AuthenticatedAppSeoIndexRoute
+  '/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -254,7 +310,6 @@ export interface FileRoutesByTo {
   '/app/leads': typeof AuthenticatedAppLeadsRoute
   '/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/app/offers': typeof AuthenticatedAppOffersRoute
-  '/app/seo': typeof AuthenticatedAppSeoRoute
   '/app/services': typeof AuthenticatedAppServicesRoute
   '/app/settings': typeof AuthenticatedAppSettingsRoute
   '/business/new': typeof AuthenticatedBusinessNewRoute
@@ -264,9 +319,14 @@ export interface FileRoutesByTo {
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
+  '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/app/experiments': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
+  '/app/seo': typeof AuthenticatedAppSeoIndexRoute
+  '/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -274,7 +334,9 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/_authenticated/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/_authenticated/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -287,7 +349,7 @@ export interface FileRoutesById {
   '/_authenticated/app/leads': typeof AuthenticatedAppLeadsRoute
   '/_authenticated/app/notifications': typeof AuthenticatedAppNotificationsRoute
   '/_authenticated/app/offers': typeof AuthenticatedAppOffersRoute
-  '/_authenticated/app/seo': typeof AuthenticatedAppSeoRoute
+  '/_authenticated/app/seo': typeof AuthenticatedAppSeoRouteWithChildren
   '/_authenticated/app/services': typeof AuthenticatedAppServicesRoute
   '/_authenticated/app/settings': typeof AuthenticatedAppSettingsRoute
   '/_authenticated/business/new': typeof AuthenticatedBusinessNewRoute
@@ -297,9 +359,14 @@ export interface FileRoutesById {
   '/_authenticated/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/_authenticated/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/_authenticated/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
+  '/_authenticated/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/_authenticated/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/_authenticated/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
+  '/_authenticated/app/seo/': typeof AuthenticatedAppSeoIndexRoute
+  '/_authenticated/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -307,7 +374,9 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/app'
+    | '/business-os-for/$slug'
     | '/app/action-plan'
     | '/app/ai-usage'
     | '/app/blueprint'
@@ -330,14 +399,21 @@ export interface FileRouteTypes {
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
     | '/app/operations/$processId'
+    | '/app/seo/library'
+    | '/app/seo/opportunities'
+    | '/app/seo/platform'
     | '/app/experiments/'
     | '/app/metrics/'
     | '/app/operations/'
+    | '/app/seo/'
+    | '/app/seo/pages/$pageId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/sitemap.xml'
+    | '/business-os-for/$slug'
     | '/app/action-plan'
     | '/app/ai-usage'
     | '/app/blueprint'
@@ -350,7 +426,6 @@ export interface FileRouteTypes {
     | '/app/leads'
     | '/app/notifications'
     | '/app/offers'
-    | '/app/seo'
     | '/app/services'
     | '/app/settings'
     | '/business/new'
@@ -360,16 +435,23 @@ export interface FileRouteTypes {
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
     | '/app/operations/$processId'
+    | '/app/seo/library'
+    | '/app/seo/opportunities'
+    | '/app/seo/platform'
     | '/app/experiments'
     | '/app/metrics'
     | '/app/operations'
+    | '/app/seo'
+    | '/app/seo/pages/$pageId'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/auth'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/_authenticated/app'
+    | '/business-os-for/$slug'
     | '/_authenticated/app/action-plan'
     | '/_authenticated/app/ai-usage'
     | '/_authenticated/app/blueprint'
@@ -392,9 +474,14 @@ export interface FileRouteTypes {
     | '/_authenticated/app/experiments/$experimentId'
     | '/_authenticated/app/metrics/$metricId'
     | '/_authenticated/app/operations/$processId'
+    | '/_authenticated/app/seo/library'
+    | '/_authenticated/app/seo/opportunities'
+    | '/_authenticated/app/seo/platform'
     | '/_authenticated/app/experiments/'
     | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
+    | '/_authenticated/app/seo/'
+    | '/_authenticated/app/seo/pages/$pageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -402,6 +489,8 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  BusinessOsForSlugRoute: typeof BusinessOsForSlugRoute
   ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
 }
 
@@ -435,12 +524,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app': {
       id: '/_authenticated/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/business-os-for/$slug': {
+      id: '/business-os-for/$slug'
+      path: '/business-os-for/$slug'
+      fullPath: '/business-os-for/$slug'
+      preLoaderRoute: typeof BusinessOsForSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
@@ -617,8 +720,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppOperationsProcessIdRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/seo/': {
+      id: '/_authenticated/app/seo/'
+      path: '/'
+      fullPath: '/app/seo/'
+      preLoaderRoute: typeof AuthenticatedAppSeoIndexRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
+    '/_authenticated/app/seo/library': {
+      id: '/_authenticated/app/seo/library'
+      path: '/library'
+      fullPath: '/app/seo/library'
+      preLoaderRoute: typeof AuthenticatedAppSeoLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
+    '/_authenticated/app/seo/opportunities': {
+      id: '/_authenticated/app/seo/opportunities'
+      path: '/opportunities'
+      fullPath: '/app/seo/opportunities'
+      preLoaderRoute: typeof AuthenticatedAppSeoOpportunitiesRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
+    '/_authenticated/app/seo/platform': {
+      id: '/_authenticated/app/seo/platform'
+      path: '/platform'
+      fullPath: '/app/seo/platform'
+      preLoaderRoute: typeof AuthenticatedAppSeoPlatformRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
+    '/_authenticated/app/seo/pages/$pageId': {
+      id: '/_authenticated/app/seo/pages/$pageId'
+      path: '/pages/$pageId'
+      fullPath: '/app/seo/pages/$pageId'
+      preLoaderRoute: typeof AuthenticatedAppSeoPagesPageIdRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
   }
 }
+
+interface AuthenticatedAppSeoRouteChildren {
+  AuthenticatedAppSeoLibraryRoute: typeof AuthenticatedAppSeoLibraryRoute
+  AuthenticatedAppSeoOpportunitiesRoute: typeof AuthenticatedAppSeoOpportunitiesRoute
+  AuthenticatedAppSeoPlatformRoute: typeof AuthenticatedAppSeoPlatformRoute
+  AuthenticatedAppSeoIndexRoute: typeof AuthenticatedAppSeoIndexRoute
+  AuthenticatedAppSeoPagesPageIdRoute: typeof AuthenticatedAppSeoPagesPageIdRoute
+}
+
+const AuthenticatedAppSeoRouteChildren: AuthenticatedAppSeoRouteChildren = {
+  AuthenticatedAppSeoLibraryRoute: AuthenticatedAppSeoLibraryRoute,
+  AuthenticatedAppSeoOpportunitiesRoute: AuthenticatedAppSeoOpportunitiesRoute,
+  AuthenticatedAppSeoPlatformRoute: AuthenticatedAppSeoPlatformRoute,
+  AuthenticatedAppSeoIndexRoute: AuthenticatedAppSeoIndexRoute,
+  AuthenticatedAppSeoPagesPageIdRoute: AuthenticatedAppSeoPagesPageIdRoute,
+}
+
+const AuthenticatedAppSeoRouteWithChildren =
+  AuthenticatedAppSeoRoute._addFileChildren(AuthenticatedAppSeoRouteChildren)
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppActionPlanRoute: typeof AuthenticatedAppActionPlanRoute
@@ -633,7 +790,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppLeadsRoute: typeof AuthenticatedAppLeadsRoute
   AuthenticatedAppNotificationsRoute: typeof AuthenticatedAppNotificationsRoute
   AuthenticatedAppOffersRoute: typeof AuthenticatedAppOffersRoute
-  AuthenticatedAppSeoRoute: typeof AuthenticatedAppSeoRoute
+  AuthenticatedAppSeoRoute: typeof AuthenticatedAppSeoRouteWithChildren
   AuthenticatedAppServicesRoute: typeof AuthenticatedAppServicesRoute
   AuthenticatedAppSettingsRoute: typeof AuthenticatedAppSettingsRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
@@ -658,7 +815,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppLeadsRoute: AuthenticatedAppLeadsRoute,
   AuthenticatedAppNotificationsRoute: AuthenticatedAppNotificationsRoute,
   AuthenticatedAppOffersRoute: AuthenticatedAppOffersRoute,
-  AuthenticatedAppSeoRoute: AuthenticatedAppSeoRoute,
+  AuthenticatedAppSeoRoute: AuthenticatedAppSeoRouteWithChildren,
   AuthenticatedAppServicesRoute: AuthenticatedAppServicesRoute,
   AuthenticatedAppSettingsRoute: AuthenticatedAppSettingsRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
@@ -695,6 +852,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
+  BusinessOsForSlugRoute: BusinessOsForSlugRoute,
   ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
 }
 export const routeTree = rootRouteImport

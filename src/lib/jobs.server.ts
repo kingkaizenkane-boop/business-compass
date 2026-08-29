@@ -20,6 +20,7 @@ export const JOB_TYPES = [
   "action_plan_run",
   "process_generation",
   "experiment_learning",
+  "seo_page_generation",
 ] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
@@ -30,6 +31,7 @@ export const JOB_LABELS: Record<JobType, string> = {
   action_plan_run: "Sequencing the 90-day plan",
   process_generation: "Designing repeatable processes",
   experiment_learning: "Writing what the experiment taught us",
+  seo_page_generation: "Writing an SEO page from verified facts",
 };
 
 export type JobView = {
@@ -266,6 +268,19 @@ async function runJob(db: Client, job: JobRow): Promise<Record<string, unknown>>
         memoryWritten: result.memoryWritten,
         aiUsed: result.aiUsed,
       };
+    }
+    case "seo_page_generation": {
+      await setProgress(db, job.id, "Writing the page from verified Business Brain facts");
+      const { generateSeoPage } = await import("./seo.server");
+      const result = await generateSeoPage({
+        supabase: db,
+        opportunityId: input["opportunityId"] ?? "",
+        userId: input["userId"] ?? null,
+        organizationId,
+        jobId: job.id,
+      });
+      if (result.status === "ai_failed") throw new Error(result.reason ?? "SEO generation failed.");
+      return result as unknown as Record<string, unknown>;
     }
     default:
       throw new Error(`Unknown job type: ${job.job_type}`);
