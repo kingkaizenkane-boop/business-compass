@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_authenticated/app/connectors")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: ConnectorsPage;
+  component: ConnectorsPage,
 });
 
 const STATUS_TONE: Record<ConnectorStatus, string> = {
