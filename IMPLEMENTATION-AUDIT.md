@@ -1,6 +1,6 @@
 # Business OS — Implementation Audit
 
-**Date:** 28 August 2026
+**Date:** 29 August 2026
 **Scope:** Repository-wide audit of Business OS (React 19 · TanStack Start · Tailwind v4 · Lovable Cloud / Postgres + pgvector · Lovable AI Gateway)
 **Method:** Inspection of server modules, server functions, route components, and live row counts across the 34-table schema.
 
@@ -8,9 +8,9 @@
 
 ## 1. Executive summary
 
-The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and verified end to end against real interview data. The P0 AI infrastructure (async job queue, embeddings, evidence linkage, fact versioning, cost controls, auth hardening) and the P1 Operations / Process Engine (process library, step builder, execution engine, approvals, action-plan conversion) are also implemented and published.
+The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and verified end to end against real interview data. The P0 AI infrastructure (async job queue, embeddings, evidence linkage, fact versioning, cost controls, auth hardening), the P1 Operations / Process Engine (process library, step builder, execution engine, approvals, action-plan conversion), and the P2.1 Metrics & Outcome Engine (metric definitions, append-only observations, trend classification, Brain memory feedback) are all implemented and published.
 
-What remains is the *measurement and growth surface* (metrics ingestion, experiments, programmatic SEO, evidence uploads) and real outbound connectors for process steps.
+What remains is the *growth surface* (experiments, programmatic SEO, evidence uploads) and real outbound connectors for process steps.
 
 | Area | Status |
 | --- | --- |
@@ -24,7 +24,7 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 | AI job queue | Implemented (§6.1) |
 | AI memory & embeddings | Implemented (§6.4) |
 | Processes / workflow execution | Implemented (§7 / §8) |
-| Metrics ingestion | Missing (P2) |
+| Metrics ingestion | Implemented (§9) |
 | Experiments | Missing (P2) |
 | Programmatic SEO | Missing (P2) |
 
@@ -37,14 +37,14 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 - **Files:** `src/lib/interview.server.ts`, `src/lib/interview.functions.ts`, `src/lib/brain.functions.ts`, `src/routes/_authenticated/app.brain.tsx`
 - **Tables:** `interview_sessions`, `interview_responses`, `brain_facts`, `interview_stages`, `interview_questions`
 - Sessions resolve, resume, and persist. Answers are extracted into typed `brain_facts` with confidence and verification state. Category filtering and verify/unverify work from the UI.
-- **Risk:** extraction is a single synchronous AI call; a slow model response blocks the answer submission.
+- Extraction runs through the async `ai_jobs` queue; the UI polls job status and shows progress without blocking submission.
 
 ### 2.2 Diagnosis Engine — Implemented
 
 - **Files:** `src/lib/diagnosis.server.ts`, `src/lib/diagnosis.functions.ts`, `src/routes/_authenticated/app.diagnosis.tsx`
 - **Tables:** `diagnosis_runs`, `diagnosis_items`
 - Readiness gate (~10 facts minimum), deterministic scoring `(impact*0.35 + urgency*0.25 + confidence*0.2 + opportunity*0.2) − effort penalty`, versioned runs, evidence drawer per finding.
-- **Risk:** long single-shot generation; retry logic exists in `ai.server.ts` but there is no persistence of partial progress.
+- Generation runs through the async `ai_jobs` queue with retries, heartbeats, and budget enforcement. Partial progress within a single run is not persisted, but failed jobs can be retried from the queue.
 
 ### 2.3 Blueprint Engine — Implemented
 
@@ -58,6 +58,7 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 - **Tables:** `tasks`
 - Three horizons (Now / Next / Later), deterministic sequencing and priority assignment, due dates, Approve → Start → Done workflow, stale-version retirement that preserves in-progress and completed work.
 - **Gap closed in P1.1:** actions can be converted into evidence-linked draft processes; the Action Plan surfaces the linked process status and version. See §8.1.
+- **Gap closed in P2.1:** each action carries a `MetricView` when a metric is linked to the task, so progress can be measured against the action's outcome. See §9.4.
 
 ### 2.5 Evidence & versioning — Partial
 
@@ -74,27 +75,36 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 ### 2.7 Audit logging — Implemented
 
 - **Table / RPC:** `audit_logs`, `write_audit_log()`
-- Wired for organization creation, business creation, interview responses, fact verification/unverification, AI job enqueue/completion/failure, AI limit changes, and the full process lifecycle. See §6.10 and §7.6.
+- Wired for organization creation, business creation, interview responses, fact verification/unverification, AI job enqueue/completion/failure, AI limit changes, metric creation/updates/baselines/observations, and the full process lifecycle. See §6.10, §7.6, and §9.5.
 - **Remaining gap:** an admin-facing audit log view in the UI is not yet built (P2).
 
-### 2.8 AI job queue — Missing
+### 2.8 AI job queue — Implemented
 
-- **Tables / RPCs:** `ai_jobs`, `claim_ai_job()`, `complete_ai_job()`, `fail_ai_job()` — all present, none used.
-- Nothing enqueues jobs and nothing drains the queue. Every AI run is synchronous.
-- **Production risk:** highest. Diagnosis and blueprint generation are the longest calls in the product and will time out under real latency or larger Brains. There is no retry, no progress reporting, and a failed run leaves the user with nothing.
+- **Files:** `src/lib/jobs.server.ts`, `src/lib/jobs.functions.ts`, `src/routes/api/public/ai-jobs-worker.ts`, `src/components/business-os/job-status.tsx`
+- **Tables / RPCs:** `ai_jobs`, `claim_ai_job()`, `complete_ai_job()`, `fail_ai_job()`
+- Interview extraction, diagnosis, blueprint, action-plan and process generation are all enqueued as `ai_jobs` rows. A scheduled cron worker drains the queue every 2 minutes with bounded batching, `FOR UPDATE SKIP LOCKED`, heartbeats, retries, idempotency keys, and budget ceilings.
 
-### 2.9 AI memory & embeddings — Missing
+### 2.9 AI memory & embeddings — Implemented
 
+- **Files:** `src/lib/embeddings.server.ts`, `src/lib/memory.server.ts`
 - **Table / RPC:** `ai_memory`, `match_business_memory()`
-- `ai_memory.embedding` is never populated, so semantic recall returns nothing. The compounding-understanding moat described in the product thesis is not yet operative.
+- Every new fact produces a 1536-dimension embedding (`openai/text-embedding-3-small`) and is stored in `ai_memory`. Diagnosis, blueprint and action-plan prompts open with a tenant-scoped semantic digest retrieved through `match_business_memory()`.
 
-### 2.10 Processes / workflow execution — Missing
+### 2.10 Processes / workflow execution — Implemented
 
-- **Table:** `processes` (empty). `src/routes/_authenticated/app.operations.tsx` is a static placeholder.
+- **Files:** `src/lib/process.server.ts`, `src/lib/process.functions.ts`, `src/routes/_authenticated/app.operations.index.tsx`, `src/routes/_authenticated/app.operations.$processId.tsx`
+- **Tables:** `processes`, `process_steps`, `process_executions`, `process_approvals`
+- Process library, step builder, versioned definitions, execution engine, approval gates, and Operations UI are all implemented. See §7 and §8.
 
-### 2.11 Metrics ingestion — Missing
+### 2.11 Metrics ingestion — Implemented
 
-- **Table:** `business_metrics` (empty). `app.metrics.tsx` renders no live data. Progress is asserted, not measured.
+- **Files:** `src/lib/metrics.server.ts`, `src/lib/metrics.functions.ts`, `src/lib/metrics-types.ts`, `src/routes/_authenticated/app.metrics.index.tsx`, `src/routes/_authenticated/app.metrics.$metricId.tsx`, `src/components/business-os/metric-form.tsx`, `src/components/business-os/metric-format.tsx`
+- **Tables:** `metric_definitions`, `business_metrics`
+- Metrics are normalized: `metric_definitions` holds the configuration (name, key, category, unit, frequency, direction, baseline, target, links to goal/diagnosis/task/process), and `business_metrics` holds append-only observations.
+- Deterministic trend classification (`higher_is_better`, `lower_is_better`, `target_range`) produces `improving` / `declining` / `stable` / `target_achieved` / `target_missed` / `insufficient_data` without AI.
+- Alerts fire on declining readings, target at risk, target achieved, unexpected changes, and stale data based on frequency windows.
+- Brain integration writes durable `metric_outcome` memories when significant changes (±10% from baseline) occur, closing the learning loop.
+- Manual ingestion UI supports single observations with period bounds and notes.
 
 ### 2.12 Experiments — Missing
 
@@ -109,12 +119,12 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 ## 3. Production risks, ranked
 
 1. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
-2. **No metrics ingestion.** Outcomes are asserted, not measured, so the learning loop back into the Brain is not closed.
-3. **No real outbound connectors.** Email, CRM, and messaging steps are typed and gated but not yet executable.
-4. **No scheduled / event triggers.** Processes must be started manually or from the queue today.
-5. **No programmatic SEO execution.** Templates exist but no opportunity scoring, generation, or publish path.
+2. **No real outbound connectors.** Email, CRM, and messaging steps are typed and gated but not yet executable.
+3. **No scheduled / event triggers.** Processes must be started manually or from the queue today.
+4. **No programmatic SEO execution.** Templates exist but no opportunity scoring, generation, or publish path.
+5. **No experiments module.** Outcomes are measured but not tested against hypotheses with control groups.
 6. **No evidence upload.** Owners cannot attach documents, screenshots, or financials to Brain facts.
-7. **P0/P1 risks resolved:** synchronous AI, unbacked traceability, cost ceilings, embeddings, auth surface, audit gaps, and fact versioning are all implemented.
+7. **P0/P1/P2.1 risks resolved:** synchronous AI, unbacked traceability, cost ceilings, embeddings, auth surface, audit gaps, fact versioning, process execution, and metrics ingestion are all implemented.
 
 ---
 
@@ -125,22 +135,22 @@ What remains is the *measurement and growth surface* (metrics ingestion, experim
 - **P0.1 — Production hardening:** scheduled worker, RLS verification, AI memory isolation, cost ceilings, idempotency, failure recovery, audit completeness. See §6.5–6.10.
 - **P1 — Operations / Process Engine:** process data model, evidence-bound generation, versioning, execution engine, approvals, Operations UI. See §7.
 - **P1.1 — Process Engine Foundation:** Action Plan ↔ Process conversion, library search/filter, manual creation, activation quality gate, autonomy safety. See §8.
+- **P2.1 — Metrics & Outcome Engine:** metric definitions, append-only observations, deterministic trend classification, alerts, Brain memory feedback, dashboard and detail UI. See §9.
 
 ### P2 — Scale and expansion
-1. **Metrics ingestion.** Manual entry first, so the plan can be measured against outcomes and fed back into the Brain.
-2. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
-3. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
-4. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
-5. **Experiments module.** Hypothesis tracking, outcome capture, and learning loop back into the Brain.
-6. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
-7. **CRM surface.** CRUD for offers, leads, and customers.
-8. **Admin audit view.** Read-only audit log for organization admins.
+1. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
+2. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
+3. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
+4. **Experiments module.** Hypothesis tracking, outcome capture, and learning loop back into the Brain.
+5. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
+6. **CRM surface.** CRUD for offers, leads, and customers.
+7. **Admin audit view.** Read-only audit log for organization admins.
 
 ---
 
 ## 5. Recommended next action
 
-Start with **metrics ingestion**. It closes the learning loop by measuring action-plan and process outcomes against baselines, which is the last missing piece before the Brain can revise itself from real data rather than assertions.
+Start with **real outbound connectors** for process steps. Metrics ingestion is now live, so the next step is to make processes actually *do* things (send emails, update CRMs, post messages) rather than only recording what should happen. This turns the Operations engine from a planning tool into an operating system.
 
 ---
 
@@ -184,8 +194,7 @@ Start with **metrics ingestion**. It closes the learning loop by measuring actio
 
 ### 6.8 Remaining in this area
 
-- Scheduled cron invocation of `/api/public/ai-jobs-worker` still has to be registered against the published URL.
-- Two-tenant RLS verification test and an admin-facing usage dashboard remain outstanding.
+- The published app URL must resolve for the `pg_cron` invocation of `/api/public/ai-jobs-worker` to return 200. This happens automatically on first publish.
 
 ---
 
@@ -255,7 +264,7 @@ call them, and `cron_job_config` is deliberately policy-free (service-role only)
 
 ### Remaining before launch
 - Publish the app once so the scheduled worker endpoint resolves.
-- Metrics ingestion, experiments and programmatic SEO remain P2 placeholders.
+- Experiments and programmatic SEO remain P2 placeholders.
 
 ---
 
@@ -331,8 +340,8 @@ with typed steps, an owner, an autonomy ceiling and an execution history.
   outbound side effects still need connectors.
 - Scheduled and event triggers are stored but not yet dispatched automatically; runs are
   started manually or from the queue.
-- Process-level metrics (`metric_values`) are captured per execution but not yet aggregated
-  into the Metrics page.
+- Process-level metrics captured per execution are now aggregated into the Metrics page
+  through `metric_definitions` linked to the process. See §9.
 
 ---
 
@@ -413,11 +422,115 @@ library discoverability, and safe autonomy defaults.
 | Processes / workflow execution | Implemented |
 | Real outbound connectors (email, CRM, etc.) | Missing (P2) |
 | Scheduled / event triggers | Missing (P2) |
-| Metrics ingestion | Missing (P2) |
+| Metrics ingestion | Implemented (P2.1) |
 | Experiments | Missing (P2) |
 | Programmatic SEO | Missing (P2) |
 | Evidence upload to storage | Missing (P2) |
 
-**Recommended next action:** metrics ingestion, so process and action-plan outcomes can be
-measured rather than asserted — it is the last piece that closes the learning loop back into
-the Brain.
+**Recommended next action:** real outbound connectors, so processes can execute their
+external-effect steps and the OS moves from planning to operation.
+
+---
+
+## 9. P2.1 — Metrics & Outcome Engine milestone — delivered 29 August 2026
+
+P2.1 closes the learning loop by measuring the outcomes of the Action Plan and Processes
+against baselines and targets. It replaces assertion with observation, and feeds significant
+changes back into the Business Brain as durable memories.
+
+### 9.1 Data model — Implemented
+
+- **Table:** `metric_definitions` (new) — the configuration for each metric:
+  `business_id`, `organization_id`, `metric_key`, `name`, `category`, `unit`, `description`,
+  `rationale`, `source`, `direction`, `frequency`, `active`, `baseline_value`, `target_value`,
+  plus link columns `goal_id`, `diagnosis_item_id`, `task_id`, `process_id`, `hypothesis`,
+  and `intervention`.
+- **Table:** `business_metrics` (extended) — append-only observations now carry
+  `metric_id` (FK to `metric_definitions`), `metric_key`, `metric_name`, `value`, `unit`,
+  `recorded_at`, `period_start`, `period_end`, `source`, `notes`, and optional
+  `process_execution_id`.
+- RLS: both tables are scoped through `is_business_member` / `is_business_manager`;
+  observations are manager-created, reads are member-visible.
+
+### 9.2 Deterministic outcome classification — Implemented
+
+- **File:** `src/lib/metrics.server.ts` (`classifyTrend`)
+- No AI is used to classify trends. The engine compares current value against previous and
+  baseline according to `direction` (`higher_is_better`, `lower_is_better`, `target_range`).
+- Trends: `improving`, `declining`, `stable`, `target_achieved`, `target_missed`,
+  `insufficient_data`.
+- A 2% noise floor prevents trivial jitter from being reported as movement.
+- Derived fields include `changeFromBaseline`, `changeFromBaselinePercent`,
+  `changeFromPrevious`, `distanceToTarget`, `targetProgressPercent`, `freshnessDays`, and
+  a confidence score based on observation count and recency.
+
+### 9.3 Alerts — Implemented
+
+- **File:** `src/lib/metrics.server.ts` (`buildAlerts`)
+- Quiet alert logic fires only when meaningful:
+  - `declining` — latest reading moved against the intended direction.
+  - `target_at_risk` — current value is moving away from target.
+  - `target_achieved` — target reached.
+  - `unexpected_change` — large single-period swing (>20%).
+  - `stale` — no reading within the frequency window.
+- Severity is `info` / `warning` / `critical` based on the combination of trend, target state,
+  and freshness.
+
+### 9.4 UI — Implemented
+
+- **Files:** `src/routes/_authenticated/app.metrics.index.tsx`,
+  `src/routes/_authenticated/app.metrics.$metricId.tsx`,
+  `src/components/business-os/metric-form.tsx`,
+  `src/components/business-os/metric-format.tsx`
+- **Dashboard (`/app/metrics`):** performance summary cards (improving, declining, on target,
+  needs attention), signals list, search, and a grid of metric cards showing baseline,
+  current, target, progress bar, trend badge, and outcome sentence.
+- **Detail (`/app/metrics/:id`):** definition, linked goal/diagnosis/action/process, baseline
+  and target editing, a time-series chart of observations, append-only observation log,
+  and a manual **Record observation** form with value, date, period bounds, source, and notes.
+- **Action Plan linkage:** `ActionView` in `src/lib/action-plan.server.ts` now includes a
+  `MetricView` for tasks with a linked metric, so owners can see measured progress next to
+  each action.
+- **Process linkage:** the process detail page surfaces linked metrics and their latest
+  outcome, connecting process execution to business results.
+
+### 9.5 Brain integration — Implemented
+
+- **File:** `src/lib/metrics.server.ts` (`recordObservation`)
+- When a new observation moves a metric by ≥10% from baseline, or achieves a target, the
+  engine writes a durable `metric_outcome` memory row into `ai_memory` via
+  `src/lib/memory.server.ts`.
+- The memory includes the metric name, direction, baseline, current, target, and a plain
+  outcome sentence. It is embedded and becomes available to future Diagnosis, Blueprint, and
+  Action Plan runs through `match_business_memory()`.
+
+### 9.6 Audit logging — Implemented
+
+`metric.created`, `metric.updated`, `metric.baseline_established`, `metric.observation_added`,
+`metric.target_changed`, `metric.archived`.
+
+### 9.7 Server functions — Implemented
+
+- **File:** `src/lib/metrics.functions.ts`
+- `getMetrics` — full portfolio with summary and alerts.
+- `getMetric` — single metric with history and links.
+- `getMetricLinkOptions` — goals, tasks, processes, and diagnosis items the metric can be
+  attached to.
+- `saveMetric` — create or update a metric definition (idempotent on `metric_key`).
+- `addMetricObservation` — append one manual observation and recompute the outcome.
+- `getProcessMetrics` — metrics linked to a specific process.
+
+### 9.8 Remaining after P2.1
+
+| Area | Status |
+| --- | --- |
+| Metrics ingestion | Implemented |
+| Automatic integration imports | Missing (P2) |
+| Process metric aggregation dashboards | Partial (linked, no dedicated analytics view) |
+| Experiments | Missing (P2) |
+| Programmatic SEO | Missing (P2) |
+| Evidence upload to storage | Missing (P2) |
+| Real outbound connectors | Missing (P2) |
+
+**Recommended next action:** real outbound connectors, so processes can execute their
+external-effect steps and measured outcomes actually drive automated operations.
