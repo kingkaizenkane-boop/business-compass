@@ -26,7 +26,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 | Processes / workflow execution | Implemented (§7 / §8) |
 | Metrics ingestion | Implemented (§9) |
 | Experiments | Implemented (P2.2) |
-| Programmatic SEO | Missing (P2) |
+| Programmatic SEO | Implemented (P2.3) |
 
 ---
 
@@ -110,9 +110,9 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 
 - No hypothesis tracking, no outcome capture, no learning loop back into the Brain. `app.experiments.tsx` is a placeholder.
 
-### 2.13 Programmatic SEO — Missing
+### 2.13 Programmatic SEO — Implemented (P2.3, see §11)
 
-- **Tables:** `seo_sites` and template rows seeded (5 templates), but no opportunity scoring, generation, quality gate or publish path. `app.seo.tsx` is scaffolding.
+- Two separated engines (platform acquisition and customer lead generation), deterministic opportunity scoring, queued AI generation, a 75/100 quality gate, human review/publish, public page routes and a sitemap driven by published pages only.
 
 ---
 
@@ -121,9 +121,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 1. **Thin error/empty-state coverage** on routes with loaders — a failed read can blank a page.
 2. **No real outbound connectors.** Email, CRM, and messaging steps are typed and gated but not yet executable.
 3. **No scheduled / event triggers.** Processes must be started manually or from the queue today.
-4. **No programmatic SEO execution.** Templates exist but no opportunity scoring, generation, or publish path.
-5. **No experiments module.** Outcomes are measured but not tested against hypotheses with control groups.
-6. **No evidence upload.** Owners cannot attach documents, screenshots, or financials to Brain facts.
+4. **No evidence upload.** Owners cannot attach documents, screenshots, or financials to Brain facts.
 7. **P0/P1/P2.1 risks resolved:** synchronous AI, unbacked traceability, cost ceilings, embeddings, auth surface, audit gaps, fact versioning, process execution, and metrics ingestion are all implemented.
 
 ---
@@ -140,7 +138,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 ### P2 — Scale and expansion
 1. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
 2. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
-3. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
+3. ~~**Programmatic SEO execution.**~~ Delivered in P2.3: opportunity scoring → generation → quality gate → review → publish. See §11.
 4. ~~**Experiments module.**~~ Delivered in P2.2: hypothesis tracking, deterministic outcome capture, and the learning loop back into the Brain. See §10.
 5. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
 6. **CRM surface.** CRUD for offers, leads, and customers.
@@ -257,14 +255,14 @@ password reset flow at `/reset-password`. Protected routes stay under `_authenti
 `audit_logs` now records organization creation, business creation, interview responses,
 fact verification/unverification, AI job enqueue, job completion/failure and AI limit changes.
 
-### 11. Security review — CLEAN (with documented exceptions)
+### 6.11 Security review — CLEAN (with documented exceptions)
 The linter's remaining findings are intentional and recorded in security memory:
 the `is_*` membership helpers must stay executable by signed-in users because RLS policies
 call them, and `cron_job_config` is deliberately policy-free (service-role only).
 
 ### Remaining before launch
 - Publish the app once so the scheduled worker endpoint resolves.
-- Programmatic SEO remains a P2 placeholder; Experiments shipped in P2.2 (see §10).
+- Experiments shipped in P2.2 (see §10); Programmatic SEO shipped in P2.3 (see §11).
 
 ---
 
@@ -424,7 +422,7 @@ library discoverability, and safe autonomy defaults.
 | Scheduled / event triggers | Missing (P2) |
 | Metrics ingestion | Implemented (P2.1) |
 | Experiments | Implemented (P2.2) |
-| Programmatic SEO | Missing (P2) |
+| Programmatic SEO | Implemented (P2.3) |
 | Evidence upload to storage | Missing (P2) |
 
 **Recommended next action:** real outbound connectors, so processes can execute their
@@ -528,7 +526,7 @@ changes back into the Business Brain as durable memories.
 | Automatic integration imports | Missing (P2) |
 | Process metric aggregation dashboards | Partial (linked, no dedicated analytics view) |
 | Experiments | Implemented (P2.2) |
-| Programmatic SEO | Missing (P2) |
+| Programmatic SEO | Implemented (P2.3) |
 | Evidence upload to storage | Missing (P2) |
 | Real outbound connectors | Missing (P2) |
 
@@ -583,6 +581,58 @@ experiment type. AI never decides whether an experiment succeeded.
 
 ### 10.5 Remaining
 
-- Programmatic SEO engine (P3).
+- Programmatic SEO engine — delivered in P2.3 (see §11).
 - Automated experiment cohorting / control groups beyond the current
   observational and controlled types.
+
+---
+
+## 11. P2.3 — Programmatic SEO & Acquisition Engine milestone — delivered 29 August 2026
+
+Two engines, one codebase, permanently separated datasets:
+
+- **Engine A — Platform SEO.** Pages that market Business OS itself, managed only by
+  organization admins (`is_org_admin`), served publicly at `/business-os-for/$slug`.
+- **Engine B — Customer SEO.** Pages that generate leads for a customer business,
+  served at `/sites/$siteId/$slug`. Platform and customer rows never mix.
+
+### 11.1 Data model — Implemented
+
+- `seo_sites` (site type, org/business mapping), `seo_opportunities` (intent, service,
+  location, component scores, status and rejection reason), `seo_pages` (content, metadata,
+  schema, quality report, lifecycle status).
+- Tenant-isolated RLS with anonymous SELECT limited to published pages; drafts are private.
+
+### 11.2 Deterministic scoring and quality gate — Implemented
+
+- `computeOpportunityScore` in `src/lib/seo-types.ts` produces a 0–100 score from business
+  fit, relevance, content value and competition. A keyword only qualifies when verified
+  Brain facts can substantiate a real page; unsupported keywords are rejected *with a reason*.
+- `runQualityGate` in `src/lib/seo.server.ts` scores nine checks server-side — content depth,
+  business relevance, search intent, originality, internal linking, metadata, schema,
+  canonical URL, indexability. Threshold is 75/100 and nothing can publish below it.
+- `nameLike` filtering keeps statistical and sentence-like facts out of the keyword seed set,
+  so no page is built on a fragment such as "70 percent of customers".
+
+### 11.3 Generation, review and publishing — Implemented
+
+- `seo_page_generation` runs through the existing AI job queue with separate strict prompts
+  per engine; every claim must trace to a Brain fact. Generation always lands as a draft.
+- Review workflow: draft → review → approved → published, with pause and archive.
+- `recordPageMeasurement` feeds real measured performance into the Metrics Engine and the
+  Brain outcome loop. Search numbers are never estimated or invented.
+
+### 11.4 UI and public surfaces — Implemented
+
+- `/app/seo` (overview), `/app/seo/opportunities`, `/app/seo/library`,
+  `/app/seo/pages/$pageId` (quality report, metadata editor, evidence drawer),
+  `/app/seo/platform` (admin-only).
+- Public: `/business-os-for/$slug`, `/sites/$siteId/$slug`, and `/sitemap.xml` generated
+  from published pages only, with JSON-LD injected per page.
+
+### 11.5 Remaining
+
+- Real outbound connectors for process steps.
+- Evidence upload to storage.
+- Search Console / analytics ingestion to populate measured performance automatically.
+
