@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
+import { Route as BusinessOsForSlugRouteImport } from './routes/business-os-for.$slug'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authenticated/app.action-plan'
 import { Route as AuthenticatedAppAiUsageRouteImport } from './routes/_authenticated/app.ai-usage'
@@ -68,6 +69,11 @@ const AuthenticatedAppRoute = AuthenticatedAppRouteImport.update({
   id: '/app',
   path: '/app',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const BusinessOsForSlugRoute = BusinessOsForSlugRouteImport.update({
+  id: '/business-os-for/$slug',
+  path: '/business-os-for/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAppIndexRoute = AuthenticatedAppIndexRouteImport.update({
   id: '/',
@@ -247,6 +253,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
+  '/business-os-for/$slug': typeof BusinessOsForSlugRoute
   '/_authenticated/app/action-plan': typeof AuthenticatedAppActionPlanRoute
   '/_authenticated/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/app'
+    | '/business-os-for/$slug'
     | '/app/action-plan'
     | '/app/ai-usage'
     | '/app/blueprint'
@@ -392,6 +402,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/reset-password'
+    | '/business-os-for/$slug'
     | '/app/action-plan'
     | '/app/ai-usage'
     | '/app/blueprint'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/reset-password'
     | '/_authenticated/app'
+    | '/business-os-for/$slug'
     | '/_authenticated/app/action-plan'
     | '/_authenticated/app/ai-usage'
     | '/_authenticated/app/blueprint'
@@ -465,6 +477,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
+  BusinessOsForSlugRoute: typeof BusinessOsForSlugRoute
   ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
 }
 
@@ -504,6 +517,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app'
       preLoaderRoute: typeof AuthenticatedAppRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/business-os-for/$slug': {
+      id: '/business-os-for/$slug'
+      path: '/business-os-for/$slug'
+      fullPath: '/business-os-for/$slug'
+      preLoaderRoute: typeof BusinessOsForSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/app/': {
       id: '/_authenticated/app/'
@@ -812,6 +832,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ResetPasswordRoute: ResetPasswordRoute,
+  BusinessOsForSlugRoute: BusinessOsForSlugRoute,
   ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
 }
 export const routeTree = rootRouteImport
