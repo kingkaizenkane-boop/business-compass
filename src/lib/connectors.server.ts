@@ -370,7 +370,11 @@ export async function setConnectionStatus(input: {
 }): Promise<ConnectorConnectionView> {
   const { data, error } = await input.supabase
     .from("connector_connections")
-    .update({ status: input.status, last_error: input.status === "connected" ? null : undefined })
+    .update(
+      input.status === "connected"
+        ? { status: input.status, last_error: null }
+        : { status: input.status },
+    )
     .eq("id", input.connectionId)
     .eq("business_id", input.businessId)
     .select("*")
