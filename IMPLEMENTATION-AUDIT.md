@@ -696,3 +696,25 @@ framework; each channel is a provider entry with an adapter, and only the adapte
 - Connector events as first-class evidence attachments on Brain facts.
 
 
+
+## 13. End-to-end barber stress test — 29 August 2026
+
+A full-loop stress test was run against a realistic Lagos barbershop tenant
+(`[TEST] King's Edge Barbers`). Report: `END-TO-END-BARBER-STRESS-TEST.md`.
+
+Result: the loop (interview → Brain → diagnosis → blueprint → 90-day plan →
+processes → metrics → experiments → SEO → connectors) passed end to end.
+44 AI jobs completed with zero failures for ~$0.027 of model spend, and
+mobile/desktop layouts were clean on all ten app pages.
+
+Defects fixed as part of the run:
+
+- `experiments.server.ts` measurement window ignored backdated observations.
+- Missing member INSERT policies on `audit_logs` and `ai_memory`.
+- `seo.server.ts` `updatePage` never re-scored the quality gate after an owner
+  edit, so a corrected page could never publish and a degraded page could.
+
+Open issues carried forward: customer SEO keyword synthesis inherits the raw
+business name, per-family discovery blockers are not surfaced in the UI,
+inbound connector dedup needs a payload-hash fallback, and a React
+"state update before mount" warning appears on authenticated routes.

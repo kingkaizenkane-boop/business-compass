@@ -267,10 +267,23 @@ function evaluateReadiness(row: Row, primary: MetricView | null): ExperimentRead
 }
 
 function periodBounds(row: Row) {
-  const from = row.started_at ?? (row.start_date ? `${row.start_date}T00:00:00.000Z` : null);
-  const to = row.completed_at ?? row.cancelled_at ?? null;
+  // The declared window wins when it is set, so observations recorded for dates
+  // inside the experiment period still count when the row is started later
+  // (backfilled measurements, retrospective before/after studies).
+  const declaredFrom = row.start_date ? `${row.start_date}T00:00:00.000Z` : null;
+  const from =
+    declaredFrom && row.started_at
+      ? declaredFrom < row.started_at
+        ? declaredFrom
+        : row.started_at
+      : (declaredFrom ?? row.started_at ?? null);
+  const declaredTo = row.end_date ? `${row.end_date}T23:59:59.999Z` : null;
+  const closedTo = row.completed_at ?? row.cancelled_at ?? null;
+  const to =
+    declaredTo && closedTo ? (declaredTo > closedTo ? declaredTo : closedTo) : (declaredTo ?? closedTo);
   return { from, to };
 }
+
 
 function buildView(
   row: Row,
