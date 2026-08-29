@@ -2564,54 +2564,107 @@ export type Database = {
       }
       seo_opportunities: {
         Row: {
+          business_fit_score: number | null
+          business_id: string | null
+          business_stage: string | null
           commercial_score: number | null
           competition_score: number | null
+          content_value_score: number | null
           created_at: string
+          decided_at: string | null
           geographic_modifier: string | null
           id: string
+          industry: string | null
           keyword: string
+          location: string | null
           metadata: Json
           opportunity_score: number | null
+          organization_id: string | null
+          problem: string | null
+          reason: string | null
           recommended_page_type: string | null
           relevance_score: number | null
           search_intent: string | null
           seo_site_id: string
+          service: string | null
           status: string
+          topic: string | null
           topic_cluster: string | null
+          updated_at: string
         }
         Insert: {
+          business_fit_score?: number | null
+          business_id?: string | null
+          business_stage?: string | null
           commercial_score?: number | null
           competition_score?: number | null
+          content_value_score?: number | null
           created_at?: string
+          decided_at?: string | null
           geographic_modifier?: string | null
           id?: string
+          industry?: string | null
           keyword: string
+          location?: string | null
           metadata?: Json
           opportunity_score?: number | null
+          organization_id?: string | null
+          problem?: string | null
+          reason?: string | null
           recommended_page_type?: string | null
           relevance_score?: number | null
           search_intent?: string | null
           seo_site_id: string
+          service?: string | null
           status?: string
+          topic?: string | null
           topic_cluster?: string | null
+          updated_at?: string
         }
         Update: {
+          business_fit_score?: number | null
+          business_id?: string | null
+          business_stage?: string | null
           commercial_score?: number | null
           competition_score?: number | null
+          content_value_score?: number | null
           created_at?: string
+          decided_at?: string | null
           geographic_modifier?: string | null
           id?: string
+          industry?: string | null
           keyword?: string
+          location?: string | null
           metadata?: Json
           opportunity_score?: number | null
+          organization_id?: string | null
+          problem?: string | null
+          reason?: string | null
           recommended_page_type?: string | null
           relevance_score?: number | null
           search_intent?: string | null
           seo_site_id?: string
+          service?: string | null
           status?: string
+          topic?: string | null
           topic_cluster?: string | null
+          updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "seo_opportunities_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_opportunities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "seo_opportunities_seo_site_id_fkey"
             columns: ["seo_site_id"]
@@ -2621,94 +2674,326 @@ export type Database = {
           },
         ]
       }
+      seo_page_measurements: {
+        Row: {
+          business_id: string | null
+          created_at: string
+          id: string
+          metric_key: string
+          note: string | null
+          organization_id: string | null
+          page_id: string
+          period_end: string | null
+          period_start: string | null
+          recorded_by: string | null
+          source: string
+          value: number
+        }
+        Insert: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metric_key: string
+          note?: string | null
+          organization_id?: string | null
+          page_id: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_by?: string | null
+          source?: string
+          value: number
+        }
+        Update: {
+          business_id?: string | null
+          created_at?: string
+          id?: string
+          metric_key?: string
+          note?: string | null
+          organization_id?: string | null
+          page_id?: string
+          period_end?: string | null
+          period_start?: string | null
+          recorded_by?: string | null
+          source?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_page_measurements_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_page_measurements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_page_measurements_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "seo_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seo_page_templates: {
         Row: {
           active: boolean
           created_at: string
+          description: string | null
+          eligibility: Json
           id: string
           name: string
           page_type: string
+          site_type: string
           template_config: Json
+          version: number
         }
         Insert: {
           active?: boolean
           created_at?: string
+          description?: string | null
+          eligibility?: Json
           id?: string
           name: string
           page_type: string
+          site_type?: string
           template_config: Json
+          version?: number
         }
         Update: {
           active?: boolean
           created_at?: string
+          description?: string | null
+          eligibility?: Json
           id?: string
           name?: string
           page_type?: string
+          site_type?: string
           template_config?: Json
+          version?: number
         }
         Relationships: []
       }
-      seo_pages: {
+      seo_page_versions: {
         Row: {
+          business_id: string | null
+          business_relevance_score: number | null
           canonical_url: string | null
           content: Json | null
+          created_at: string
+          created_by: string | null
+          factual_confidence: number | null
+          h1: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          organization_id: string | null
+          originality_score: number | null
+          page_id: string
+          published_at: string | null
+          quality_report: Json
+          quality_score: number | null
+          schema_json: Json | null
+          slug: string | null
+          status: string | null
+          title: string | null
+          version: number
+        }
+        Insert: {
+          business_id?: string | null
+          business_relevance_score?: number | null
+          canonical_url?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          factual_confidence?: number | null
+          h1?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          organization_id?: string | null
+          originality_score?: number | null
+          page_id: string
+          published_at?: string | null
+          quality_report?: Json
+          quality_score?: number | null
+          schema_json?: Json | null
+          slug?: string | null
+          status?: string | null
+          title?: string | null
+          version: number
+        }
+        Update: {
+          business_id?: string | null
+          business_relevance_score?: number | null
+          canonical_url?: string | null
+          content?: Json | null
+          created_at?: string
+          created_by?: string | null
+          factual_confidence?: number | null
+          h1?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          organization_id?: string | null
+          originality_score?: number | null
+          page_id?: string
+          published_at?: string | null
+          quality_report?: Json
+          quality_score?: number | null
+          schema_json?: Json | null
+          slug?: string | null
+          status?: string | null
+          title?: string | null
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seo_page_versions_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_page_versions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_page_versions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "seo_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seo_pages: {
+        Row: {
+          business_id: string | null
+          business_relevance_score: number | null
+          canonical_url: string | null
+          content: Json | null
+          content_fingerprint: string | null
+          created_at: string
+          evidence_fact_ids: string[]
+          factual_confidence: number | null
           h1: string | null
           id: string
           indexable: boolean
           last_refreshed_at: string | null
           meta_description: string | null
+          meta_title: string | null
           opportunity_id: string | null
+          organization_id: string | null
+          originality_score: number | null
           published_at: string | null
+          quality_report: Json
           quality_score: number | null
+          review_notes: string | null
           schema_json: Json | null
           seo_site_id: string
           slug: string
           status: Database["public"]["Enums"]["seo_page_status"]
           template_id: string | null
           title: string | null
+          updated_at: string
+          version: number
+          word_count: number | null
         }
         Insert: {
+          business_id?: string | null
+          business_relevance_score?: number | null
           canonical_url?: string | null
           content?: Json | null
+          content_fingerprint?: string | null
+          created_at?: string
+          evidence_fact_ids?: string[]
+          factual_confidence?: number | null
           h1?: string | null
           id?: string
           indexable?: boolean
           last_refreshed_at?: string | null
           meta_description?: string | null
+          meta_title?: string | null
           opportunity_id?: string | null
+          organization_id?: string | null
+          originality_score?: number | null
           published_at?: string | null
+          quality_report?: Json
           quality_score?: number | null
+          review_notes?: string | null
           schema_json?: Json | null
           seo_site_id: string
           slug: string
           status?: Database["public"]["Enums"]["seo_page_status"]
           template_id?: string | null
           title?: string | null
+          updated_at?: string
+          version?: number
+          word_count?: number | null
         }
         Update: {
+          business_id?: string | null
+          business_relevance_score?: number | null
           canonical_url?: string | null
           content?: Json | null
+          content_fingerprint?: string | null
+          created_at?: string
+          evidence_fact_ids?: string[]
+          factual_confidence?: number | null
           h1?: string | null
           id?: string
           indexable?: boolean
           last_refreshed_at?: string | null
           meta_description?: string | null
+          meta_title?: string | null
           opportunity_id?: string | null
+          organization_id?: string | null
+          originality_score?: number | null
           published_at?: string | null
+          quality_report?: Json
           quality_score?: number | null
+          review_notes?: string | null
           schema_json?: Json | null
           seo_site_id?: string
           slug?: string
           status?: Database["public"]["Enums"]["seo_page_status"]
           template_id?: string | null
           title?: string | null
+          updated_at?: string
+          version?: number
+          word_count?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "seo_pages_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "seo_pages_opportunity_id_fkey"
             columns: ["opportunity_id"]
             isOneToOne: false
             referencedRelation: "seo_opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_pages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -2735,7 +3020,15 @@ export type Database = {
           created_at: string
           domain: string | null
           id: string
+          name: string | null
+          organization_id: string | null
+          robots_status: string
           site_type: string
+          sitemap_status: string
+          status: string
+          subdomain: string | null
+          updated_at: string
+          url_pattern: string
         }
         Insert: {
           active?: boolean
@@ -2744,7 +3037,15 @@ export type Database = {
           created_at?: string
           domain?: string | null
           id?: string
+          name?: string | null
+          organization_id?: string | null
+          robots_status?: string
           site_type: string
+          sitemap_status?: string
+          status?: string
+          subdomain?: string | null
+          updated_at?: string
+          url_pattern?: string
         }
         Update: {
           active?: boolean
@@ -2753,7 +3054,15 @@ export type Database = {
           created_at?: string
           domain?: string | null
           id?: string
+          name?: string | null
+          organization_id?: string | null
+          robots_status?: string
           site_type?: string
+          sitemap_status?: string
+          status?: string
+          subdomain?: string | null
+          updated_at?: string
+          url_pattern?: string
         }
         Relationships: [
           {
@@ -2761,6 +3070,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "seo_sites_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -3076,6 +3392,8 @@ export type Database = {
       seo_page_status:
         | "draft"
         | "generating"
+        | "review"
+        | "approved"
         | "published"
         | "paused"
         | "archived"
@@ -3380,6 +3698,8 @@ export const Constants = {
       seo_page_status: [
         "draft",
         "generating",
+        "review",
+        "approved",
         "published",
         "paused",
         "archived",
