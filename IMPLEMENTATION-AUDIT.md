@@ -255,7 +255,7 @@ password reset flow at `/reset-password`. Protected routes stay under `_authenti
 `audit_logs` now records organization creation, business creation, interview responses,
 fact verification/unverification, AI job enqueue, job completion/failure and AI limit changes.
 
-### 11. Security review — CLEAN (with documented exceptions)
+### 6.11 Security review — CLEAN (with documented exceptions)
 The linter's remaining findings are intentional and recorded in security memory:
 the `is_*` membership helpers must stay executable by signed-in users because RLS policies
 call them, and `cron_job_config` is deliberately policy-free (service-role only).
@@ -581,7 +581,7 @@ experiment type. AI never decides whether an experiment succeeded.
 
 ### 10.5 Remaining
 
-- Programmatic SEO engine (P3).
+- Programmatic SEO engine — delivered in P2.3 (see §11).
 - Automated experiment cohorting / control groups beyond the current
   observational and controlled types.
 
