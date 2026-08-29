@@ -1,7 +1,9 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
-import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
+// Intentionally replaces the generated attachSupabaseAuth: it does not wait for
+// the session to hydrate on a cold load.
+import { attachSupabaseAuthWithWait } from "./lib/supabase-auth-attach";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
