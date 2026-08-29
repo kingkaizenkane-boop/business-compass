@@ -71,6 +71,12 @@ export const AUDIT_ACTIONS = [
   "seo.page_paused",
   "seo.page_archived",
   "seo.measurement_recorded",
+  "connector.created",
+  "connector.enabled",
+  "connector.disabled",
+  "connector.secret_rotated",
+  "connector.events_ingested",
+  "connector.message_sent",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

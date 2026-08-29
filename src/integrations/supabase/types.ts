@@ -966,6 +966,192 @@ export type Database = {
           },
         ]
       }
+      connector_connections: {
+        Row: {
+          business_id: string
+          capabilities: string[]
+          config: Json
+          created_at: string
+          created_by: string | null
+          credential_secret_name: string | null
+          display_name: string
+          events_received: number
+          id: string
+          inbound_secret_hash: string | null
+          inbound_secret_set_at: string | null
+          last_error: string | null
+          last_event_at: string | null
+          leads_created: number
+          organization_id: string
+          provider: string
+          status: Database["public"]["Enums"]["connector_status"]
+          updated_at: string
+        }
+        Insert: {
+          business_id: string
+          capabilities?: string[]
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_secret_name?: string | null
+          display_name: string
+          events_received?: number
+          id?: string
+          inbound_secret_hash?: string | null
+          inbound_secret_set_at?: string | null
+          last_error?: string | null
+          last_event_at?: string | null
+          leads_created?: number
+          organization_id: string
+          provider: string
+          status?: Database["public"]["Enums"]["connector_status"]
+          updated_at?: string
+        }
+        Update: {
+          business_id?: string
+          capabilities?: string[]
+          config?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_secret_name?: string | null
+          display_name?: string
+          events_received?: number
+          id?: string
+          inbound_secret_hash?: string | null
+          inbound_secret_set_at?: string | null
+          last_error?: string | null
+          last_event_at?: string | null
+          leads_created?: number
+          organization_id?: string
+          provider?: string
+          status?: Database["public"]["Enums"]["connector_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_connections_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_connections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connector_events: {
+        Row: {
+          body_preview: string | null
+          business_id: string
+          connection_id: string
+          contact_email: string | null
+          contact_name: string | null
+          contact_phone: string | null
+          created_at: string
+          customer_id: string | null
+          direction: Database["public"]["Enums"]["connector_direction"]
+          error: string | null
+          event_type: string
+          external_id: string | null
+          id: string
+          lead_id: string | null
+          occurred_at: string
+          organization_id: string
+          payload: Json
+          provider: string
+          routed_action: string | null
+          status: Database["public"]["Enums"]["connector_event_status"]
+          subject: string | null
+        }
+        Insert: {
+          body_preview?: string | null
+          business_id: string
+          connection_id: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction?: Database["public"]["Enums"]["connector_direction"]
+          error?: string | null
+          event_type: string
+          external_id?: string | null
+          id?: string
+          lead_id?: string | null
+          occurred_at?: string
+          organization_id: string
+          payload?: Json
+          provider: string
+          routed_action?: string | null
+          status?: Database["public"]["Enums"]["connector_event_status"]
+          subject?: string | null
+        }
+        Update: {
+          body_preview?: string | null
+          business_id?: string
+          connection_id?: string
+          contact_email?: string | null
+          contact_name?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          customer_id?: string | null
+          direction?: Database["public"]["Enums"]["connector_direction"]
+          error?: string | null
+          event_type?: string
+          external_id?: string | null
+          id?: string
+          lead_id?: string | null
+          occurred_at?: string
+          organization_id?: string
+          payload?: Json
+          provider?: string
+          routed_action?: string | null
+          status?: Database["public"]["Enums"]["connector_event_status"]
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connector_events_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_events_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "connector_connections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_events_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connector_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cron_job_config: {
         Row: {
           created_at: string
@@ -3253,6 +3439,14 @@ export type Database = {
     Enums: {
       ai_job_status: "queued" | "running" | "completed" | "failed" | "cancelled"
       confidence_level: "very_low" | "low" | "medium" | "high" | "very_high"
+      connector_direction: "inbound" | "outbound"
+      connector_event_status:
+        | "received"
+        | "normalized"
+        | "routed"
+        | "ignored"
+        | "failed"
+      connector_status: "draft" | "connected" | "error" | "disabled"
       diagnosis_category:
         | "revenue"
         | "marketing"
@@ -3544,6 +3738,15 @@ export const Constants = {
     Enums: {
       ai_job_status: ["queued", "running", "completed", "failed", "cancelled"],
       confidence_level: ["very_low", "low", "medium", "high", "very_high"],
+      connector_direction: ["inbound", "outbound"],
+      connector_event_status: [
+        "received",
+        "normalized",
+        "routed",
+        "ignored",
+        "failed",
+      ],
+      connector_status: ["draft", "connected", "error", "disabled"],
       diagnosis_category: [
         "revenue",
         "marketing",

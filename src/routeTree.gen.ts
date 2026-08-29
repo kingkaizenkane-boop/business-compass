@@ -21,6 +21,7 @@ import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppAiUsageRouteImport } from './routes/_authenticated/app.ai-usage'
 import { Route as AuthenticatedAppBlueprintRouteImport } from './routes/_authenticated/app.blueprint'
 import { Route as AuthenticatedAppBrainRouteImport } from './routes/_authenticated/app.brain'
+import { Route as AuthenticatedAppConnectorsRouteImport } from './routes/_authenticated/app.connectors'
 import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/app.dashboard'
 import { Route as AuthenticatedAppDiagnosisRouteImport } from './routes/_authenticated/app.diagnosis'
@@ -46,6 +47,7 @@ import { Route as AuthenticatedAppSeoIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppSeoLibraryRouteImport } from './routes/_authenticated/app.seo.library'
 import { Route as AuthenticatedAppSeoOpportunitiesRouteImport } from './routes/_authenticated/app.seo.opportunities'
 import { Route as AuthenticatedAppSeoPlatformRouteImport } from './routes/_authenticated/app.seo.platform'
+import { Route as ApiPublicConnectorsConnectionIdRouteImport } from './routes/api/public/connectors.$connectionId'
 import { Route as AuthenticatedAppSeoPagesPageIdRouteImport } from './routes/_authenticated/app.seo.pages.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -109,6 +111,12 @@ const AuthenticatedAppBrainRoute = AuthenticatedAppBrainRouteImport.update({
   path: '/brain',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppConnectorsRoute =
+  AuthenticatedAppConnectorsRouteImport.update({
+    id: '/connectors',
+    path: '/connectors',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppCustomersRoute =
   AuthenticatedAppCustomersRouteImport.update({
     id: '/customers',
@@ -253,6 +261,12 @@ const AuthenticatedAppSeoPlatformRoute =
     path: '/platform',
     getParentRoute: () => AuthenticatedAppSeoRoute,
   } as any)
+const ApiPublicConnectorsConnectionIdRoute =
+  ApiPublicConnectorsConnectionIdRouteImport.update({
+    id: '/api/public/connectors/$connectionId',
+    path: '/api/public/connectors/$connectionId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAppSeoPagesPageIdRoute =
   AuthenticatedAppSeoPagesPageIdRouteImport.update({
     id: '/pages/$pageId',
@@ -271,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -293,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
+  '/api/public/connectors/$connectionId': typeof ApiPublicConnectorsConnectionIdRoute
   '/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -309,6 +325,7 @@ export interface FileRoutesByTo {
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -330,6 +347,7 @@ export interface FileRoutesByTo {
   '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
+  '/api/public/connectors/$connectionId': typeof ApiPublicConnectorsConnectionIdRoute
   '/app/experiments': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
@@ -349,6 +367,7 @@ export interface FileRoutesById {
   '/_authenticated/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/_authenticated/app/brain': typeof AuthenticatedAppBrainRoute
+  '/_authenticated/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/_authenticated/app/customers': typeof AuthenticatedAppCustomersRoute
   '/_authenticated/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -371,6 +390,7 @@ export interface FileRoutesById {
   '/_authenticated/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/_authenticated/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/_authenticated/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
+  '/api/public/connectors/$connectionId': typeof ApiPublicConnectorsConnectionIdRoute
   '/_authenticated/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -390,6 +410,7 @@ export interface FileRouteTypes {
     | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/connectors'
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
@@ -412,6 +433,7 @@ export interface FileRouteTypes {
     | '/app/seo/library'
     | '/app/seo/opportunities'
     | '/app/seo/platform'
+    | '/api/public/connectors/$connectionId'
     | '/app/experiments/'
     | '/app/metrics/'
     | '/app/operations/'
@@ -428,6 +450,7 @@ export interface FileRouteTypes {
     | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/connectors'
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
@@ -449,6 +472,7 @@ export interface FileRouteTypes {
     | '/app/seo/library'
     | '/app/seo/opportunities'
     | '/app/seo/platform'
+    | '/api/public/connectors/$connectionId'
     | '/app/experiments'
     | '/app/metrics'
     | '/app/operations'
@@ -467,6 +491,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/ai-usage'
     | '/_authenticated/app/blueprint'
     | '/_authenticated/app/brain'
+    | '/_authenticated/app/connectors'
     | '/_authenticated/app/customers'
     | '/_authenticated/app/dashboard'
     | '/_authenticated/app/diagnosis'
@@ -489,6 +514,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/seo/library'
     | '/_authenticated/app/seo/opportunities'
     | '/_authenticated/app/seo/platform'
+    | '/api/public/connectors/$connectionId'
     | '/_authenticated/app/experiments/'
     | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
@@ -505,6 +531,7 @@ export interface RootRouteChildren {
   BusinessOsForSlugRoute: typeof BusinessOsForSlugRoute
   ApiPublicAiJobsWorkerRoute: typeof ApiPublicAiJobsWorkerRoute
   SitesSiteIdSlugRoute: typeof SitesSiteIdSlugRoute
+  ApiPublicConnectorsConnectionIdRoute: typeof ApiPublicConnectorsConnectionIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -591,6 +618,13 @@ declare module '@tanstack/react-router' {
       path: '/brain'
       fullPath: '/app/brain'
       preLoaderRoute: typeof AuthenticatedAppBrainRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/connectors': {
+      id: '/_authenticated/app/connectors'
+      path: '/connectors'
+      fullPath: '/app/connectors'
+      preLoaderRoute: typeof AuthenticatedAppConnectorsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/customers': {
@@ -768,6 +802,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSeoPlatformRouteImport
       parentRoute: typeof AuthenticatedAppSeoRoute
     }
+    '/api/public/connectors/$connectionId': {
+      id: '/api/public/connectors/$connectionId'
+      path: '/api/public/connectors/$connectionId'
+      fullPath: '/api/public/connectors/$connectionId'
+      preLoaderRoute: typeof ApiPublicConnectorsConnectionIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/app/seo/pages/$pageId': {
       id: '/_authenticated/app/seo/pages/$pageId'
       path: '/pages/$pageId'
@@ -802,6 +843,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAiUsageRoute: typeof AuthenticatedAppAiUsageRoute
   AuthenticatedAppBlueprintRoute: typeof AuthenticatedAppBlueprintRoute
   AuthenticatedAppBrainRoute: typeof AuthenticatedAppBrainRoute
+  AuthenticatedAppConnectorsRoute: typeof AuthenticatedAppConnectorsRoute
   AuthenticatedAppCustomersRoute: typeof AuthenticatedAppCustomersRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppDiagnosisRoute: typeof AuthenticatedAppDiagnosisRoute
@@ -827,6 +869,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAiUsageRoute: AuthenticatedAppAiUsageRoute,
   AuthenticatedAppBlueprintRoute: AuthenticatedAppBlueprintRoute,
   AuthenticatedAppBrainRoute: AuthenticatedAppBrainRoute,
+  AuthenticatedAppConnectorsRoute: AuthenticatedAppConnectorsRoute,
   AuthenticatedAppCustomersRoute: AuthenticatedAppCustomersRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppDiagnosisRoute: AuthenticatedAppDiagnosisRoute,
@@ -876,6 +919,7 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessOsForSlugRoute: BusinessOsForSlugRoute,
   ApiPublicAiJobsWorkerRoute: ApiPublicAiJobsWorkerRoute,
   SitesSiteIdSlugRoute: SitesSiteIdSlugRoute,
+  ApiPublicConnectorsConnectionIdRoute: ApiPublicConnectorsConnectionIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

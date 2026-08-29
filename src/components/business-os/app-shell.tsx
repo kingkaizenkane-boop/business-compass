@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   MessagesSquare,
   Package,
+  Plug,
   Search,
   Settings,
   Sparkles,
@@ -57,6 +58,7 @@ const SECONDARY_NAV: NavItem[] = [
   { label: "SEO", to: "/app/seo", icon: Search },
   { label: "Experiments", to: "/app/experiments", icon: FlaskConical },
   { label: "Metrics", to: "/app/metrics", icon: Gauge },
+  { label: "Connectors", to: "/app/connectors", icon: Plug },
   { label: "AI usage", to: "/app/ai-usage", icon: Sparkles },
 ];
 
