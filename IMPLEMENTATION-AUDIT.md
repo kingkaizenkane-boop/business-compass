@@ -194,8 +194,7 @@ Start with **real outbound connectors** for process steps. Metrics ingestion is 
 
 ### 6.8 Remaining in this area
 
-- Scheduled cron invocation of `/api/public/ai-jobs-worker` still has to be registered against the published URL.
-- Two-tenant RLS verification test and an admin-facing usage dashboard remain outstanding.
+- The published app URL must resolve for the `pg_cron` invocation of `/api/public/ai-jobs-worker` to return 200. This happens automatically on first publish.
 
 ---
 
