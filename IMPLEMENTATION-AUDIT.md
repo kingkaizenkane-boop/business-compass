@@ -633,7 +633,66 @@ Two engines, one codebase, permanently separated datasets:
 
 ### 11.5 Remaining
 
-- Real outbound connectors for process steps.
 - Evidence upload to storage.
 - Search Console / analytics ingestion to populate measured performance automatically.
+
+---
+
+## 12. P3.1 — Connector Framework + Email Connector — delivered
+
+WhatsApp, CRM and payments are **not** separate systems. There is exactly one connector
+framework; each channel is a provider entry with an adapter, and only the adapter differs.
+
+### 12.1 Data model — Implemented
+
+- `connector_connections` — organization/business scoped connection with provider,
+  capabilities, status (`draft`/`connected`/`error`/`disabled`), hashed rotating inbound
+  secret, outbound credential *name* (never the value), counters and `last_error`.
+- `connector_events` — normalised event store: direction, event type, contact identity,
+  subject, body, raw payload, routing outcome, status and error.
+- Tenant-isolated RLS on both tables; a unique index on
+  `(connection_id, external_id)` makes redelivery a no-op.
+
+### 12.2 Unified contract — Implemented
+
+- `src/lib/connectors-types.ts` holds `CONNECTOR_REGISTRY` (email available; WhatsApp, CRM,
+  payments and calendar registered as planned) plus the single `NormalizedConnectorEvent`
+  shape every adapter must produce.
+- `src/lib/connectors.server.ts` owns the provider-agnostic pipeline:
+  verify caller → normalise → deduplicate → persist → route → audit. Adding a channel means
+  adding one adapter, not a new subsystem.
+
+### 12.3 Routing and lead creation — Implemented
+
+- Inbound enquiries upsert into `leads` by email/phone match, so the same person does not
+  become two leads. Only real inbound activity creates a lead; nothing is synthesised.
+- Outbound sending goes through the same event log, so every message the business sends is
+  auditable alongside what it received.
+
+### 12.4 Security — Implemented
+
+- Inbound tokens are shown once, stored as SHA-256 hashes, and rotatable; a stale token
+  fails closed with 401.
+- The public webhook `/api/public/connectors/$connectionId` authenticates the caller inside
+  the handler and validates the payload before any write.
+- Outbound credentials are referenced by secret name and read server-side only.
+- Audit vocabulary: `connector.created`, `connector.enabled`, `connector.disabled`,
+  `connector.secret_rotated`, `connector.events_ingested`, `connector.message_sent`.
+
+### 12.5 UI — Implemented
+
+- `/app/connectors`: connector health, available channels from the registry, per-connection
+  endpoint and token management, enable/disable, rotate, outbound compose, and a live feed of
+  normalised events with routing outcome.
+
+### 12.6 Verified end to end
+
+- Inbound email webhook → 1 event stored → 1 lead created; redelivery of the same
+  `messageId` → 0 stored, 1 duplicate; invalid token → 401.
+
+### 12.7 Remaining
+
+- WhatsApp, CRM, payments and calendar adapters (framework and registry already in place).
+- Connector events as first-class evidence attachments on Brain facts.
+
 
