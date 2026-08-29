@@ -37,14 +37,14 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 - **Files:** `src/lib/interview.server.ts`, `src/lib/interview.functions.ts`, `src/lib/brain.functions.ts`, `src/routes/_authenticated/app.brain.tsx`
 - **Tables:** `interview_sessions`, `interview_responses`, `brain_facts`, `interview_stages`, `interview_questions`
 - Sessions resolve, resume, and persist. Answers are extracted into typed `brain_facts` with confidence and verification state. Category filtering and verify/unverify work from the UI.
-- **Risk:** extraction is a single synchronous AI call; a slow model response blocks the answer submission.
+- Extraction runs through the async `ai_jobs` queue; the UI polls job status and shows progress without blocking submission.
 
 ### 2.2 Diagnosis Engine — Implemented
 
 - **Files:** `src/lib/diagnosis.server.ts`, `src/lib/diagnosis.functions.ts`, `src/routes/_authenticated/app.diagnosis.tsx`
 - **Tables:** `diagnosis_runs`, `diagnosis_items`
 - Readiness gate (~10 facts minimum), deterministic scoring `(impact*0.35 + urgency*0.25 + confidence*0.2 + opportunity*0.2) − effort penalty`, versioned runs, evidence drawer per finding.
-- **Risk:** long single-shot generation; retry logic exists in `ai.server.ts` but there is no persistence of partial progress.
+- Generation runs through the async `ai_jobs` queue with retries, heartbeats, and budget enforcement. Partial progress within a single run is not persisted, but failed jobs can be retried from the queue.
 
 ### 2.3 Blueprint Engine — Implemented
 
@@ -78,20 +78,23 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 - Wired for organization creation, business creation, interview responses, fact verification/unverification, AI job enqueue/completion/failure, AI limit changes, metric creation/updates/baselines/observations, and the full process lifecycle. See §6.10, §7.6, and §9.5.
 - **Remaining gap:** an admin-facing audit log view in the UI is not yet built (P2).
 
-### 2.8 AI job queue — Missing
+### 2.8 AI job queue — Implemented
 
-- **Tables / RPCs:** `ai_jobs`, `claim_ai_job()`, `complete_ai_job()`, `fail_ai_job()` — all present, none used.
-- Nothing enqueues jobs and nothing drains the queue. Every AI run is synchronous.
-- **Production risk:** highest. Diagnosis and blueprint generation are the longest calls in the product and will time out under real latency or larger Brains. There is no retry, no progress reporting, and a failed run leaves the user with nothing.
+- **Files:** `src/lib/jobs.server.ts`, `src/lib/jobs.functions.ts`, `src/routes/api/public/ai-jobs-worker.ts`, `src/components/business-os/job-status.tsx`
+- **Tables / RPCs:** `ai_jobs`, `claim_ai_job()`, `complete_ai_job()`, `fail_ai_job()`
+- Interview extraction, diagnosis, blueprint, action-plan and process generation are all enqueued as `ai_jobs` rows. A scheduled cron worker drains the queue every 2 minutes with bounded batching, `FOR UPDATE SKIP LOCKED`, heartbeats, retries, idempotency keys, and budget ceilings.
 
-### 2.9 AI memory & embeddings — Missing
+### 2.9 AI memory & embeddings — Implemented
 
+- **Files:** `src/lib/embeddings.server.ts`, `src/lib/memory.server.ts`
 - **Table / RPC:** `ai_memory`, `match_business_memory()`
-- `ai_memory.embedding` is never populated, so semantic recall returns nothing. The compounding-understanding moat described in the product thesis is not yet operative.
+- Every new fact produces a 1536-dimension embedding (`openai/text-embedding-3-small`) and is stored in `ai_memory`. Diagnosis, blueprint and action-plan prompts open with a tenant-scoped semantic digest retrieved through `match_business_memory()`.
 
-### 2.10 Processes / workflow execution — Missing
+### 2.10 Processes / workflow execution — Implemented
 
-- **Table:** `processes` (empty). `src/routes/_authenticated/app.operations.tsx` is a static placeholder.
+- **Files:** `src/lib/process.server.ts`, `src/lib/process.functions.ts`, `src/routes/_authenticated/app.operations.index.tsx`, `src/routes/_authenticated/app.operations.$processId.tsx`
+- **Tables:** `processes`, `process_steps`, `process_executions`, `process_approvals`
+- Process library, step builder, versioned definitions, execution engine, approval gates, and Operations UI are all implemented. See §7 and §8.
 
 ### 2.11 Metrics ingestion — Implemented
 
