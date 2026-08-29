@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './route
 import { Route as AuthenticatedAppSeoIndexRouteImport } from './routes/_authenticated/app.seo.index'
 import { Route as AuthenticatedAppSeoLibraryRouteImport } from './routes/_authenticated/app.seo.library'
 import { Route as AuthenticatedAppSeoOpportunitiesRouteImport } from './routes/_authenticated/app.seo.opportunities'
+import { Route as AuthenticatedAppSeoPagesPageIdRouteImport } from './routes/_authenticated/app.seo.pages.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -227,6 +228,12 @@ const AuthenticatedAppSeoOpportunitiesRoute =
     path: '/opportunities',
     getParentRoute: () => AuthenticatedAppSeoRoute,
   } as any)
+const AuthenticatedAppSeoPagesPageIdRoute =
+  AuthenticatedAppSeoPagesPageIdRouteImport.update({
+    id: '/pages/$pageId',
+    path: '/pages/$pageId',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -261,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
   '/app/seo/': typeof AuthenticatedAppSeoIndexRoute
+  '/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -293,6 +301,7 @@ export interface FileRoutesByTo {
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
   '/app/seo': typeof AuthenticatedAppSeoIndexRoute
+  '/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -329,6 +338,7 @@ export interface FileRoutesById {
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
   '/_authenticated/app/seo/': typeof AuthenticatedAppSeoIndexRoute
+  '/_authenticated/app/seo/pages/$pageId': typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -365,6 +375,7 @@ export interface FileRouteTypes {
     | '/app/metrics/'
     | '/app/operations/'
     | '/app/seo/'
+    | '/app/seo/pages/$pageId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/app/metrics'
     | '/app/operations'
     | '/app/seo'
+    | '/app/seo/pages/$pageId'
   id:
     | '__root__'
     | '/'
@@ -432,6 +444,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
     | '/_authenticated/app/seo/'
+    | '/_authenticated/app/seo/pages/$pageId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -675,6 +688,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSeoOpportunitiesRouteImport
       parentRoute: typeof AuthenticatedAppSeoRoute
     }
+    '/_authenticated/app/seo/pages/$pageId': {
+      id: '/_authenticated/app/seo/pages/$pageId'
+      path: '/pages/$pageId'
+      fullPath: '/app/seo/pages/$pageId'
+      preLoaderRoute: typeof AuthenticatedAppSeoPagesPageIdRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
   }
 }
 
@@ -682,12 +702,14 @@ interface AuthenticatedAppSeoRouteChildren {
   AuthenticatedAppSeoLibraryRoute: typeof AuthenticatedAppSeoLibraryRoute
   AuthenticatedAppSeoOpportunitiesRoute: typeof AuthenticatedAppSeoOpportunitiesRoute
   AuthenticatedAppSeoIndexRoute: typeof AuthenticatedAppSeoIndexRoute
+  AuthenticatedAppSeoPagesPageIdRoute: typeof AuthenticatedAppSeoPagesPageIdRoute
 }
 
 const AuthenticatedAppSeoRouteChildren: AuthenticatedAppSeoRouteChildren = {
   AuthenticatedAppSeoLibraryRoute: AuthenticatedAppSeoLibraryRoute,
   AuthenticatedAppSeoOpportunitiesRoute: AuthenticatedAppSeoOpportunitiesRoute,
   AuthenticatedAppSeoIndexRoute: AuthenticatedAppSeoIndexRoute,
+  AuthenticatedAppSeoPagesPageIdRoute: AuthenticatedAppSeoPagesPageIdRoute,
 }
 
 const AuthenticatedAppSeoRouteWithChildren =
