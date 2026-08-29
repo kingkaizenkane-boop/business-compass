@@ -20,6 +20,7 @@ export const JOB_TYPES = [
   "action_plan_run",
   "process_generation",
   "experiment_learning",
+  "seo_page_generation",
 ] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
