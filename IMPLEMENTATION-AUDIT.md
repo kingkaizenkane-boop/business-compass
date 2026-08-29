@@ -27,6 +27,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 | Metrics ingestion | Implemented (§9) |
 | Experiments | Implemented (P2.2) |
 | Programmatic SEO | Implemented (P2.3) |
+| Connector framework | Implemented (P3.1, email adapter live — see §12) |
 
 ---
 
