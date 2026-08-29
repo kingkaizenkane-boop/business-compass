@@ -40,6 +40,7 @@ import { Route as AuthenticatedAppMetricsMetricIdRouteImport } from './routes/_a
 import { Route as AuthenticatedAppOperationsIndexRouteImport } from './routes/_authenticated/app.operations.index'
 import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './routes/_authenticated/app.operations.$processId'
 import { Route as AuthenticatedAppSeoIndexRouteImport } from './routes/_authenticated/app.seo.index'
+import { Route as AuthenticatedAppSeoLibraryRouteImport } from './routes/_authenticated/app.seo.library'
 import { Route as AuthenticatedAppSeoOpportunitiesRouteImport } from './routes/_authenticated/app.seo.opportunities'
 
 const IndexRoute = IndexRouteImport.update({
@@ -214,6 +215,12 @@ const AuthenticatedAppSeoIndexRoute =
     path: '/',
     getParentRoute: () => AuthenticatedAppSeoRoute,
   } as any)
+const AuthenticatedAppSeoLibraryRoute =
+  AuthenticatedAppSeoLibraryRouteImport.update({
+    id: '/library',
+    path: '/library',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
 const AuthenticatedAppSeoOpportunitiesRoute =
   AuthenticatedAppSeoOpportunitiesRouteImport.update({
     id: '/opportunities',
@@ -248,6 +255,7 @@ export interface FileRoutesByFullPath {
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
@@ -279,6 +287,7 @@ export interface FileRoutesByTo {
   '/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/app/experiments': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
@@ -314,6 +323,7 @@ export interface FileRoutesById {
   '/_authenticated/app/experiments/$experimentId': typeof AuthenticatedAppExperimentsExperimentIdRoute
   '/_authenticated/app/metrics/$metricId': typeof AuthenticatedAppMetricsMetricIdRoute
   '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
+  '/_authenticated/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/_authenticated/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
   '/_authenticated/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
     | '/app/operations/$processId'
+    | '/app/seo/library'
     | '/app/seo/opportunities'
     | '/app/experiments/'
     | '/app/metrics/'
@@ -380,6 +391,7 @@ export interface FileRouteTypes {
     | '/app/experiments/$experimentId'
     | '/app/metrics/$metricId'
     | '/app/operations/$processId'
+    | '/app/seo/library'
     | '/app/seo/opportunities'
     | '/app/experiments'
     | '/app/metrics'
@@ -414,6 +426,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/experiments/$experimentId'
     | '/_authenticated/app/metrics/$metricId'
     | '/_authenticated/app/operations/$processId'
+    | '/_authenticated/app/seo/library'
     | '/_authenticated/app/seo/opportunities'
     | '/_authenticated/app/experiments/'
     | '/_authenticated/app/metrics/'
@@ -648,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSeoIndexRouteImport
       parentRoute: typeof AuthenticatedAppSeoRoute
     }
+    '/_authenticated/app/seo/library': {
+      id: '/_authenticated/app/seo/library'
+      path: '/library'
+      fullPath: '/app/seo/library'
+      preLoaderRoute: typeof AuthenticatedAppSeoLibraryRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
     '/_authenticated/app/seo/opportunities': {
       id: '/_authenticated/app/seo/opportunities'
       path: '/opportunities'
@@ -659,11 +679,13 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAppSeoRouteChildren {
+  AuthenticatedAppSeoLibraryRoute: typeof AuthenticatedAppSeoLibraryRoute
   AuthenticatedAppSeoOpportunitiesRoute: typeof AuthenticatedAppSeoOpportunitiesRoute
   AuthenticatedAppSeoIndexRoute: typeof AuthenticatedAppSeoIndexRoute
 }
 
 const AuthenticatedAppSeoRouteChildren: AuthenticatedAppSeoRouteChildren = {
+  AuthenticatedAppSeoLibraryRoute: AuthenticatedAppSeoLibraryRoute,
   AuthenticatedAppSeoOpportunitiesRoute: AuthenticatedAppSeoOpportunitiesRoute,
   AuthenticatedAppSeoIndexRoute: AuthenticatedAppSeoIndexRoute,
 }
