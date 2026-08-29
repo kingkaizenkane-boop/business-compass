@@ -1,3 +1,11 @@
+export type SeoJson =
+  | string
+  | number
+  | boolean
+  | null
+  | SeoJson[]
+  | { [key: string]: SeoJson };
+
 /**
  * Client-safe SEO types, vocabularies and pure helpers.
  *
@@ -264,7 +272,7 @@ export type PageView = {
 
 export type PageDetail = PageView & {
   content: PageContent | null;
-  schema: Record<string, unknown> | null;
+  schema: SeoJson | null;
   quality: QualityReport | null;
   evidence: { id: string; category: string; factKey: string; value: string; verified: boolean }[];
   versions: {

@@ -1689,7 +1689,7 @@ export async function loadPage(db: Client, pageId: string): Promise<PageDetail> 
   return {
     ...view,
     content: (page.content as PageContent | null) ?? null,
-    schema: (page.schema_json as Record<string, unknown> | null) ?? null,
+    schema: (page.schema_json as SeoJson | null) ?? null,
     quality: (page.quality_report as QualityReport | null) ?? null,
     evidence: evidence.map((f) => ({
       id: f.id,
