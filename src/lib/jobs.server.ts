@@ -31,6 +31,7 @@ export const JOB_LABELS: Record<JobType, string> = {
   action_plan_run: "Sequencing the 90-day plan",
   process_generation: "Designing repeatable processes",
   experiment_learning: "Writing what the experiment taught us",
+  seo_page_generation: "Writing an SEO page from verified facts",
 };
 
 export type JobView = {
