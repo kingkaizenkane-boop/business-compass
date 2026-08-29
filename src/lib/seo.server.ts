@@ -1412,17 +1412,43 @@ export async function updatePage(options: {
   if (options.patch.sections) content.sections = options.patch.sections;
 
   const version = (page.version ?? 1) + 1;
+  const title = options.patch.title ?? page.title ?? "";
+  const metaTitle = options.patch.metaTitle ?? page.meta_title;
+  const metaDescription = options.patch.metaDescription ?? page.meta_description;
+  const h1 = options.patch.h1 ?? page.h1;
+
+  // Owner edits change the copy, so the quality gate must be recomputed here.
+  // Without this the stored report goes stale: a page whose blocking claim was
+  // just removed could never publish, and a page edited badly could.
+  const quality = await rescoreQuality(db, page, {
+    content,
+    title,
+    metaTitle: metaTitle ?? title,
+    metaDescription: metaDescription ?? "",
+    h1: h1 ?? title,
+  });
+
   const { error: updateError } = await db
     .from("seo_pages")
     .update({
-      title: options.patch.title ?? page.title,
-      meta_title: options.patch.metaTitle ?? page.meta_title,
-      meta_description: options.patch.metaDescription ?? page.meta_description,
-      h1: options.patch.h1 ?? page.h1,
+      title,
+      meta_title: metaTitle,
+      meta_description: metaDescription,
+      h1,
       content: content as never,
       review_notes: options.patch.reviewNotes ?? page.review_notes,
       version,
       updated_at: new Date().toISOString(),
+      ...(quality
+        ? {
+            quality_score: quality.score,
+            originality_score: quality.originality,
+            business_relevance_score: quality.businessRelevance,
+            factual_confidence: quality.factualConfidence,
+            word_count: quality.wordCount,
+            quality_report: quality as never,
+          }
+        : {}),
     })
     .eq("id", options.pageId);
   if (updateError) throw updateError;
@@ -1440,6 +1466,90 @@ export async function updatePage(options: {
   });
 
   return loadPage(db, options.pageId);
+}
+
+/**
+ * Re-runs the deterministic quality gate for an already-generated page after an
+ * owner edit. Returns null when the page's site or opportunity can no longer be
+ * read, in which case the stored report is left untouched.
+ */
+async function rescoreQuality(
+  db: Client,
+  page: PageRow,
+  next: {
+    content: PageContent;
+    title: string;
+    metaTitle: string;
+    metaDescription: string;
+    h1: string;
+  },
+): Promise<QualityReport | null> {
+  const { data: site } = await db.from("seo_sites").select("*").eq("id", page.seo_site_id).maybeSingle();
+  if (!site) return null;
+
+  const siteType = site.site_type as SeoSiteType;
+  const opportunity = page.opportunity_id
+    ? (await db.from("seo_opportunities").select("*").eq("id", page.opportunity_id).maybeSingle()).data
+    : null;
+
+  let brainText = "";
+  let brain: BrainSeoContext | null = null;
+  if (siteType === "customer" && page.business_id) {
+    brain = await loadSeoBrain(db, page.business_id);
+    brainText = brain.facts
+      .filter((f) => f.verified)
+      .map(
+        (f) =>
+          `- id=${f.id} (${f.category}/${f.subcategory ?? "general"}) ${f.fact_key}: ${f.value_text ?? f.value_number ?? ""}`,
+      )
+      .join("\n");
+  }
+
+  const { data: siblings } = await db
+    .from("seo_pages")
+    .select("id, title, slug, canonical_url, content, status")
+    .eq("seo_site_id", page.seo_site_id)
+    .neq("id", page.id)
+    .limit(200);
+
+  const bodyText = contentText(next.content);
+  let maxSimilarity = 0;
+  for (const sibling of siblings ?? []) {
+    const other = contentText((sibling.content as PageContent | null) ?? null);
+    if (!other) continue;
+    maxSimilarity = Math.max(maxSimilarity, contentSimilarity(bodyText, other));
+  }
+
+  const keyword = opportunity?.keyword ?? page.title ?? "";
+  const schema = opportunity
+    ? buildSchema({
+        siteType,
+        title: next.title,
+        metaDescription: next.metaDescription,
+        canonical: page.canonical_url ?? "",
+        content: next.content,
+        brain,
+        opportunity,
+      })
+    : page.schema_json;
+
+  return runQualityGate({
+    content: next.content,
+    title: next.title,
+    metaTitle: next.metaTitle,
+    metaDescription: next.metaDescription,
+    h1: next.h1,
+    canonicalUrl: page.canonical_url,
+    keyword,
+    schema,
+    brainText,
+    siteType,
+    maxSimilarity,
+    duplicateTitle: (siblings ?? []).some((s) => (s.title ?? "").toLowerCase() === next.title.toLowerCase()),
+    duplicateSlug: (siblings ?? []).some((s) => s.slug.toLowerCase() === (page.slug ?? "").toLowerCase()),
+    duplicateCanonical: (siblings ?? []).some((s) => s.canonical_url === page.canonical_url),
+    evidenceCount: next.content.evidenceFactIds?.length ?? 0,
+  });
 }
 
 const TRANSITIONS: Record<string, string[]> = {
