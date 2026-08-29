@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Activity, AlertTriangle, CheckCircle2, HelpCircle, Loader2, Sparkles } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, FlaskConical, HelpCircle, Loader2, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -24,6 +24,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { useWorkspace } from "@/hooks/use-workspace";
 import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getLatestDiagnosis, runDiagnosis } from "@/lib/diagnosis.functions";
+import { draftExperiment } from "@/lib/experiments.functions";
 
 export const Route = createFileRoute("/_authenticated/app/diagnosis")({
   head: () => ({
@@ -63,6 +64,8 @@ function DiagnosisPage() {
   const run = useServerFn(runDiagnosis);
   const queryClient = useQueryClient();
   const enqueue = useServerFn(enqueueEngineRun);
+  const draft = useServerFn(draftExperiment);
+  const navigate = useNavigate();
   const [evidenceItem, setEvidenceItem] = useState<ItemView | null>(null);
 
   const query = useQuery({
@@ -80,6 +83,26 @@ function DiagnosisPage() {
     },
     onError: (error: unknown) =>
       toast.error(error instanceof Error ? error.message : "The diagnosis could not be queued"),
+  });
+
+  // Turns a finding into a DRAFT experiment. Nothing starts automatically —
+  // the owner reviews the hypothesis, baseline and target first.
+  const testMutation = useMutation({
+    mutationFn: (diagnosisItemId: string) =>
+      draft({ data: { businessId: businessId!, diagnosisItemId } }),
+    onSuccess: (result) => {
+      toast.success(
+        result.needsBaseline
+          ? "Experiment drafted. Set its baseline and target before starting."
+          : "Experiment drafted from this finding.",
+      );
+      void navigate({
+        to: "/app/experiments/$experimentId",
+        params: { experimentId: result.experimentId },
+      });
+    },
+    onError: (error: unknown) =>
+      toast.error(error instanceof Error ? error.message : "The experiment could not be drafted."),
   });
 
   const data = query.data;
@@ -243,10 +266,23 @@ function DiagnosisPage() {
             <SectionLabel aside={`${constraints.length} found`}>Top constraints</SectionLabel>
             <div className="space-y-4">
               {constraints.slice(0, 3).map((item) => (
-                <ItemCard key={item.id} item={item} onEvidence={setEvidenceItem} />
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onEvidence={setEvidenceItem}
+                  onTest={(picked) => testMutation.mutate(picked.id)}
+                  testing={testMutation.isPending}
+                />
               ))}
               {constraints.slice(3).map((item) => (
-                <ItemCard key={item.id} item={item} onEvidence={setEvidenceItem} compact />
+                <ItemCard
+                  key={item.id}
+                  item={item}
+                  onEvidence={setEvidenceItem}
+                  onTest={(picked) => testMutation.mutate(picked.id)}
+                  testing={testMutation.isPending}
+                  compact
+                />
               ))}
             </div>
           </section>
@@ -256,7 +292,14 @@ function DiagnosisPage() {
               <SectionLabel aside="Ranked by server-calculated priority">Opportunities</SectionLabel>
               <div className="space-y-4">
                 {opportunities.map((item) => (
-                  <ItemCard key={item.id} item={item} onEvidence={setEvidenceItem} compact />
+                  <ItemCard
+                  key={item.id}
+                  item={item}
+                  onEvidence={setEvidenceItem}
+                  onTest={(picked) => testMutation.mutate(picked.id)}
+                  testing={testMutation.isPending}
+                  compact
+                />
                 ))}
               </div>
             </section>
@@ -361,10 +404,14 @@ function DiagnosisPage() {
 function ItemCard({
   item,
   onEvidence,
+  onTest,
+  testing = false,
   compact = false,
 }: {
   item: ItemView;
   onEvidence: (item: ItemView) => void;
+  onTest?: (item: ItemView) => void;
+  testing?: boolean;
   compact?: boolean;
 }) {
   return (
@@ -420,9 +467,17 @@ function ItemCard({
         <span className="text-xs text-muted-foreground">
           {item.evidence.length} supporting fact{item.evidence.length === 1 ? "" : "s"}
         </span>
-        <Button variant="outline" size="sm" onClick={() => onEvidence(item)}>
-          Why did Business OS say this?
-        </Button>
+        <div className="flex items-center gap-2">
+          {onTest ? (
+            <Button variant="ghost" size="sm" disabled={testing} onClick={() => onTest(item)}>
+              <FlaskConical className="mr-1.5 size-4" aria-hidden />
+              {testing ? "Drafting…" : "Test this"}
+            </Button>
+          ) : null}
+          <Button variant="outline" size="sm" onClick={() => onEvidence(item)}>
+            Why did Business OS say this?
+          </Button>
+        </div>
       </div>
     </article>
   );

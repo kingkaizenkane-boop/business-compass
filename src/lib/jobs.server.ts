@@ -19,6 +19,7 @@ export const JOB_TYPES = [
   "blueprint_run",
   "action_plan_run",
   "process_generation",
+  "experiment_learning",
 ] as const;
 export type JobType = (typeof JOB_TYPES)[number];
 
@@ -28,6 +29,7 @@ export const JOB_LABELS: Record<JobType, string> = {
   blueprint_run: "Writing the strategic blueprint",
   action_plan_run: "Sequencing the 90-day plan",
   process_generation: "Designing repeatable processes",
+  experiment_learning: "Writing what the experiment taught us",
 };
 
 export type JobView = {
@@ -247,6 +249,22 @@ async function runJob(db: Client, job: JobRow): Promise<Record<string, unknown>>
         status: result.status,
         created: result.created.length,
         rejected: result.rejected.length,
+      };
+    }
+    case "experiment_learning": {
+      await setProgress(db, job.id, "Interpreting the experiment result");
+      const { generateExperimentLearning } = await import("./experiments.server");
+      const result = await generateExperimentLearning({
+        supabase: db,
+        businessId,
+        experimentId: input["experimentId"] ?? "",
+        userId: input["userId"] ?? null,
+        organizationId,
+        jobId: job.id,
+      });
+      return {
+        memoryWritten: result.memoryWritten,
+        aiUsed: result.aiUsed,
       };
     }
     default:
