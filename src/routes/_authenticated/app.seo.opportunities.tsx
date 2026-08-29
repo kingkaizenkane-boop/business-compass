@@ -85,7 +85,7 @@ function OpportunitiesPage() {
   const addKeyword = useMutation({
     mutationFn: () => propose({ data: { businessId: businessId!, keyword: keyword.trim() } }),
     onSuccess: (result) => {
-      if (result.status === "rejected") toast.error(result.reason ?? "The Business Brain cannot support that keyword.");
+      if (result.rejected) toast.error(result.reason || "The Business Brain cannot support that keyword.");
       else toast.success("Opportunity added.");
       setKeyword("");
       invalidate();
