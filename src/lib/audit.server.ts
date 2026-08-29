@@ -60,6 +60,17 @@ export const AUDIT_ACTIONS = [
   "experiment.cancelled",
   "experiment.observation_recorded",
   "experiment.learning_generated",
+  "seo.site_created",
+  "seo.opportunity_created",
+  "seo.opportunity_rejected",
+  "seo.page_generated",
+  "seo.page_quality_failed",
+  "seo.page_updated",
+  "seo.page_approved",
+  "seo.page_published",
+  "seo.page_paused",
+  "seo.page_archived",
+  "seo.measurement_recorded",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];
