@@ -6,7 +6,13 @@ import { useEffect, useRef } from "react";
 import { getJobStatus } from "@/lib/jobs.functions";
 import { cn } from "@/lib/utils";
 
-export type JobTypeFilter = "interview_extraction" | "diagnosis_run" | "blueprint_run" | "action_plan_run" | "process_generation";
+export type JobTypeFilter =
+  | "interview_extraction"
+  | "diagnosis_run"
+  | "blueprint_run"
+  | "action_plan_run"
+  | "process_generation"
+  | "experiment_learning";
 
 /**
  * Live AI job state for a business. Polls while work is queued or running and

@@ -1246,6 +1246,293 @@ export type Database = {
           },
         ]
       }
+      experiment_metrics: {
+        Row: {
+          created_at: string
+          experiment_id: string
+          id: string
+          metric_id: string
+          role: string
+        }
+        Insert: {
+          created_at?: string
+          experiment_id: string
+          id?: string
+          metric_id: string
+          role?: string
+        }
+        Update: {
+          created_at?: string
+          experiment_id?: string
+          id?: string
+          metric_id?: string
+          role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiment_metrics_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiment_metrics_metric_id_fkey"
+            columns: ["metric_id"]
+            isOneToOne: false
+            referencedRelation: "metric_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      experiments: {
+        Row: {
+          absolute_change: number | null
+          baseline_observation_id: string | null
+          baseline_period_end: string | null
+          baseline_period_start: string | null
+          baseline_source: string | null
+          baseline_value: number | null
+          business_id: string
+          cancelled_at: string | null
+          comparison_definition: string | null
+          completed_at: string | null
+          conclusion: string | null
+          confidence: number | null
+          confidence_level:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
+          created_at: string
+          created_by: string | null
+          definition_locked_at: string | null
+          description: string | null
+          end_date: string | null
+          evidence: Json
+          experiment_type: Database["public"]["Enums"]["experiment_type"]
+          final_value: number | null
+          hypothesis: string | null
+          hypothesis_expected_change: string | null
+          hypothesis_intervention: string | null
+          hypothesis_rationale: string | null
+          id: string
+          intervention_summary: string | null
+          learning: string | null
+          learning_generated_at: string | null
+          learning_status: Database["public"]["Enums"]["experiment_learning_status"]
+          limitation: string | null
+          metadata: Json
+          name: string
+          organization_id: string | null
+          paused_at: string | null
+          percent_change: number | null
+          primary_metric_id: string | null
+          process_execution_id: string | null
+          process_id: string | null
+          process_version: number | null
+          rationale: string | null
+          recommendation: string | null
+          result_data: Json
+          source_blueprint_id: string | null
+          source_blueprint_version: number | null
+          source_diagnosis_item_id: string | null
+          source_diagnosis_run_id: string | null
+          source_task_id: string | null
+          start_date: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["experiment_status"]
+          target_achieved: boolean | null
+          target_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          absolute_change?: number | null
+          baseline_observation_id?: string | null
+          baseline_period_end?: string | null
+          baseline_period_start?: string | null
+          baseline_source?: string | null
+          baseline_value?: number | null
+          business_id: string
+          cancelled_at?: string | null
+          comparison_definition?: string | null
+          completed_at?: string | null
+          conclusion?: string | null
+          confidence?: number | null
+          confidence_level?:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
+          created_at?: string
+          created_by?: string | null
+          definition_locked_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          evidence?: Json
+          experiment_type?: Database["public"]["Enums"]["experiment_type"]
+          final_value?: number | null
+          hypothesis?: string | null
+          hypothesis_expected_change?: string | null
+          hypothesis_intervention?: string | null
+          hypothesis_rationale?: string | null
+          id?: string
+          intervention_summary?: string | null
+          learning?: string | null
+          learning_generated_at?: string | null
+          learning_status?: Database["public"]["Enums"]["experiment_learning_status"]
+          limitation?: string | null
+          metadata?: Json
+          name: string
+          organization_id?: string | null
+          paused_at?: string | null
+          percent_change?: number | null
+          primary_metric_id?: string | null
+          process_execution_id?: string | null
+          process_id?: string | null
+          process_version?: number | null
+          rationale?: string | null
+          recommendation?: string | null
+          result_data?: Json
+          source_blueprint_id?: string | null
+          source_blueprint_version?: number | null
+          source_diagnosis_item_id?: string | null
+          source_diagnosis_run_id?: string | null
+          source_task_id?: string | null
+          start_date?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          target_achieved?: boolean | null
+          target_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          absolute_change?: number | null
+          baseline_observation_id?: string | null
+          baseline_period_end?: string | null
+          baseline_period_start?: string | null
+          baseline_source?: string | null
+          baseline_value?: number | null
+          business_id?: string
+          cancelled_at?: string | null
+          comparison_definition?: string | null
+          completed_at?: string | null
+          conclusion?: string | null
+          confidence?: number | null
+          confidence_level?:
+            | Database["public"]["Enums"]["confidence_level"]
+            | null
+          created_at?: string
+          created_by?: string | null
+          definition_locked_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          evidence?: Json
+          experiment_type?: Database["public"]["Enums"]["experiment_type"]
+          final_value?: number | null
+          hypothesis?: string | null
+          hypothesis_expected_change?: string | null
+          hypothesis_intervention?: string | null
+          hypothesis_rationale?: string | null
+          id?: string
+          intervention_summary?: string | null
+          learning?: string | null
+          learning_generated_at?: string | null
+          learning_status?: Database["public"]["Enums"]["experiment_learning_status"]
+          limitation?: string | null
+          metadata?: Json
+          name?: string
+          organization_id?: string | null
+          paused_at?: string | null
+          percent_change?: number | null
+          primary_metric_id?: string | null
+          process_execution_id?: string | null
+          process_id?: string | null
+          process_version?: number | null
+          rationale?: string | null
+          recommendation?: string | null
+          result_data?: Json
+          source_blueprint_id?: string | null
+          source_blueprint_version?: number | null
+          source_diagnosis_item_id?: string | null
+          source_diagnosis_run_id?: string | null
+          source_task_id?: string | null
+          start_date?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["experiment_status"]
+          target_achieved?: boolean | null
+          target_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_baseline_observation_id_fkey"
+            columns: ["baseline_observation_id"]
+            isOneToOne: false
+            referencedRelation: "business_metrics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_primary_metric_id_fkey"
+            columns: ["primary_metric_id"]
+            isOneToOne: false
+            referencedRelation: "metric_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_process_execution_id_fkey"
+            columns: ["process_execution_id"]
+            isOneToOne: false
+            referencedRelation: "process_executions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_source_blueprint_id_fkey"
+            columns: ["source_blueprint_id"]
+            isOneToOne: false
+            referencedRelation: "business_blueprints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_source_diagnosis_item_id_fkey"
+            columns: ["source_diagnosis_item_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_source_diagnosis_run_id_fkey"
+            columns: ["source_diagnosis_run_id"]
+            isOneToOne: false
+            referencedRelation: "diagnosis_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "experiments_source_task_id_fkey"
+            columns: ["source_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interview_questions: {
         Row: {
           ai_generated: boolean
@@ -2677,6 +2964,19 @@ export type Database = {
         | "financial_record"
         | "manual_entry"
         | "system_generated"
+      experiment_learning_status:
+        | "pending"
+        | "positive"
+        | "negative"
+        | "inconclusive"
+      experiment_status:
+        | "draft"
+        | "planned"
+        | "running"
+        | "paused"
+        | "completed"
+        | "cancelled"
+      experiment_type: "before_after" | "controlled" | "observational"
       fact_type:
         | "fact"
         | "claim"
@@ -2955,6 +3255,21 @@ export const Constants = {
         "manual_entry",
         "system_generated",
       ],
+      experiment_learning_status: [
+        "pending",
+        "positive",
+        "negative",
+        "inconclusive",
+      ],
+      experiment_status: [
+        "draft",
+        "planned",
+        "running",
+        "paused",
+        "completed",
+        "cancelled",
+      ],
+      experiment_type: ["before_after", "controlled", "observational"],
       fact_type: [
         "fact",
         "claim",

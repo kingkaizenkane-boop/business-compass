@@ -50,6 +50,16 @@ export const AUDIT_ACTIONS = [
   "metric.observation_added",
   "metric.target_changed",
   "metric.archived",
+  "experiment.created",
+  "experiment.updated",
+  "experiment.planned",
+  "experiment.started",
+  "experiment.paused",
+  "experiment.resumed",
+  "experiment.completed",
+  "experiment.cancelled",
+  "experiment.observation_recorded",
+  "experiment.learning_generated",
 ] as const;
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[number];

@@ -25,7 +25,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 | AI memory & embeddings | Implemented (§6.4) |
 | Processes / workflow execution | Implemented (§7 / §8) |
 | Metrics ingestion | Implemented (§9) |
-| Experiments | Missing (P2) |
+| Experiments | Implemented (P2.2) |
 | Programmatic SEO | Missing (P2) |
 
 ---
@@ -106,7 +106,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 - Brain integration writes durable `metric_outcome` memories when significant changes (±10% from baseline) occur, closing the learning loop.
 - Manual ingestion UI supports single observations with period bounds and notes.
 
-### 2.12 Experiments — Missing
+### 2.12 Experiments — Implemented (P2.2, see §10)
 
 - No hypothesis tracking, no outcome capture, no learning loop back into the Brain. `app.experiments.tsx` is a placeholder.
 
@@ -141,7 +141,7 @@ What remains is the *growth surface* (experiments, programmatic SEO, evidence up
 1. **Real outbound connectors.** Email, messaging, CRM, and payment step handlers with credential management.
 2. **Scheduled and event triggers.** Automatically start processes on time, state change, or webhook.
 3. **Programmatic SEO execution.** Opportunity scoring → generation → quality gate → publish.
-4. **Experiments module.** Hypothesis tracking, outcome capture, and learning loop back into the Brain.
+4. ~~**Experiments module.**~~ Delivered in P2.2: hypothesis tracking, deterministic outcome capture, and the learning loop back into the Brain. See §10.
 5. **Evidence upload.** Storage-backed documents, screenshots, financials attached to Brain facts.
 6. **CRM surface.** CRUD for offers, leads, and customers.
 7. **Admin audit view.** Read-only audit log for organization admins.
@@ -264,7 +264,7 @@ call them, and `cron_job_config` is deliberately policy-free (service-role only)
 
 ### Remaining before launch
 - Publish the app once so the scheduled worker endpoint resolves.
-- Experiments and programmatic SEO remain P2 placeholders.
+- Programmatic SEO remains a P2 placeholder; Experiments shipped in P2.2 (see §10).
 
 ---
 
@@ -423,7 +423,7 @@ library discoverability, and safe autonomy defaults.
 | Real outbound connectors (email, CRM, etc.) | Missing (P2) |
 | Scheduled / event triggers | Missing (P2) |
 | Metrics ingestion | Implemented (P2.1) |
-| Experiments | Missing (P2) |
+| Experiments | Implemented (P2.2) |
 | Programmatic SEO | Missing (P2) |
 | Evidence upload to storage | Missing (P2) |
 
@@ -527,10 +527,62 @@ changes back into the Business Brain as durable memories.
 | Metrics ingestion | Implemented |
 | Automatic integration imports | Missing (P2) |
 | Process metric aggregation dashboards | Partial (linked, no dedicated analytics view) |
-| Experiments | Missing (P2) |
+| Experiments | Implemented (P2.2) |
 | Programmatic SEO | Missing (P2) |
 | Evidence upload to storage | Missing (P2) |
 | Real outbound connectors | Missing (P2) |
 
 **Recommended next action:** real outbound connectors, so processes can execute their
 external-effect steps and measured outcomes actually drive automated operations.
+
+---
+
+## 10. P2.2 — Experiments & Learning Engine milestone — delivered 29 August 2026
+
+P2.2 makes change testable. Every significant intervention can be framed as a
+hypothesis, measured against a stated baseline, and resolved into a learning that
+is written back into the Business Brain.
+
+### 10.1 Data model — Implemented
+
+- `experiments` — hypothesis (IF / THEN / BECAUSE), experiment type, lifecycle
+  status, baseline value and source, target value, guardrails, decision, learning
+  narrative, `learning_generated_at`, and provenance to the originating diagnosis
+  item, task, process or blueprint.
+- `experiment_metrics` — the metrics an experiment measures, with primary/guardrail
+  roles, linked to `metric_definitions`.
+- Enums for experiment status, type and learning classification.
+- Tenant-isolated RLS on both tables plus `updated_at` triggers and GRANTs.
+
+### 10.2 Deterministic outcome — Implemented
+
+`computeOutcome` in `src/lib/experiments.server.ts` is pure: it compares the
+primary metric's observations against baseline and target, respects the metric's
+direction, and returns the change, target attainment and a confidence score that
+is earned from observation count, baseline source, data completeness and
+experiment type. AI never decides whether an experiment succeeded.
+
+### 10.3 AI synthesis and Brain feedback — Implemented
+
+- `draftExperiment` turns a diagnosis finding, action or process into a draft
+  experiment with an evidence-bound hypothesis. Drafts never start automatically.
+- On completion an async `experiment_learning` job synthesises the narrative and
+  writes a durable `experiment_outcome` memory into the Brain. The idempotency key
+  is versioned by `learning_generated_at`, so learning is re-runnable exactly once
+  per generated narrative.
+
+### 10.4 UI — Implemented
+
+- `/app/experiments` — dashboard with summary stats and status filtering.
+- `/app/experiments/$experimentId` — hypothesis, baseline, interventions,
+  measurement recording, deterministic result panel and the AI learning narrative.
+- `src/components/business-os/experiment-form.tsx` — structured hypothesis entry
+  with baseline pull-through from the linked metric.
+- Entry points: "Test this" on diagnosis findings, "Test this action" on action-plan
+  items, and "Test this process" on the process detail page.
+
+### 10.5 Remaining
+
+- Programmatic SEO engine (P3).
+- Automated experiment cohorting / control groups beyond the current
+  observational and controlled types.

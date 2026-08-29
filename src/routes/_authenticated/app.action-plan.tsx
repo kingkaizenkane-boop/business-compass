@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { CheckCircle2, ClipboardList, Gauge, RefreshCw, Sparkles, Workflow } from "lucide-react";
+import { CheckCircle2, ClipboardList, FlaskConical, Gauge, RefreshCw, Sparkles, Workflow } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -28,6 +28,7 @@ import { useWorkspace } from "@/hooks/use-workspace";
 import { enqueueEngineRun } from "@/lib/jobs.functions";
 import { getActionPlan, runActionPlan, updateActionState } from "@/lib/action-plan.functions";
 import { createProcess } from "@/lib/process.functions";
+import { draftExperiment } from "@/lib/experiments.functions";
 
 export const Route = createFileRoute("/_authenticated/app/action-plan")({
   head: () => ({
@@ -149,6 +150,20 @@ function ActionPlanPage() {
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "That action could not be updated."),
+  });
+
+  const draft = useServerFn(draftExperiment);
+  const testMutation = useMutation({
+    mutationFn: (taskId: string) => draft({ data: { businessId: businessId!, taskId } }),
+    onSuccess: (result) => {
+      toast.success("Experiment drafted from this action.");
+      void navigate({
+        to: "/app/experiments/$experimentId",
+        params: { experimentId: result.experimentId },
+      });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "The experiment could not be drafted."),
   });
 
   const convertMutation = useMutation({
@@ -412,6 +427,15 @@ function ActionPlanPage() {
                                   Convert to process
                                 </Button>
                               )}
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={testMutation.isPending}
+                                onClick={() => testMutation.mutate(action.id)}
+                              >
+                                <FlaskConical className="size-4" aria-hidden />
+                                Test this action
+                              </Button>
                             </div>
                           </li>
                         ))

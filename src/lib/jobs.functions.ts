@@ -9,6 +9,7 @@ const JOB_TYPE = z.enum([
   "blueprint_run",
   "action_plan_run",
   "process_generation",
+  "experiment_learning",
 ]);
 
 /** Job status for the current business. RLS scopes reads to members. */

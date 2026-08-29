@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowUp,
   Copy,
+  FlaskConical,
   Pause,
   Play,
   Plus,
@@ -18,6 +19,7 @@ import { toast } from "sonner";
 import { AutonomyBadge, PageHeader, SectionLabel } from "@/components/business-os/primitives";
 import { formatMetricValue } from "@/components/business-os/metric-format";
 import { getProcessMetrics } from "@/lib/metrics.functions";
+import { draftExperiment } from "@/lib/experiments.functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,6 +123,7 @@ function ProcessDetailPage() {
   const businessId = activeBusiness?.id ?? null;
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const draft = useServerFn(draftExperiment);
 
   const fetchProcess = useServerFn(getProcess);
   const save = useServerFn(saveProcessDefinition);
@@ -258,6 +261,20 @@ function ProcessDetailPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  // Draft an experiment that measures whether this process actually works.
+  const testMutation = useMutation({
+    mutationFn: () => draft({ data: { businessId: businessId!, processId } }),
+    onSuccess: (result) => {
+      toast.success("Experiment drafted for this process.");
+      void navigate({
+        to: "/app/experiments/$experimentId",
+        params: { experimentId: result.experimentId },
+      });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "The experiment could not be drafted."),
+  });
+
   const duplicateMutation = useMutation({
     mutationFn: () => duplicate({ data: { businessId: businessId!, processId } }),
     onSuccess: (result) => {
@@ -336,6 +353,13 @@ function ProcessDetailPage() {
                 <Play className="mr-2 h-4 w-4" /> Activate
               </Button>
             )}
+            <Button
+              variant="ghost"
+              disabled={testMutation.isPending}
+              onClick={() => testMutation.mutate()}
+            >
+              <FlaskConical className="mr-2 h-4 w-4" /> Test this process
+            </Button>
             <Button variant="ghost" onClick={() => duplicateMutation.mutate()}>
               <Copy className="mr-2 h-4 w-4" /> Duplicate
             </Button>
