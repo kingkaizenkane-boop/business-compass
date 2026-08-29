@@ -1249,7 +1249,7 @@ function buildSchema(options: {
   content: PageContent;
   brain: BrainSeoContext | null;
   opportunity: OppRow;
-}) {
+}): Record<string, unknown> {
   const faq =
     options.content.faq.length > 0
       ? {
@@ -1370,13 +1370,13 @@ export async function updatePage(options: {
   pageId: string;
   userId: string;
   patch: {
-    title?: string;
-    metaTitle?: string;
-    metaDescription?: string;
-    h1?: string;
-    intro?: string;
-    sections?: { key: string; heading: string; body: string }[];
-    reviewNotes?: string;
+    title?: string | undefined;
+    metaTitle?: string | undefined;
+    metaDescription?: string | undefined;
+    h1?: string | undefined;
+    intro?: string | undefined;
+    sections?: { key: string; heading: string; body: string }[] | undefined;
+    reviewNotes?: string | undefined;
   };
 }): Promise<PageDetail> {
   const db = options.supabase;
@@ -1439,7 +1439,7 @@ export async function setPageStatus(options: {
   status: "review" | "approved" | "published" | "paused" | "archived" | "draft";
   userId: string;
   note?: string | null;
-}): Promise<{ ok: boolean; reason?: string; page?: PageDetail }> {
+}): Promise<{ ok: boolean; reason?: string | undefined; page?: PageDetail | undefined }> {
   const db = options.supabase;
   const { data: page, error } = await db.from("seo_pages").select("*").eq("id", options.pageId).single();
   if (error) throw error;
@@ -1455,17 +1455,17 @@ export async function setPageStatus(options: {
   }
 
   const now = new Date().toISOString();
-  const patch: Record<string, unknown> = {
-    status: options.status,
+  const publishing = options.status === "published";
+  const hiding = options.status === "paused" || options.status === "archived";
+  const patch = {
+    status: options.status as Database["public"]["Enums"]["seo_page_status"],
     updated_at: now,
     review_notes: options.note ?? page.review_notes,
+    ...(publishing
+      ? { published_at: page.published_at ?? now, indexable: true, last_refreshed_at: now }
+      : {}),
+    ...(hiding ? { indexable: false } : {}),
   };
-  if (options.status === "published") {
-    patch["published_at"] = page.published_at ?? now;
-    patch["indexable"] = true;
-    patch["last_refreshed_at"] = now;
-  }
-  if (options.status === "paused" || options.status === "archived") patch["indexable"] = false;
 
   const { error: updateError } = await db.from("seo_pages").update(patch).eq("id", options.pageId);
   if (updateError) throw updateError;
@@ -1509,7 +1509,7 @@ export async function setPageStatus(options: {
 }
 
 /** Final server-side gate. Nothing reaches the public site without passing it. */
-async function verifyPublishable(db: Client, page: PageRow): Promise<{ ok: boolean; reason?: string }> {
+async function verifyPublishable(db: Client, page: PageRow): Promise<{ ok: boolean; reason: string }> {
   const quality = (page.quality_report ?? null) as QualityReport | null;
   if (!quality || Number(page.quality_score ?? 0) < QUALITY_THRESHOLD) {
     return {
@@ -1549,7 +1549,7 @@ async function verifyPublishable(db: Client, page: PageRow): Promise<{ ok: boole
     }
   }
 
-  return { ok: true };
+  return { ok: true, reason: "" };
 }
 
 /* ------------------------------------------------------------------ measurement */
@@ -1689,7 +1689,7 @@ export async function loadPage(db: Client, pageId: string): Promise<PageDetail> 
   return {
     ...view,
     content: (page.content as PageContent | null) ?? null,
-    schema: page.schema_json,
+    schema: (page.schema_json as Record<string, unknown> | null) ?? null,
     quality: (page.quality_report as QualityReport | null) ?? null,
     evidence: evidence.map((f) => ({
       id: f.id,

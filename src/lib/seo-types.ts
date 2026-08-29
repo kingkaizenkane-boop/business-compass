@@ -264,7 +264,7 @@ export type PageView = {
 
 export type PageDetail = PageView & {
   content: PageContent | null;
-  schema: unknown;
+  schema: Record<string, unknown> | null;
   quality: QualityReport | null;
   evidence: { id: string; category: string; factKey: string; value: string; verified: boolean }[];
   versions: {
