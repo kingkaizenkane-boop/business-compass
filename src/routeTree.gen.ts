@@ -42,6 +42,7 @@ import { Route as AuthenticatedAppOperationsProcessIdRouteImport } from './route
 import { Route as AuthenticatedAppSeoIndexRouteImport } from './routes/_authenticated/app.seo.index'
 import { Route as AuthenticatedAppSeoLibraryRouteImport } from './routes/_authenticated/app.seo.library'
 import { Route as AuthenticatedAppSeoOpportunitiesRouteImport } from './routes/_authenticated/app.seo.opportunities'
+import { Route as AuthenticatedAppSeoPlatformRouteImport } from './routes/_authenticated/app.seo.platform'
 import { Route as AuthenticatedAppSeoPagesPageIdRouteImport } from './routes/_authenticated/app.seo.pages.$pageId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -228,6 +229,12 @@ const AuthenticatedAppSeoOpportunitiesRoute =
     path: '/opportunities',
     getParentRoute: () => AuthenticatedAppSeoRoute,
   } as any)
+const AuthenticatedAppSeoPlatformRoute =
+  AuthenticatedAppSeoPlatformRouteImport.update({
+    id: '/platform',
+    path: '/platform',
+    getParentRoute: () => AuthenticatedAppSeoRoute,
+  } as any)
 const AuthenticatedAppSeoPagesPageIdRoute =
   AuthenticatedAppSeoPagesPageIdRouteImport.update({
     id: '/pages/$pageId',
@@ -264,6 +271,7 @@ export interface FileRoutesByFullPath {
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -297,6 +305,7 @@ export interface FileRoutesByTo {
   '/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/app/experiments': typeof AuthenticatedAppExperimentsIndexRoute
   '/app/metrics': typeof AuthenticatedAppMetricsIndexRoute
   '/app/operations': typeof AuthenticatedAppOperationsIndexRoute
@@ -334,6 +343,7 @@ export interface FileRoutesById {
   '/_authenticated/app/operations/$processId': typeof AuthenticatedAppOperationsProcessIdRoute
   '/_authenticated/app/seo/library': typeof AuthenticatedAppSeoLibraryRoute
   '/_authenticated/app/seo/opportunities': typeof AuthenticatedAppSeoOpportunitiesRoute
+  '/_authenticated/app/seo/platform': typeof AuthenticatedAppSeoPlatformRoute
   '/_authenticated/app/experiments/': typeof AuthenticatedAppExperimentsIndexRoute
   '/_authenticated/app/metrics/': typeof AuthenticatedAppMetricsIndexRoute
   '/_authenticated/app/operations/': typeof AuthenticatedAppOperationsIndexRoute
@@ -371,6 +381,7 @@ export interface FileRouteTypes {
     | '/app/operations/$processId'
     | '/app/seo/library'
     | '/app/seo/opportunities'
+    | '/app/seo/platform'
     | '/app/experiments/'
     | '/app/metrics/'
     | '/app/operations/'
@@ -404,6 +415,7 @@ export interface FileRouteTypes {
     | '/app/operations/$processId'
     | '/app/seo/library'
     | '/app/seo/opportunities'
+    | '/app/seo/platform'
     | '/app/experiments'
     | '/app/metrics'
     | '/app/operations'
@@ -440,6 +452,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/operations/$processId'
     | '/_authenticated/app/seo/library'
     | '/_authenticated/app/seo/opportunities'
+    | '/_authenticated/app/seo/platform'
     | '/_authenticated/app/experiments/'
     | '/_authenticated/app/metrics/'
     | '/_authenticated/app/operations/'
@@ -688,6 +701,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppSeoOpportunitiesRouteImport
       parentRoute: typeof AuthenticatedAppSeoRoute
     }
+    '/_authenticated/app/seo/platform': {
+      id: '/_authenticated/app/seo/platform'
+      path: '/platform'
+      fullPath: '/app/seo/platform'
+      preLoaderRoute: typeof AuthenticatedAppSeoPlatformRouteImport
+      parentRoute: typeof AuthenticatedAppSeoRoute
+    }
     '/_authenticated/app/seo/pages/$pageId': {
       id: '/_authenticated/app/seo/pages/$pageId'
       path: '/pages/$pageId'
@@ -701,6 +721,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAppSeoRouteChildren {
   AuthenticatedAppSeoLibraryRoute: typeof AuthenticatedAppSeoLibraryRoute
   AuthenticatedAppSeoOpportunitiesRoute: typeof AuthenticatedAppSeoOpportunitiesRoute
+  AuthenticatedAppSeoPlatformRoute: typeof AuthenticatedAppSeoPlatformRoute
   AuthenticatedAppSeoIndexRoute: typeof AuthenticatedAppSeoIndexRoute
   AuthenticatedAppSeoPagesPageIdRoute: typeof AuthenticatedAppSeoPagesPageIdRoute
 }
@@ -708,6 +729,7 @@ interface AuthenticatedAppSeoRouteChildren {
 const AuthenticatedAppSeoRouteChildren: AuthenticatedAppSeoRouteChildren = {
   AuthenticatedAppSeoLibraryRoute: AuthenticatedAppSeoLibraryRoute,
   AuthenticatedAppSeoOpportunitiesRoute: AuthenticatedAppSeoOpportunitiesRoute,
+  AuthenticatedAppSeoPlatformRoute: AuthenticatedAppSeoPlatformRoute,
   AuthenticatedAppSeoIndexRoute: AuthenticatedAppSeoIndexRoute,
   AuthenticatedAppSeoPagesPageIdRoute: AuthenticatedAppSeoPagesPageIdRoute,
 }
