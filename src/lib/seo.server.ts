@@ -36,6 +36,7 @@ import {
   type QualityReport,
   type SeoOverview,
   type SeoSiteType,
+  type SeoJson,
 } from "./seo-types";
 import type { Database } from "@/integrations/supabase/types";
 
