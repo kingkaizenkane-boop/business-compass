@@ -13,6 +13,7 @@ import {
   LayoutDashboard,
   MessagesSquare,
   Package,
+  Plug,
   Search,
   Settings,
   Sparkles,
