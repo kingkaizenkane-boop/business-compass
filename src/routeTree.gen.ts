@@ -21,6 +21,7 @@ import { Route as AuthenticatedAppActionPlanRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppAiUsageRouteImport } from './routes/_authenticated/app.ai-usage'
 import { Route as AuthenticatedAppBlueprintRouteImport } from './routes/_authenticated/app.blueprint'
 import { Route as AuthenticatedAppBrainRouteImport } from './routes/_authenticated/app.brain'
+import { Route as AuthenticatedAppConnectorsRouteImport } from './routes/_authenticated/app.connectors'
 import { Route as AuthenticatedAppCustomersRouteImport } from './routes/_authenticated/app.customers'
 import { Route as AuthenticatedAppDashboardRouteImport } from './routes/_authenticated/app.dashboard'
 import { Route as AuthenticatedAppDiagnosisRouteImport } from './routes/_authenticated/app.diagnosis'
@@ -110,6 +111,12 @@ const AuthenticatedAppBrainRoute = AuthenticatedAppBrainRouteImport.update({
   path: '/brain',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppConnectorsRoute =
+  AuthenticatedAppConnectorsRouteImport.update({
+    id: '/connectors',
+    path: '/connectors',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppCustomersRoute =
   AuthenticatedAppCustomersRouteImport.update({
     id: '/customers',
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -317,6 +325,7 @@ export interface FileRoutesByTo {
   '/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/app/brain': typeof AuthenticatedAppBrainRoute
+  '/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/app/customers': typeof AuthenticatedAppCustomersRoute
   '/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -358,6 +367,7 @@ export interface FileRoutesById {
   '/_authenticated/app/ai-usage': typeof AuthenticatedAppAiUsageRoute
   '/_authenticated/app/blueprint': typeof AuthenticatedAppBlueprintRoute
   '/_authenticated/app/brain': typeof AuthenticatedAppBrainRoute
+  '/_authenticated/app/connectors': typeof AuthenticatedAppConnectorsRoute
   '/_authenticated/app/customers': typeof AuthenticatedAppCustomersRoute
   '/_authenticated/app/dashboard': typeof AuthenticatedAppDashboardRoute
   '/_authenticated/app/diagnosis': typeof AuthenticatedAppDiagnosisRoute
@@ -400,6 +410,7 @@ export interface FileRouteTypes {
     | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/connectors'
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
@@ -439,6 +450,7 @@ export interface FileRouteTypes {
     | '/app/ai-usage'
     | '/app/blueprint'
     | '/app/brain'
+    | '/app/connectors'
     | '/app/customers'
     | '/app/dashboard'
     | '/app/diagnosis'
@@ -479,6 +491,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/ai-usage'
     | '/_authenticated/app/blueprint'
     | '/_authenticated/app/brain'
+    | '/_authenticated/app/connectors'
     | '/_authenticated/app/customers'
     | '/_authenticated/app/dashboard'
     | '/_authenticated/app/diagnosis'
@@ -605,6 +618,13 @@ declare module '@tanstack/react-router' {
       path: '/brain'
       fullPath: '/app/brain'
       preLoaderRoute: typeof AuthenticatedAppBrainRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/connectors': {
+      id: '/_authenticated/app/connectors'
+      path: '/connectors'
+      fullPath: '/app/connectors'
+      preLoaderRoute: typeof AuthenticatedAppConnectorsRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/customers': {
@@ -823,6 +843,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAiUsageRoute: typeof AuthenticatedAppAiUsageRoute
   AuthenticatedAppBlueprintRoute: typeof AuthenticatedAppBlueprintRoute
   AuthenticatedAppBrainRoute: typeof AuthenticatedAppBrainRoute
+  AuthenticatedAppConnectorsRoute: typeof AuthenticatedAppConnectorsRoute
   AuthenticatedAppCustomersRoute: typeof AuthenticatedAppCustomersRoute
   AuthenticatedAppDashboardRoute: typeof AuthenticatedAppDashboardRoute
   AuthenticatedAppDiagnosisRoute: typeof AuthenticatedAppDiagnosisRoute
@@ -848,6 +869,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAiUsageRoute: AuthenticatedAppAiUsageRoute,
   AuthenticatedAppBlueprintRoute: AuthenticatedAppBlueprintRoute,
   AuthenticatedAppBrainRoute: AuthenticatedAppBrainRoute,
+  AuthenticatedAppConnectorsRoute: AuthenticatedAppConnectorsRoute,
   AuthenticatedAppCustomersRoute: AuthenticatedAppCustomersRoute,
   AuthenticatedAppDashboardRoute: AuthenticatedAppDashboardRoute,
   AuthenticatedAppDiagnosisRoute: AuthenticatedAppDiagnosisRoute,
