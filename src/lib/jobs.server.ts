@@ -269,6 +269,19 @@ async function runJob(db: Client, job: JobRow): Promise<Record<string, unknown>>
         aiUsed: result.aiUsed,
       };
     }
+    case "seo_page_generation": {
+      await setProgress(db, job.id, "Writing the page from verified Business Brain facts");
+      const { generateSeoPage } = await import("./seo.server");
+      const result = await generateSeoPage({
+        supabase: db,
+        opportunityId: input["opportunityId"] ?? "",
+        userId: input["userId"] ?? null,
+        organizationId,
+        jobId: job.id,
+      });
+      if (result.status === "ai_failed") throw new Error(result.reason ?? "SEO generation failed.");
+      return result as unknown as Record<string, unknown>;
+    }
     default:
       throw new Error(`Unknown job type: ${job.job_type}`);
   }
