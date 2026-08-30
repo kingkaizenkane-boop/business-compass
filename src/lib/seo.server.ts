@@ -109,17 +109,8 @@ function itemOf(fact: Fact): BrainItem | null {
  * read like names, not like sentences, statistics or commentary. Anything that
  * fails this is still kept as evidence — it just never mints a keyword.
  */
-const STAT_LIKE = /[0-9%£$€]|percent|per cent/i;
-const SENTENCE_LIKE = /[.;:!?]|\b(is|are|was|were|we|our|they|because|which|that|will|should)\b/i;
-
 function nameLike(item: BrainItem): boolean {
-  const value = item.value.trim();
-  if (value.length < 3 || value.length > 60) return false;
-  if (STAT_LIKE.test(value)) return false;
-  if (SENTENCE_LIKE.test(value)) return false;
-  const words = value.split(/\s+/);
-  if (words.length > 6) return false;
-  return /[a-z]{3}/i.test(value);
+  return isUsableEntity(item.value);
 }
 
 function dedupeItems(items: BrainItem[]): BrainItem[] {
