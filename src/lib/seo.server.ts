@@ -369,6 +369,23 @@ async function upsertCandidates(options: {
 }
 
 /**
+ * Normalises every synthesised keyword, drops the ones that would not read as a
+ * real search, and removes duplicates produced by overlapping families.
+ */
+function dedupeCandidates(candidates: Candidate[]): Candidate[] {
+  const seen = new Set<string>();
+  const kept: Candidate[] = [];
+  for (const candidate of candidates) {
+    const check = validateKeyword(candidate.keyword);
+    if (!check.ok) continue;
+    if (seen.has(check.keyword)) continue;
+    seen.add(check.keyword);
+    kept.push({ ...candidate, keyword: check.keyword });
+  }
+  return kept;
+}
+
+/**
  * CUSTOMER discovery. Opportunities are derived exclusively from verified
  * Business Brain facts — a location the Brain does not establish can never
  * produce a page.
