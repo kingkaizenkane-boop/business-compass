@@ -555,8 +555,9 @@ export async function discoverCustomerOpportunities(options: {
     businessId,
     organizationId: orgRow?.organization_id ?? null,
     userId: options.userId ?? null,
-    // Quality over count: cap what one discovery run can add.
-    candidates: candidates.slice(0, 40),
+    // Quality over count: cap what one discovery run can add, and never mint a
+    // keyword that fails the searchability gate.
+    candidates: dedupeCandidates(candidates).slice(0, 40),
   });
 
   return {
