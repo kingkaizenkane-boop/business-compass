@@ -38,6 +38,13 @@ import {
   type SeoSiteType,
   type SeoJson,
 } from "./seo-types";
+import {
+  cleanEntityName,
+  isUsableEntity,
+  normalizeKeyword,
+  seoBlockers,
+  validateKeyword,
+} from "./seo-keywords";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = SupabaseClient<Database>;
