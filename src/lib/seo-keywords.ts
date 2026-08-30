@@ -62,7 +62,7 @@ const ID_LIKE = /\b[0-9a-f]{8}-[0-9a-f]{4}|\b[a-z]+_[a-z_]+\b|\b[A-Z]{2,}\d+\b/;
 const MIN_LENGTH = 6;
 const MAX_LENGTH = 70;
 const MIN_WORDS = 2;
-const MAX_WORDS = 8;
+const MAX_WORDS = 10;
 
 export type KeywordCheck =
   | { ok: true; keyword: string }
