@@ -600,8 +600,14 @@ export async function proposeCustomerOpportunity(options: {
   userId?: string | null;
 }): Promise<{ opportunity: OpportunityView | null; rejected: boolean; reason: string }> {
   const { supabase, businessId } = options;
-  const keyword = options.keyword.trim().toLowerCase();
+  const check = validateKeyword(options.keyword);
+  const keyword = check.keyword;
   if (keyword.length < 3) throw new Error("Enter a longer keyword.");
+  // A phrase that is not a plausible search is refused before the Brain is even
+  // consulted, with the deterministic reason shown to the owner.
+  if (!check.ok) {
+    return { opportunity: null, rejected: true, reason: check.reason };
+  }
 
   const site = await ensureCustomerSite({ supabase, businessId, userId: options.userId ?? null });
   const brain = await loadSeoBrain(supabase, businessId);
