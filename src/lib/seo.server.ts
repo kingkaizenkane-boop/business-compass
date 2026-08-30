@@ -38,6 +38,13 @@ import {
   type SeoSiteType,
   type SeoJson,
 } from "./seo-types";
+import {
+  cleanEntityName,
+  isUsableEntity,
+  normalizeKeyword,
+  seoBlockers,
+  validateKeyword,
+} from "./seo-keywords";
 import type { Database } from "@/integrations/supabase/types";
 
 type Client = SupabaseClient<Database>;
@@ -102,17 +109,8 @@ function itemOf(fact: Fact): BrainItem | null {
  * read like names, not like sentences, statistics or commentary. Anything that
  * fails this is still kept as evidence — it just never mints a keyword.
  */
-const STAT_LIKE = /[0-9%£$€]|percent|per cent/i;
-const SENTENCE_LIKE = /[.;:!?]|\b(is|are|was|were|we|our|they|because|which|that|will|should)\b/i;
-
 function nameLike(item: BrainItem): boolean {
-  const value = item.value.trim();
-  if (value.length < 3 || value.length > 60) return false;
-  if (STAT_LIKE.test(value)) return false;
-  if (SENTENCE_LIKE.test(value)) return false;
-  const words = value.split(/\s+/);
-  if (words.length > 6) return false;
-  return /[a-z]{3}/i.test(value);
+  return isUsableEntity(item.value);
 }
 
 function dedupeItems(items: BrainItem[]): BrainItem[] {
@@ -371,6 +369,23 @@ async function upsertCandidates(options: {
 }
 
 /**
+ * Normalises every synthesised keyword, drops the ones that would not read as a
+ * real search, and removes duplicates produced by overlapping families.
+ */
+function dedupeCandidates(candidates: Candidate[]): Candidate[] {
+  const seen = new Set<string>();
+  const kept: Candidate[] = [];
+  for (const candidate of candidates) {
+    const check = validateKeyword(candidate.keyword);
+    if (!check.ok) continue;
+    if (seen.has(check.keyword)) continue;
+    seen.add(check.keyword);
+    kept.push({ ...candidate, keyword: check.keyword });
+  }
+  return kept;
+}
+
+/**
  * CUSTOMER discovery. Opportunities are derived exclusively from verified
  * Business Brain facts — a location the Brain does not establish can never
  * produce a page.
@@ -384,8 +399,8 @@ export async function discoverCustomerOpportunities(options: {
   const site = await ensureCustomerSite({ supabase, businessId, userId: options.userId ?? null });
   const brain = await loadSeoBrain(supabase, businessId);
 
-  const services = verifiedOnly(brain.services).slice(0, 8);
-  const locations = verifiedOnly(brain.locations).slice(0, 8);
+  const services = verifiedOnly(brain.services).filter((s) => isUsableEntity(s.value)).slice(0, 8);
+  const locations = verifiedOnly(brain.locations).filter((l) => isUsableEntity(l.value)).slice(0, 8);
 
   if (services.length === 0) {
     return {
@@ -399,15 +414,25 @@ export async function discoverCustomerOpportunities(options: {
   const supportDepth = Math.min(100, 40 + brain.factCount * 2);
   const candidates: Candidate[] = [];
 
+  // Brand wording is only used when the public trading name is clean. A name
+  // carrying internal markers never reaches a keyword.
+  const brand = cleanEntityName(brain.businessName);
+  const brandUsable = isUsableEntity(brand);
+  const industry = isUsableEntity(brain.industry) ? cleanEntityName(brain.industry!) : null;
+
+  // Priority order: what people actually search. Service + place first,
+  // then intent-led variants, then industry + place, then brand.
   for (const service of services) {
+    const serviceName = cleanEntityName(service.value);
     for (const location of locations) {
+      const locationName = cleanEntityName(location.value);
       candidates.push({
-        keyword: `${service.value} in ${location.value}`.toLowerCase(),
+        keyword: `${serviceName} in ${locationName}`,
         intent: "local",
-        topic: service.value,
-        location: location.value,
-        service: service.value,
-        industry: brain.industry,
+        topic: serviceName,
+        location: locationName,
+        service: serviceName,
+        industry,
         problem: null,
         businessStage: null,
         pageType: "service_location",
@@ -418,54 +443,122 @@ export async function discoverCustomerOpportunities(options: {
           commercialIntent: 85,
           competitionOpportunity: 60,
         },
-        reason: `Verified service "${service.value}" and verified service area "${location.value}".`,
+        reason: `Verified service "${serviceName}" and verified service area "${locationName}".`,
+        status: "qualified",
+      });
+      candidates.push({
+        keyword: `best ${serviceName} in ${locationName}`,
+        intent: "commercial",
+        topic: serviceName,
+        location: locationName,
+        service: serviceName,
+        industry,
+        problem: null,
+        businessStage: null,
+        pageType: "service_location",
+        components: {
+          intentFit: 88,
+          businessRelevance: 92,
+          contentValue: Math.min(88, supportDepth),
+          commercialIntent: 90,
+          competitionOpportunity: 55,
+        },
+        reason: `Comparison intent for verified service "${serviceName}" in "${locationName}".`,
         status: "qualified",
       });
     }
     candidates.push({
-      keyword: `${brain.businessName} ${service.value}`.toLowerCase(),
-      intent: "navigational",
-      topic: service.value,
+      keyword: `book ${serviceName}`,
+      intent: "transactional",
+      topic: serviceName,
       location: null,
-      service: service.value,
-      industry: brain.industry,
+      service: serviceName,
+      industry,
       problem: null,
       businessStage: null,
       pageType: "business_service",
       components: {
-        intentFit: 75,
-        businessRelevance: 95,
+        intentFit: 86,
+        businessRelevance: 94,
         contentValue: Math.min(85, supportDepth),
-        commercialIntent: 70,
-        competitionOpportunity: 80,
+        commercialIntent: 92,
+        competitionOpportunity: 65,
       },
-      reason: `Verified service "${service.value}" offered by this business.`,
+      reason: `Booking intent for verified service "${serviceName}".`,
       status: "qualified",
     });
+    if (brandUsable) {
+      candidates.push({
+        keyword: `${brand} ${serviceName}`,
+        intent: "navigational",
+        topic: serviceName,
+        location: null,
+        service: serviceName,
+        industry,
+        problem: null,
+        businessStage: null,
+        pageType: "business_service",
+        components: {
+          intentFit: 75,
+          businessRelevance: 95,
+          contentValue: Math.min(85, supportDepth),
+          commercialIntent: 70,
+          competitionOpportunity: 80,
+        },
+        reason: `Verified service "${serviceName}" offered by ${brand}.`,
+        status: "qualified",
+      });
+    }
   }
 
   for (const location of locations) {
-    candidates.push({
-      keyword: `${brain.businessName} in ${location.value}`.toLowerCase(),
-      intent: "local",
-      topic: null,
-      location: location.value,
-      service: null,
-      industry: brain.industry,
-      problem: null,
-      businessStage: null,
-      pageType: "business_location",
-      components: {
-        intentFit: 80,
-        businessRelevance: 90,
-        contentValue: Math.min(80, supportDepth),
-        commercialIntent: 75,
-        competitionOpportunity: 65,
-      },
-      reason: `Verified service area "${location.value}".`,
-      status: "qualified",
-    });
+    const locationName = cleanEntityName(location.value);
+    if (industry) {
+      candidates.push({
+        keyword: `${industry} in ${locationName}`,
+        intent: "local",
+        topic: industry,
+        location: locationName,
+        service: null,
+        industry,
+        problem: null,
+        businessStage: null,
+        pageType: "industry_location",
+        components: {
+          intentFit: 84,
+          businessRelevance: 88,
+          contentValue: Math.min(82, supportDepth),
+          commercialIntent: 80,
+          competitionOpportunity: 55,
+        },
+        reason: `Recorded industry "${industry}" and verified service area "${locationName}".`,
+        status: "qualified",
+      });
+    }
+    if (brandUsable) {
+      candidates.push({
+        keyword: `${brand} in ${locationName}`,
+        intent: "local",
+        topic: null,
+        location: locationName,
+        service: null,
+        industry,
+        problem: null,
+        businessStage: null,
+        pageType: "business_location",
+        components: {
+          intentFit: 80,
+          businessRelevance: 90,
+          contentValue: Math.min(80, supportDepth),
+          commercialIntent: 75,
+          competitionOpportunity: 65,
+        },
+        reason: `Verified service area "${locationName}".`,
+        status: "qualified",
+      });
+    }
   }
+
 
   const { data: orgRow } = await supabase
     .from("businesses")
@@ -479,8 +572,9 @@ export async function discoverCustomerOpportunities(options: {
     businessId,
     organizationId: orgRow?.organization_id ?? null,
     userId: options.userId ?? null,
-    // Quality over count: cap what one discovery run can add.
-    candidates: candidates.slice(0, 40),
+    // Quality over count: cap what one discovery run can add, and never mint a
+    // keyword that fails the searchability gate.
+    candidates: dedupeCandidates(candidates).slice(0, 40),
   });
 
   return {
@@ -506,8 +600,14 @@ export async function proposeCustomerOpportunity(options: {
   userId?: string | null;
 }): Promise<{ opportunity: OpportunityView | null; rejected: boolean; reason: string }> {
   const { supabase, businessId } = options;
-  const keyword = options.keyword.trim().toLowerCase();
+  const check = validateKeyword(options.keyword);
+  const keyword = check.keyword;
   if (keyword.length < 3) throw new Error("Enter a longer keyword.");
+  // A phrase that is not a plausible search is refused before the Brain is even
+  // consulted, with the deterministic reason shown to the owner.
+  if (!check.ok) {
+    return { opportunity: null, rejected: true, reason: check.reason };
+  }
 
   const site = await ensureCustomerSite({ supabase, businessId, userId: options.userId ?? null });
   const brain = await loadSeoBrain(supabase, businessId);
