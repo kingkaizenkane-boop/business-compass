@@ -71,6 +71,7 @@ export const AUDIT_ACTIONS = [
   "seo.page_paused",
   "seo.page_archived",
   "seo.measurement_recorded",
+  "connector.configured",
   "connector.created",
   "connector.enabled",
   "connector.disabled",
