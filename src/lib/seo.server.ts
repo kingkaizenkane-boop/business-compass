@@ -778,7 +778,7 @@ export async function discoverPlatformOpportunities(options: {
     businessId: null,
     organizationId: options.organizationId ?? null,
     userId: options.userId ?? null,
-    candidates,
+    candidates: dedupeCandidates(candidates),
   });
 }
 
@@ -2031,6 +2031,12 @@ export async function loadSeoOverview(options: {
             ? "No verified service areas yet — local pages stay locked until you confirm where you work."
             : "The Business Brain holds enough verified information to ground pages.",
     },
+    blockers: seoBlockers({
+      services: verifiedServices.map((s) => s.value),
+      locations: verifiedLocations.map((l) => l.value),
+      industry: brain.industry,
+      businessName: brain.businessName,
+    }),
     opportunities: opportunityViews,
     pages: pageRows.map((p) => toPageView(p, site)),
     jobs: jobs.map((j) => ({
