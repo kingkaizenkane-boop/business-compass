@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Compass, Plus } from "lucide-react";
+import { Compass, Lock, Plus, Unlock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -153,6 +153,52 @@ function OpportunitiesPage() {
           <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
             Keywords your Business Brain cannot substantiate are rejected with a reason rather than written badly.
           </p>
+        </section>
+      ) : null}
+
+      {data?.blockers?.length ? (
+        <section>
+          <SectionLabel aside={`${data.blockers.filter((b) => b.state === "ready").length}/${data.blockers.length} unlocked`}>
+            What is unlocked, and what is not
+          </SectionLabel>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {data.blockers.map((blocker) => (
+              <li
+                key={blocker.key}
+                className={`rounded-xl border p-4 shadow-quiet ${
+                  blocker.state === "ready" ? "border-border bg-card" : "border-caution/40 bg-caution/5"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  {blocker.state === "ready" ? (
+                    <Unlock className="size-4 text-positive" aria-hidden />
+                  ) : (
+                    <Lock className="size-4 text-caution-foreground" aria-hidden />
+                  )}
+                  <p className="text-sm text-foreground">{blocker.label}</p>
+                  <Badge variant="outline" className="ml-auto rounded-full font-normal text-muted-foreground">
+                    {blocker.state === "ready" ? "Available" : "Locked"}
+                  </Badge>
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{blocker.detail}</p>
+                {blocker.state === "blocked" ? (
+                  <>
+                    <p className="mt-2 text-xs leading-relaxed text-foreground">
+                      <span className="text-muted-foreground">To unlock: </span>
+                      {blocker.unlock}
+                    </p>
+                    <Button asChild size="sm" variant="outline" className="mt-3">
+                      <Link to={blocker.to}>Go there</Link>
+                    </Button>
+                  </>
+                ) : blocker.examples.length > 0 ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Example searches: {blocker.examples.join(", ")}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
         </section>
       ) : null}
 

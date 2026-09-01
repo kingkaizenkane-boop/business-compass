@@ -1,3 +1,5 @@
+import type { SeoBlocker } from "./seo-keywords";
+
 export type SeoJson =
   | string
   | number
@@ -329,6 +331,8 @@ export type SeoOverview = {
     ready: boolean;
     reason: string;
   };
+  /** Per-family availability: what is unlocked, what is not, and how to unlock it. */
+  blockers: SeoBlocker[];
   opportunities: OpportunityView[];
   pages: PageView[];
   jobs: { id: string; status: string; label: string; progress: string | null; errorMessage: string | null }[];
