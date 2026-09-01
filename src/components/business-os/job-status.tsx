@@ -25,7 +25,20 @@ export function useJobStatus(options: {
 }) {
   const fetchJobs = useServerFn(getJobStatus);
   const settledRef = useRef<Set<string>>(new Set());
-  const onSettled = options.onSettled;
+  const mountedRef = useRef(false);
+
+  // Callers pass a fresh closure on every render. Holding it in a ref keeps the
+  // settle effect out of the render loop, so an invalidation can never be
+  // triggered from a render pass or after this component has gone away.
+  const onSettledRef = useRef(options.onSettled);
+  onSettledRef.current = options.onSettled;
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const query = useQuery({
     queryKey: ["ai-jobs", options.businessId, options.jobTypes ?? "all"],
