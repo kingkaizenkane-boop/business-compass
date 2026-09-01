@@ -104,3 +104,50 @@ export const sendConnectorMessage = createServerFn({ method: "POST" })
       body: data.body,
     });
   });
+
+/** Saves provider settings, such as the verified email sender identity. */
+export const configureConnector = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    businessInput
+      .extend({
+        connectionId: z.string().uuid(),
+        fromEmail: z.string().email().max(200).nullable().optional(),
+        fromName: z.string().max(120).nullable().optional(),
+        replyTo: z.string().email().max(200).nullable().optional(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { configureConnection } = await import("./connectors.server");
+    return configureConnection({
+      supabase: context.supabase,
+      businessId: data.businessId,
+      connectionId: data.connectionId,
+      userId: context.userId,
+      config: {
+        fromEmail: data.fromEmail ?? null,
+        fromName: data.fromName ?? null,
+        replyTo: data.replyTo ?? null,
+      },
+    });
+  });
+
+/** Proves outbound works by sending a real test message. */
+export const testConnector = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    businessInput
+      .extend({ connectionId: z.string().uuid(), to: z.string().email().max(200) })
+      .parse(input),
+  )
+  .handler(async ({ data, context }) => {
+    const { testConnection } = await import("./connectors.server");
+    return testConnection({
+      supabase: context.supabase,
+      businessId: data.businessId,
+      connectionId: data.connectionId,
+      userId: context.userId,
+      to: data.to,
+    });
+  });
