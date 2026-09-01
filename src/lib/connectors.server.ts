@@ -587,6 +587,22 @@ export async function ingestInbound(input: {
   summary.received = events.length;
 
   for (const event of events) {
+    // Providers that omit a message id still must not double-count a redelivery,
+    // so fall back to a deterministic hash of the event's identifying content.
+    if (!event.externalId) {
+      event.externalId = `sha256:${await sha256(
+        [
+          connection.id,
+          event.eventType,
+          event.occurredAt.slice(0, 19),
+          event.contactEmail ?? "",
+          event.contactPhone ?? "",
+          event.subject ?? "",
+          event.bodyPreview ?? "",
+        ].join("\u0000"),
+      )}`;
+    }
+
     if (event.externalId) {
       const { data: seen } = await db
         .from("connector_events")
@@ -686,7 +702,11 @@ export async function sendOutbound(input: {
   to: string;
   subject: string | null;
   body: string;
-}): Promise<{ sent: true }> {
+  /** Repeat sends with the same key are skipped rather than duplicated. */
+  idempotencyKey?: string | null;
+  /** Links the message back to the process run that triggered it. */
+  processExecutionId?: string | null;
+}): Promise<{ sent: true; duplicate: boolean }> {
   const { data: connection, error } = await input.supabase
     .from("connector_connections")
     .select("*")
@@ -698,6 +718,22 @@ export async function sendOutbound(input: {
 
   const adapter = adapterFor(connection.provider);
   if (!adapter?.send) throw new Error("This connector cannot send messages yet.");
+  const readiness = adapter.outboundReadiness?.(connection);
+  if (readiness && !readiness.ready) throw new Error(readiness.reason ?? "Outbound is not configured.");
+
+  const db0 = await admin();
+  const idempotencyId = input.idempotencyKey
+    ? `idem:${await sha256(`${connection.id}:${input.idempotencyKey}`)}`
+    : null;
+  if (idempotencyId) {
+    const { data: already } = await db0
+      .from("connector_events")
+      .select("id")
+      .eq("connection_id", connection.id)
+      .eq("external_id", idempotencyId)
+      .maybeSingle();
+    if (already) return { sent: true, duplicate: true };
+  }
 
   const result = await adapter.send({
     connection,
@@ -706,7 +742,7 @@ export async function sendOutbound(input: {
     body: input.body,
   });
 
-  const db = await admin();
+  const db = db0;
   await db.from("connector_events").insert({
     organization_id: connection.organization_id,
     business_id: connection.business_id,
@@ -714,7 +750,7 @@ export async function sendOutbound(input: {
     provider: connection.provider,
     direction: "outbound",
     event_type: `${connection.provider}.sent`,
-    external_id: result.externalId,
+    external_id: idempotencyId ?? result.externalId,
     status: "routed",
     occurred_at: new Date().toISOString(),
     contact_email: input.to.includes("@") ? input.to.toLowerCase() : null,
@@ -722,7 +758,11 @@ export async function sendOutbound(input: {
     subject: input.subject,
     body_preview: input.body.slice(0, 600),
     routed_action: "outbound_sent",
-    payload: { to: input.to } as never,
+    payload: {
+      to: input.to,
+      providerMessageId: result.externalId,
+      ...(input.processExecutionId ? { processExecutionId: input.processExecutionId } : {}),
+    } as never,
   });
 
   await writeAudit({
@@ -733,8 +773,82 @@ export async function sendOutbound(input: {
     userId: input.userId,
     entity: "connector_connections",
     entityId: connection.id,
-    metadata: { provider: connection.provider },
+    metadata: {
+      provider: connection.provider,
+      ...(input.processExecutionId ? { processExecutionId: input.processExecutionId } : {}),
+    },
   });
 
-  return { sent: true };
+  return { sent: true, duplicate: false };
+}
+
+
+/* ---------------------------------------------------------- configuration */
+
+/** Saves provider settings (e.g. the email sender identity) on one connection. */
+export async function configureConnection(input: {
+  supabase: Client;
+  businessId: string;
+  connectionId: string;
+  userId: string;
+  config: Record<string, string | null>;
+}): Promise<ConnectorConnectionView> {
+  const { data: current, error: readError } = await input.supabase
+    .from("connector_connections")
+    .select("*")
+    .eq("id", input.connectionId)
+    .eq("business_id", input.businessId)
+    .single();
+  if (readError || !current) throw new Error("Connector not found.");
+
+  const merged = { ...asRecord(current.config) } as Record<string, unknown>;
+  for (const [key, value] of Object.entries(input.config)) {
+    if (value === null || value.trim() === "") delete merged[key];
+    else merged[key] = value.trim();
+  }
+
+  const { data, error } = await input.supabase
+    .from("connector_connections")
+    .update({ config: merged as never })
+    .eq("id", input.connectionId)
+    .eq("business_id", input.businessId)
+    .select("*")
+    .single();
+  if (error) throw new Error(error.message);
+
+  await writeAudit({
+    supabase: input.supabase,
+    action: "connector.configured",
+    organizationId: data.organization_id,
+    businessId: input.businessId,
+    userId: input.userId,
+    entity: "connector_connections",
+    entityId: data.id,
+    before: asRecord(current.config),
+    after: merged,
+  });
+
+  return toConnectionView(data);
+}
+
+/** Sends a real message to the requester so configuration is proven, not assumed. */
+export async function testConnection(input: {
+  supabase: Client;
+  businessId: string;
+  connectionId: string;
+  userId: string;
+  to: string;
+}): Promise<{ ok: true }> {
+  await sendOutbound({
+    supabase: input.supabase,
+    businessId: input.businessId,
+    connectionId: input.connectionId,
+    userId: input.userId,
+    to: input.to,
+    subject: "Business OS connector test",
+    body:
+      "This is a test message from your Business OS email connector. If you are reading it, outbound email works.",
+    idempotencyKey: `test:${Date.now()}`,
+  });
+  return { ok: true };
 }

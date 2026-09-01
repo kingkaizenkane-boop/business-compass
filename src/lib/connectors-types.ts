@@ -143,6 +143,10 @@ export type ConnectorConnectionView = {
   capabilities: string[];
   inboundConfigured: boolean;
   outboundReady: boolean;
+  /** Plain-language reason outbound is not usable yet; null when ready. */
+  outboundBlockedReason: string | null;
+  credentialSecretName: string | null;
+  config: Record<string, string | null>;
   webhookPath: string;
   lastEventAt: string | null;
   lastError: string | null;
