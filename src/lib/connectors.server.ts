@@ -50,6 +50,8 @@ type ConnectorAdapter = {
     subject: string | null;
     body: string;
   }): Promise<{ externalId: string | null }>;
+  /** Optional readiness check: credential present AND sender identity complete. */
+  outboundReadiness?(connection: ConnectionRow): { ready: boolean; reason: string | null };
 };
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -87,6 +89,22 @@ const EMAIL_AUTOMATED =
  * Postmark, SendGrid inbound parse, or a plain forwarder) by reading a small
  * set of well-known field names. Nothing is inferred beyond what is present.
  */
+export type EmailConnectorConfig = {
+  fromEmail: string | null;
+  fromName: string | null;
+  replyTo: string | null;
+};
+
+/** Sender identity for one email connection. Stored on the connection, never guessed. */
+function emailConfig(connection: ConnectionRow): EmailConnectorConfig {
+  const config = asRecord(connection.config);
+  return {
+    fromEmail: str(config["fromEmail"])?.toLowerCase() ?? null,
+    fromName: str(config["fromName"]),
+    replyTo: str(config["replyTo"])?.toLowerCase() ?? null,
+  };
+}
+
 const emailAdapter: ConnectorAdapter = {
   provider: "email",
   parseInbound(raw) {
@@ -148,18 +166,41 @@ const emailAdapter: ConnectorAdapter = {
       },
     ];
   },
-  async send({ to, subject, body }) {
+  outboundReadiness(connection) {
+    const config = emailConfig(connection);
+    if (!process.env["RESEND_API_KEY"]) {
+      return {
+        ready: false,
+        reason:
+          "The email sending credential is not set on this project yet, so sends are refused rather than silently dropped.",
+      };
+    }
+    if (!config.fromEmail) {
+      return { ready: false, reason: "No verified sender address configured for this connector." };
+    }
+    return { ready: true, reason: null };
+  },
+  async send({ connection, to, subject, body }) {
     const key = process.env["RESEND_API_KEY"];
-    const from = process.env["CONNECTOR_EMAIL_FROM"];
+    const config = emailConfig(connection);
+    const from = config.fromName
+      ? `${config.fromName} <${config.fromEmail}>`
+      : (config.fromEmail ?? process.env["CONNECTOR_EMAIL_FROM"] ?? null);
     if (!key || !from) {
       throw new Error(
-        "Outbound email is not configured. Add the email sending credential before sending.",
+        "Outbound email is not configured. Set the sender address on the connector and add the email sending credential before sending.",
       );
     }
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ from, to, subject: subject ?? "(no subject)", text: body }),
+      body: JSON.stringify({
+        from,
+        to,
+        subject: subject ?? "(no subject)",
+        text: body,
+        ...(emailConfig(connection).replyTo ? { reply_to: emailConfig(connection).replyTo } : {}),
+      }),
     });
     if (!response.ok) {
       throw new Error(`Email provider rejected the send (${response.status}).`);
@@ -200,6 +241,10 @@ async function admin(): Promise<Client> {
 function toConnectionView(row: ConnectionRow): ConnectorConnectionView {
   const definition = connectorDefinition(row.provider);
   const secretName = definition?.outboundSecretName;
+  const adapter = adapterFor(row.provider);
+  const readiness = adapter?.outboundReadiness
+    ? adapter.outboundReadiness(row)
+    : { ready: secretName ? Boolean(process.env[secretName]) : false, reason: null };
   return {
     id: row.id,
     provider: row.provider,
@@ -208,7 +253,10 @@ function toConnectionView(row: ConnectionRow): ConnectorConnectionView {
     status: row.status as ConnectorStatus,
     capabilities: row.capabilities ?? [],
     inboundConfigured: Boolean(row.inbound_secret_hash),
-    outboundReady: secretName ? Boolean(process.env[secretName]) : false,
+    outboundReady: readiness.ready,
+    outboundBlockedReason: readiness.reason,
+    credentialSecretName: secretName ?? null,
+    config: asRecord(row.config) as Record<string, string | null>,
     webhookPath: webhookPathFor(row.id),
     lastEventAt: row.last_event_at,
     lastError: row.last_error,
