@@ -58,16 +58,23 @@ export function useJobStatus(options: {
   });
 
   const jobs = query.data?.jobs ?? [];
+  // A stable signature so the effect reacts to real job changes, not to the new
+  // array identity React Query hands back on every render.
+  const signature = jobs.map((j) => `${j.id}:${j.status}`).join("|");
 
   useEffect(() => {
-    for (const job of jobs) {
-      const terminal = job.status === "completed" || job.status === "failed" || job.status === "cancelled";
-      if (terminal && !settledRef.current.has(`${job.id}:${job.status}`)) {
-        settledRef.current.add(`${job.id}:${job.status}`);
-        onSettled?.();
+    if (!mountedRef.current) return;
+    let settled = false;
+    for (const entry of signature.split("|").filter(Boolean)) {
+      const status = entry.split(":")[1];
+      const terminal = status === "completed" || status === "failed" || status === "cancelled";
+      if (terminal && !settledRef.current.has(entry)) {
+        settledRef.current.add(entry);
+        settled = true;
       }
     }
-  }, [jobs, onSettled]);
+    if (settled) onSettledRef.current?.();
+  }, [signature]);
 
   const active = jobs.find((j) => j.status === "running") ?? jobs.find((j) => j.status === "queued") ?? null;
 
