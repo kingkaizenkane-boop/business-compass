@@ -21,6 +21,8 @@ import {
   getConnectorOverview,
   rotateConnectorSecret,
   sendConnectorMessage,
+  configureConnector,
+  testConnector,
   setConnectorStatus,
 } from "@/lib/connectors.functions";
 
@@ -64,9 +66,16 @@ function ConnectorsPage() {
   const rotate = useServerFn(rotateConnectorSecret);
   const setStatus = useServerFn(setConnectorStatus);
   const send = useServerFn(sendConnectorMessage);
+  const configure = useServerFn(configureConnector);
+  const runTest = useServerFn(testConnector);
 
   const [revealed, setRevealed] = useState<{ connectionId: string; secret: string } | null>(null);
   const [composeFor, setComposeFor] = useState<string | null>(null);
+  const [configFor, setConfigFor] = useState<string | null>(null);
+  const [fromEmail, setFromEmail] = useState("");
+  const [fromName, setFromName] = useState("");
+  const [replyTo, setReplyTo] = useState("");
+  const [testTo, setTestTo] = useState("");
   const [to, setTo] = useState("");
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
@@ -116,6 +125,31 @@ function ConnectorsPage() {
       toast.success("Connector updated.");
       invalidate();
     },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const saveConfig = useMutation({
+    mutationFn: (connectionId: string) =>
+      configure({
+        data: {
+          businessId: businessId!,
+          connectionId,
+          fromEmail: fromEmail.trim() || null,
+          fromName: fromName.trim() || null,
+          replyTo: replyTo.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Sender identity saved.");
+      invalidate();
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+
+  const sendTest = useMutation({
+    mutationFn: (connectionId: string) =>
+      runTest({ data: { businessId: businessId!, connectionId, to: testTo.trim() } }),
+    onSuccess: () => toast.success("Test message sent. Check that inbox to confirm delivery."),
     onError: (error: Error) => toast.error(error.message),
   });
 
@@ -349,6 +383,23 @@ function ConnectorsPage() {
                     <Button
                       size="sm"
                       variant="outline"
+                      onClick={() => {
+                        const next = configFor === connection.id ? null : connection.id;
+                        setConfigFor(next);
+                        if (next) {
+                          setFromEmail(connection.config["fromEmail"] ?? "");
+                          setFromName(connection.config["fromName"] ?? "");
+                          setReplyTo(connection.config["replyTo"] ?? "");
+                        }
+                      }}
+                    >
+                      {configFor === connection.id ? "Close sending setup" : "Sending setup"}
+                    </Button>
+                  ) : null}
+                  {connection.capabilities.includes("outbound_message") ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() =>
                         setComposeFor(composeFor === connection.id ? null : connection.id)
                       }
@@ -359,11 +410,68 @@ function ConnectorsPage() {
                   ) : null}
                 </div>
 
+                {configFor === connection.id ? (
+                  <div className="mt-4 space-y-3 rounded-lg border border-border p-4">
+                    <p className="text-sm text-foreground">Outbound sending</p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">
+                      {connection.outboundReady
+                        ? "Sending is configured. Messages leave from the address below and are recorded as outbound events."
+                        : (connection.outboundBlockedReason ??
+                          "Sending is not configured yet, so sends are refused rather than silently dropped.")}
+                    </p>
+                    <Input
+                      value={fromEmail}
+                      onChange={(event) => setFromEmail(event.target.value)}
+                      placeholder="Sender address, e.g. hello@yourdomain.com"
+                      aria-label="Sender address"
+                    />
+                    <Input
+                      value={fromName}
+                      onChange={(event) => setFromName(event.target.value)}
+                      placeholder="Sender name (optional)"
+                      aria-label="Sender name"
+                    />
+                    <Input
+                      value={replyTo}
+                      onChange={(event) => setReplyTo(event.target.value)}
+                      placeholder="Reply-to address (optional)"
+                      aria-label="Reply-to address"
+                    />
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        size="sm"
+                        disabled={saveConfig.isPending}
+                        onClick={() => saveConfig.mutate(connection.id)}
+                      >
+                        Save sending setup
+                      </Button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 border-t border-border pt-3">
+                      <Input
+                        value={testTo}
+                        onChange={(event) => setTestTo(event.target.value)}
+                        placeholder="Send a test to…"
+                        aria-label="Test recipient"
+                        className="max-w-xs"
+                      />
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        disabled={sendTest.isPending || !testTo.includes("@")}
+                        onClick={() => sendTest.mutate(connection.id)}
+                      >
+                        {sendTest.isPending ? "Sending…" : "Test connection"}
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
+
                 {composeFor === connection.id ? (
                   <div className="mt-4 space-y-3 rounded-lg border border-border p-4">
                     {connection.outboundReady ? null : (
                       <p className="text-sm text-caution-foreground">
-                        Outbound sending needs a sending credential configured for this channel.
+                        {connection.outboundBlockedReason ??
+                          "Outbound sending needs a sending credential configured for this channel."}
                       </p>
                     )}
                     <Input
