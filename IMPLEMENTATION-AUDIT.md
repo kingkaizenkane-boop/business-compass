@@ -1,6 +1,6 @@
 # Business OS — Implementation Audit
 
-**Date:** 29 August 2026
+**Date:** 4 September 2026
 **Scope:** Repository-wide audit of Business OS (React 19 · TanStack Start · Tailwind v4 · Lovable Cloud / Postgres + pgvector · Lovable AI Gateway)
 **Method:** Inspection of server modules, server functions, route components, and live row counts across the 34-table schema.
 
@@ -10,7 +10,7 @@
 
 The strategic core of the product — Brain, Diagnosis, Blueprint, Action Plan — is implemented and verified end to end against real interview data. The P0 AI infrastructure (async job queue, embeddings, evidence linkage, fact versioning, cost controls, auth hardening), the P1 Operations / Process Engine (process library, step builder, execution engine, approvals, action-plan conversion), and the P2.1 Metrics & Outcome Engine (metric definitions, append-only observations, trend classification, Brain memory feedback) are all implemented and published.
 
-What remains is the *growth surface* (experiments, programmatic SEO, evidence uploads) and real outbound connectors for process steps.
+All ten launch blockers are cleared as of 4 September 2026 (see §14). What remains for v1.0 are evidence uploads, adaptive interview follow-ups, audit-log surfacing, data export, and further connector adapters.
 
 | Area | Status |
 | --- | --- |
@@ -718,3 +718,60 @@ Open issues carried forward: customer SEO keyword synthesis inherits the raw
 business name, per-family discovery blockers are not surfaced in the UI,
 inbound connector dedup needs a payload-hash fallback, and a React
 "state update before mount" warning appears on authenticated routes.
+
+
+## 14. Pre-launch hardening — 4 September 2026
+
+The four issues carried forward from the barber stress test are closed, and the
+last open launch blocker (route-level failure coverage) is implemented.
+
+### 14.1 SEO keyword hygiene — closed
+
+`src/lib/seo-keywords.ts` is the single, pure gate for keyword quality, shared
+by the server engine and the UI so an accepted or refused keyword reads the same
+in both. It strips bracketed internal markers (`[TEST]`, `(demo)`), rejects
+noise tokens, statistics, sentence-like commentary, internal identifiers and
+repeated words, and normalises casing and punctuation. `seo.server.ts` uses it
+in candidate synthesis and in owner-proposed keywords.
+
+### 14.2 SEO discovery blockers in the UI — closed
+
+`seoBlockers()` computes, per keyword family (services, locations, industry,
+brand), whether it is available today, why it is locked, the exact step that
+unlocks it, and where to take that step. `/app/seo/opportunities` renders this
+verbatim, so a thin Brain explains itself instead of producing nothing.
+
+### 14.3 Connector dedup and outbound email — closed
+
+Inbound events without a provider message id now get a deterministic content
+hash, so redeliveries deduplicate. Outbound email carries a saved sender
+identity, a test-connection send, idempotent send keys, plain-language reasons
+when sending is blocked, and optional process-execution linkage.
+
+### 14.4 React mount warning — closed
+
+`useJobStatus` holds the caller's `onSettled` in a ref and reacts to a stable
+job signature rather than the array identity React Query returns each render,
+so no invalidation can be triggered from a render pass or after unmount.
+
+### 14.5 Route failure coverage — closed (last launch blocker)
+
+- `src/components/business-os/route-error.tsx` provides `RouteErrorState` and
+  `RouteNotFoundState`: calm, in-shell surfaces with a retry, a dashboard link
+  and, for session expiry, a sign-in action.
+- `src/router.tsx` registers them as `defaultErrorComponent` and
+  `defaultNotFoundComponent`, so every route inherits them without per-file
+  wiring, and the failure renders inside the surrounding layout.
+- Query defaults now set `throwOnError: true` with one retry, so a failed read
+  reaches that boundary and is explained, instead of rendering an empty page.
+
+Verified: `/app/dashboard` loads with live Brain data and a clean console after
+the change.
+
+### 14.6 Remaining (v1.0 must-haves, not blockers)
+
+- Evidence upload into `evidence` + a storage bucket.
+- Adaptive AI-authored interview follow-ups when coverage is thin.
+- Audit log surfacing in the UI for org admins.
+- Data export of Brain, blueprint and plan.
+- WhatsApp, CRM, payments and calendar adapters on the connector framework.
