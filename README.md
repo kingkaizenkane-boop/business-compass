@@ -184,8 +184,9 @@ Premium, calm, intelligent. Editorial serif headings (Instrument Serif) over a q
 - Data export (Brain + blueprint + plan) so the user owns their understanding.
 
 ### Good-to-haves (post-v1)
-- SEO engine execution: opportunity scoring → page generation → quality gate → publish (schema is ready, generation isn't).
-- Experiments module with hypothesis tracking and outcome learning.
+- SEO engine: shipped for discovery → generation → quality gate → publish; still to come are search-console measurement and automatic refresh of decaying pages.
+- Experiments: shipped with hypothesis tracking and outcome learning; still to come is cross-business learning reuse.
+- Voice interview input.
 - Voice interview input.
 - WhatsApp / email interview continuation for owners who won't sit at a desk.
 - Multi-business benchmarking within an org.
