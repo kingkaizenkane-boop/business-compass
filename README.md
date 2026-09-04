@@ -149,22 +149,27 @@ Premium, calm, intelligent. Editorial serif headings (Instrument Serif) over a q
 - Design system, primitives, app shell, loop diagram, landing page.
 - Full route tree (21 app routes) behind an auth gate.
 - Production schema applied: 34 tables, enums, indexes, RLS policies, grants, RPCs, seed data (16 stages, 37 baseline questions, 5 SEO templates).
-- Email/password auth, auto-provisioned organization, business creation, business switching.
-- DNA interview end to end: session resolution, resume, submit, progress + coverage, AI fact extraction into `brain_facts`.
+- Email/password auth plus Google sign-in, password reset, auto-provisioned organization, business creation, business switching.
+- DNA interview end to end: session resolution, resume, submit, progress + coverage, AI fact extraction into `brain_facts` with evidence links and fact versioning.
 - Brain page: live facts, category filter, confidence/verification badges, verify/unverify.
 - Dashboard: live Brain health and totals.
+- Diagnosis, Blueprint and 90-day Action Plan engines, all evidence-bound and versioned.
+- Operations / Process engine, Metrics & outcome engine, Experiments & learning engine, programmatic SEO engine, connector framework with the email adapter.
+- AI job queue drained by a cron-driven worker, with retries, heartbeats, idempotency, per-org budget ceilings and `/app/ai-usage` visibility.
+- AI memory embeddings written and searched per tenant through `match_business_memory()`.
 
-### Launch blockers
-1. **Diagnosis engine** — `diagnosis_runs` / `diagnosis_items` are unwritten. Without it there is no product, only an interview.
-2. **Blueprint generation** — `business_blueprints` unwritten; the strategic payoff of the loop.
-3. **Action plan** — turn diagnosis items into `tasks` / `processes` with priority scoring.
-4. **AI job queue worker** — long AI runs (diagnosis, blueprint, embeddings) must be async; the queue exists but nothing drains it.
-5. **Embedding writes** — `ai_memory.embedding` is never populated, so `match_business_memory()` returns nothing and long-term recall is dead.
-6. **Google sign-in + provider configuration** — currently email/password only.
-7. **Auth hardening** — email confirmation flow, password reset, session-expiry UX.
-8. **Error and empty-state coverage on every route with a loader** — `errorComponent` / `notFoundComponent` so a failed read never blanks the app.
-9. **Cost controls** — per-org AI usage ceilings and model routing before any real traffic.
-10. **Security pass** — verify no privileged import reaches a client bundle; confirm RLS with a two-tenant test.
+### Launch blockers — all cleared
+1. **Diagnosis engine** — done: scored, evidence-linked `diagnosis_runs` / `diagnosis_items` with an evidence drawer.
+2. **Blueprint generation** — done: 11 evidence-bound sections with per-section confidence and version history.
+3. **Action plan** — done: horizon-scored actions written to `tasks`, convertible into processes and experiments.
+4. **AI job queue worker** — done: `pg_cron` drains `/api/public/ai-jobs-worker` with reclaim of stalled jobs.
+5. **Embedding writes** — done: 1,536-dimension embeddings written on extraction and outcome memory.
+6. **Google sign-in + provider configuration** — done.
+7. **Auth hardening** — done: password reset, bearer-token attachment that waits for session hydration, and a session-expiry screen that offers sign-in in place.
+8. **Error and empty-state coverage** — done: the router registers a default in-shell error and not-found surface (`src/components/business-os/route-error.tsx`), and read failures are raised to that boundary instead of rendering an empty page.
+9. **Cost controls** — done: per-org ceilings, circuit breaker, token/cost accounting in `ai_usage`.
+10. **Security pass** — done: privileged clients loaded only inside handlers, two-tenant RLS isolation test, targeted scanner findings resolved.
+
 
 ### Must-haves (v1.0)
 - Fact editing with version history and conflict resolution UI.
